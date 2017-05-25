@@ -1,0 +1,160 @@
+<md-dialog aria-label="Question Dialog" class="question-dialog" flex="90">
+    <md-toolbar>
+        <div class="md-toolbar-tools">
+            <h2>{{item._id ? 'Edit ' + item.identifier : 'New Question'}}</h2>
+            <span flex></span>
+            <md-button class="md-icon-button" ng-click="closeDialog()">
+                <md-icon md-svg-src="content:times" aria-label="Close dialog"></md-icon>
+            </md-button>
+        </div>
+    </md-toolbar>
+    <md-dialog-content>
+        <div class="md-dialog-content">
+            <form name="questionForm">
+                <div layout="row">
+                    <md-input-container class="md-block" flex="30">
+                        <label>Question ID</label>
+                        <input required name="identifier" ng-model="item.identifier">
+                        <div class="input-message hint" ng-if="!questionForm.identifier.$dirty">The unique question identifier</div>
+                        <div class="input-message error-msg" ng-messages="questionForm.identifier.$error">
+                            <div ng-message="required">This is required.</div>
+                        </div>
+                    </md-input-container>
+                    <md-input-container flex="10">
+                        <label>Grade</label>
+                        <md-select name="grade" ng-model="item.grade" required>
+                            <md-option value="1">1</md-option>
+                            <md-option value="2">2</md-option>
+                            <md-option value="3">3</md-option>
+                            <md-option value="4">4</md-option>
+                            <md-option value="5">5</md-option>
+                        </md-select>
+                        <div class="input-message hint" ng-if="!questionForm.grade.$dirty">Grade</div>
+                        <div class="input-message error-msg" ng-messages="questionForm.grade.$error">
+                            <div ng-message="required">This is required.</div>
+                        </div>
+                    </md-input-container>
+                    <md-input-container flex="30">
+                        <label>BTLO</label>
+                        <md-select name="btlo" ng-model="item.btlo" required>
+                            <md-option value="Remember">Remember</md-option>
+                            <md-option value="Understand">Understand</md-option>
+                            <md-option value="Apply">Apply</md-option>
+                            <md-option value="Analyze">Analyze</md-option>
+                            <md-option value="Evaluate">Evaluate</md-option>
+                            <md-option value="Create">Create</md-option>
+                        </md-select>
+                        <div class="input-message hint" ng-if="!questionForm.btlo.$dirty">Blooms Level</div>
+                        <div class="input-message error-msg" ng-messages="questionForm.btlo.$error">
+                            <div ng-message="required">This is required.</div>
+                        </div>
+                    </md-input-container>
+                    <md-input-container flex="10">
+                        <label>Difficulty Level</label>
+                        <md-select name="difficultyLevel" ng-model="item.difficultyLevel" required>
+                            <md-option value="1">1</md-option>
+                            <md-option value="2">2</md-option>
+                            <md-option value="3">3</md-option>
+                            <md-option value="4">4</md-option>
+                            <md-option value="5">5</md-option>
+                        </md-select>
+                        <div class="input-message hint" ng-if="!questionForm.difficultyLevel.$dirty">Difficulty Level</div>
+                        <div class="input-message error-msg" ng-messages="questionForm.difficultyLevel.$error">
+                            <div ng-message="required">This is required.</div>
+                        </div>
+                    </md-input-container>
+                    <md-input-container flex="20">
+                        <label>Level</label>
+                        <md-select name="es_difficultyLevel" ng-model="item.es_difficultyLevel" required>
+                            <md-option value="EASY">EASY</md-option>
+                            <md-option value="MEDIUM">MEDIUM</md-option>
+                            <md-option value="HARD">HARD</md-option>
+                            <md-option value="RARE">RARE</md-option>
+                        </md-select>
+                        <div class="input-message hint" ng-if="!questionForm.es_difficultyLevel.$dirty">Difficulty Level</div>
+                        <div class="input-message error-msg" ng-messages="questionForm.es_difficultyLevel.$error">
+                            <div ng-message="required">This is required.</div>
+                        </div>
+                    </md-input-container>
+                </div>
+                <div layout="row">
+                    <md-input-container class="md-block" flex>
+                        <label>Question Stem</label>
+                        <textarea required name="questionStem" rows="3" ng-model="item.questionText" md-select-on-focus></textarea>
+                        <div class="input-message hint" ng-if="!questionForm.questionStem.$dirty">Write the question stem</div>
+                        <div class="input-message error-msg" ng-messages="questionForm.questionStem.$error">
+                            <div ng-message="required">This is required.</div>
+                        </div>
+                    </md-input-container>
+                </div>
+                <md-divider ng-if="!$last"></md-divider>
+                <div layout="row" ng-repeat="step in item.steps">
+                    <div layout="column" flex layout-fill ng-cloak>
+                        <h4 class="md-primary">Step #{{$index+1}}</h4>
+                        <div layout="row">
+                            <md-input-container flex="60">
+                                <label>Step text</label>
+                                <textarea required name="step" rows="1" ng-model="step.text" md-select-on-focus></textarea>
+                                <div class="input-message hint" ng-if="!questionForm.step.$dirty">Write the step</div>
+                                <div class="input-message error-msg" ng-messages="questionForm.step.$error">
+                                    <div ng-message="required">This is required.</div>
+                                </div>
+                            </md-input-container>
+                            <md-input-container flex="30">
+                                <label>Correct Answer</label>
+                                <input required name="correctAnswer" rows="1" ng-model="step.answer">
+                                <div class="input-message hint" ng-if="!questionForm.correctAnswer.$dirty">Correct Answer</div>
+                                <div class="input-message error-msg" ng-messages="questionForm.correctAnswer.$error">
+                                    <div ng-message="required">This is required.</div>
+                                </div>
+                            </md-input-container>
+                            <md-input-container flex="10">
+                                <label>Units</label>
+                                <input name="units" rows="1" ng-model="step.unit">
+                                <div class="input-message hint" ng-if="!questionForm.units.$dirty">Units</div>
+                            </md-input-container>
+                        </div>
+                        <div layout="row">
+                            <div layout="column" flex layout-fill ng-cloak>
+                                <h5>Responses</h5>
+                                <div layout="row" ng-repeat="res in step.responses">
+                                    <div layout="column" flex="100" layout-fill>
+                                        <div layout="row">
+                                            <md-input-container flex="5">
+                                                <label>#{{$index+1}}</label>
+                                            </md-input-container>
+                                            <md-input-container flex="20">
+                                                <label>Response</label>
+                                                <input name="response" rows="1" ng-model="res.response">
+                                                <div class="input-message hint" ng-if="!questionForm.response.$dirty">Response</div>
+                                            </md-input-container>
+                                            <md-input-container flex="75">
+                                                <label>Micro Hint</label>
+                                                <input name="mh" rows="1" ng-model="res.mh">
+                                                <div class="input-message hint" ng-if="!questionForm.mh.$dirty">Write the Micro hint</div>
+                                            </md-input-container>
+                                        </div>
+                                        <div layout="row">
+                                            <md-input-container flex>
+                                                <label>MMC</label>
+                                                <md-chips ng-model="res.mmc" md-separator-keys="keys" placeholder="Enter a MMC"></md-chips>
+                                                <!--<div class="input-message hint" ng-if="!questionForm.response.$dirty">MMC Codes</div>-->
+                                            </md-input-container>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div layout="row">
+                                    <md-button ng-click="addNewResponse($event, $index)">Add Response</md-button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </md-dialog-content>
+    <div class="md-actions">
+        <md-button ng-click="closeDialog()" class="md-primary">Cancel</md-button>
+        <md-button ng-click="addQuestion($event)" class="md-primary">Save</md-button>
+    </div>
+</md-dialog>
