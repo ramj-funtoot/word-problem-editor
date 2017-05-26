@@ -4,8 +4,9 @@ angular.module('wpappApp')
   .config(function ($stateProvider) {
     $stateProvider
       .state('question', {
-        url: '/question',
+        url: '/',
         templateUrl: 'app/question/question.html',
-        controller: 'QuestionCtrl'
+        controller: 'QuestionCtrl',
+        authenticate: true
       });
   });
