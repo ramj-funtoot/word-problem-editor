@@ -78,7 +78,13 @@
                     </md-input-container>
                 </div>
                 <div layout="row">
-                    <md-input-container class="md-block" flex>
+                    <div class="md-block question-image-container" flex="30">
+                        <img ng-src="{{item.questionImage}}" />
+                        <input id="qimg" type="file" ng-model="questionImage" name="questionImage" base-sixty-four-input required onload="onLoad"
+                            maxsize="500" accept="image/*" class="question-image-input">
+                        <label for="qimg">{{item.questionImage ? '' : 'Add Image'}}</label>
+                    </div>
+                    <md-input-container class="md-block" flex="70">
                         <label>Question Stem</label>
                         <textarea required name="questionStem" rows="3" ng-model="item.questionText" md-select-on-focus></textarea>
                         <div class="input-message hint" ng-if="!questionForm.questionStem.$dirty">Write the question stem</div>

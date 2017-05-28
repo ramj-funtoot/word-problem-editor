@@ -51,4 +51,9 @@ angular.module('wpappApp')
     $scope.addQuestion = function ($event) {
       $mdDialog.hide($scope.item);
     }
+    $scope.$watch('questionImage', function (n, o) {
+      if (n && n.filetype && n.base64) {
+        $scope.item.questionImage = 'data:' + n.filetype + ';base64,' + n.base64;
+      }
+    });
   });
