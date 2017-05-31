@@ -62,6 +62,8 @@ angular.module('wpappApp')
 
     $scope.getProfileImage = function () {
       var user = Auth.getCurrentUser();
-      return user[user.provider].image.url;
+      if (user.provider)
+        return user[user.provider].image.url;
+      else return null;
     }
   });

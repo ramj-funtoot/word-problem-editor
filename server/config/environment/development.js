@@ -8,5 +8,5 @@ module.exports = {
     uri: 'mongodb://localhost/wpapp-dev'
   },
 
-  seedDB: true
+  seedDB: false
 };

@@ -40,3 +40,18 @@
 .response-config-dialog .input-message{
     font-size:10px;
 }
+
+.comment-user-info{
+    font-size: 12px;
+}
+
+.comment-text{
+    background-color:#FAFAFA;
+    border:1px solid #EEEEEE;
+    border-radius:4px;
+    padding:10px;
+}
+
+.comment-block{
+    padding-bottom: 12px;
+}

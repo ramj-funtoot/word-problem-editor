@@ -12,4 +12,8 @@ angular.module('wpappApp')
         $scope.save = function ($event) {
             $mdDialog.hide($scope.step);
         }
+
+        $scope.deleteResponse = function ($event, index) {
+            $scope.step.responses.splice(index, 1);
+        }
     });

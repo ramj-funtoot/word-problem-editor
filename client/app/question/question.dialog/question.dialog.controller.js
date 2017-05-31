@@ -66,7 +66,7 @@ angular.module('wpappApp')
         controller: 'ResponseConfigDialogCtrl'
       }).then(function (updatedStep) {
         console.log('step', updatedStep);
-        angular.merge(step, updatedStep);
+        angular.extend(step, updatedStep);
       });
     }
 
@@ -77,5 +77,8 @@ angular.module('wpappApp')
         comment: $scope.userComment
       });
       $scope.userComment = '';
+    }
+    $scope.getDisplayableTime = function (time) {
+      return moment(time).fromNow();
     }
   });

@@ -95,6 +95,20 @@
                         </md-slider-container>
                         <div class="input-message hint" ng-if="!questionForm.state.$dirty">Maximum number of attempts</div>
                     </md-input-container>
+                    <md-input-container flex="20">
+                        <label>Status</label>
+                        <md-select name="status" ng-model="item.state" required>
+                            <md-option value="Draft">Draft</md-option>
+                            <md-option value="In-Review">In-Review</md-option>
+                            <md-option value="Approved">Approved</md-option>
+                            <md-option value="Published">Published</md-option>
+                            <md-option value="Rejected">Rejected</md-option>
+                        </md-select>
+                        <div class="input-message hint" ng-if="!questionForm.es_difficultyLevel.$dirty">Difficulty Level</div>
+                        <div class="input-message error-msg" ng-messages="questionForm.es_difficultyLevel.$error">
+                            <div ng-message="required">This is required.</div>
+                        </div>
+                    </md-input-container>
                 </div>
                 <div layout="row">
                     <div class="md-block question-image-container" flex="30">
@@ -149,16 +163,14 @@
                 <h2>Comments</h2>
                 <div layout="row">
                     <md-input-container flex>
-                        <label>Comments </label>
-                        <textarea name="comment" rows="3" ng-model="userComment" md-select-on-focus></textarea>
+                        <label>Add your comments </label>
+                        <textarea name="comment" rows="1" ng-model="userComment" md-select-on-focus></textarea>
                         <md-button ng-click="addComment()" class="md-primary">Add Comment</md-button>
                     </md-input-container>
                 </div>
-                <div layout="row">
-                    <div ng-repeat="comment in item.comments" layout="column" flex>
-                        <div class "md-block comment-user-info">{{comment.commentedBy}} commented on {{moment(comment.created).fromNow()}}</div>
-                        <div class "md-block comment-text">{{comment.comment}}</div>
-                    </div>
+                <div layout="column" class="comment-block" ng-repeat="comment in item.comments" flex>
+                    <div class="md-block comment-user-info">{{comment.commentedBy}} commented {{getDisplayableTime(comment.created)}}</div>
+                    <div class="md-block comment-text">{{comment.comment}}</div>
                 </div>
             </form>
         </div>
