@@ -4,7 +4,7 @@
             <h2>{{item._id ? 'Edit ' + item.identifier : 'New Question'}}</h2>
             <span flex></span>
             <md-button class="md-icon-button" ng-click="closeDialog()">
-                <md-icon md-svg-src="content:times" aria-label="Close dialog"></md-icon>
+                <md-icon md-svg-src="navigation:close" aria-label="Close dialog"></md-icon>
             </md-button>
         </div>
     </md-toolbar>
@@ -78,11 +78,32 @@
                     </md-input-container>
                 </div>
                 <div layout="row">
+                    <md-input-container class="md-block" flex="10">
+                        <label>Concept Code</label>
+                        <input required name="conceptCode" ng-model="item.conceptCode">
+                        <div class="input-message hint" ng-if="!questionForm.conceptCode.$dirty">The concept code</div>
+                        <div class="input-message error-msg" ng-messages="questionForm.conceptCode.$error">
+                            <div ng-message="required">This is required.</div>
+                        </div>
+                    </md-input-container>
+                    <md-input-container class="md-block" flex="40">
+                        <label>Max Attempts</label>
+                        <input required name="maxAttempts" ng-model="item.maxAttempts" disabled flex="20">
+                        <md-slider-container flex>
+                            <md-slider flex="80" min="1" max="10" ng-model="item.maxAttempts"></md-slider>
+                            <span>{{item.maxAttempts}}</span>
+                        </md-slider-container>
+                        <div class="input-message hint" ng-if="!questionForm.state.$dirty">Maximum number of attempts</div>
+                    </md-input-container>
+                </div>
+                <div layout="row">
                     <div class="md-block question-image-container" flex="30">
-                        <img ng-src="{{item.questionImage}}" />
                         <input id="qimg" type="file" ng-model="questionImage" name="questionImage" base-sixty-four-input required onload="onLoad"
                             maxsize="500" accept="image/*" class="question-image-input">
-                        <label for="qimg">{{item.questionImage ? '' : 'Add Image'}}</label>
+                        <label for="qimg">
+                            <!--<div ng-style="{'background-image': url({{item.questionImage || 'http://placehold.it/300x200'}})}"></div>-->
+                            <img ng-src="{{item.questionImage || 'http://placehold.it/300x200'}}" />
+                        </label>
                     </div>
                     <md-input-container class="md-block" flex="70">
                         <label>Question Stem</label>
@@ -93,12 +114,13 @@
                         </div>
                     </md-input-container>
                 </div>
-                <md-divider ng-if="!$last"></md-divider>
+                <br />
+                <md-divider></md-divider>
                 <div layout="row" ng-repeat="step in item.steps">
                     <div layout="column" flex layout-fill ng-cloak>
                         <h4 class="md-primary">Step #{{$index+1}}</h4>
                         <div layout="row">
-                            <md-input-container flex="60">
+                            <md-input-container flex="70">
                                 <label>Step text</label>
                                 <textarea required name="step" rows="1" ng-model="step.text" md-select-on-focus></textarea>
                                 <div class="input-message hint" ng-if="!questionForm.step.$dirty">Write the step</div>
@@ -107,60 +129,42 @@
                                 </div>
                             </md-input-container>
                             <md-input-container flex="30">
-                                <label>Correct Answer</label>
-                                <input required name="correctAnswer" rows="1" ng-model="step.answer">
-                                <div class="input-message hint" ng-if="!questionForm.correctAnswer.$dirty">Correct Answer</div>
-                                <div class="input-message error-msg" ng-messages="questionForm.correctAnswer.$error">
-                                    <div ng-message="required">This is required.</div>
-                                </div>
-                            </md-input-container>
-                            <md-input-container flex="10">
-                                <label>Units</label>
-                                <input name="units" rows="1" ng-model="step.unit">
-                                <div class="input-message hint" ng-if="!questionForm.units.$dirty">Units</div>
+                                <md-button class="md-primary md-hue-1" ng-click="configResponses($event, step)">Configure Responses</md-button>
                             </md-input-container>
                         </div>
-                        <div layout="row">
-                            <div layout="column" flex layout-fill ng-cloak>
-                                <h5>Responses</h5>
-                                <div layout="row" ng-repeat="res in step.responses">
-                                    <div layout="column" flex="100" layout-fill>
-                                        <div layout="row">
-                                            <md-input-container flex="5">
-                                                <label>#{{$index+1}}</label>
-                                            </md-input-container>
-                                            <md-input-container flex="20">
-                                                <label>Response</label>
-                                                <input name="response" rows="1" ng-model="res.response">
-                                                <div class="input-message hint" ng-if="!questionForm.response.$dirty">Response</div>
-                                            </md-input-container>
-                                            <md-input-container flex="75">
-                                                <label>Micro Hint</label>
-                                                <input name="mh" rows="1" ng-model="res.mh">
-                                                <div class="input-message hint" ng-if="!questionForm.mh.$dirty">Write the Micro hint</div>
-                                            </md-input-container>
-                                        </div>
-                                        <div layout="row">
-                                            <md-input-container flex>
-                                                <label>MMC</label>
-                                                <md-chips ng-model="res.mmc" md-separator-keys="keys" placeholder="Enter a MMC"></md-chips>
-                                                <!--<div class="input-message hint" ng-if="!questionForm.response.$dirty">MMC Codes</div>-->
-                                            </md-input-container>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div layout="row">
-                                    <md-button ng-click="addNewResponse($event, $index)">Add Response</md-button>
-                                </div>
-                            </div>
+                    </div>
+                </div>
+                <md-divider></md-divider>
+                <div layout="row">
+                    <md-input-container flex>
+                        <label>Hint </label>
+                        <textarea required name="hint" rows="1" ng-model="item.hintText" md-select-on-focus></textarea>
+                        <div class="input-message hint" ng-if="!questionForm.hint.$dirty">Write the step</div>
+                        <div class="input-message error-msg" ng-messages="questionForm.hint.$error">
+                            <div ng-message="required">This is required.</div>
                         </div>
+                    </md-input-container>
+                </div>
+                <md-divider></md-divider>
+                <h2>Comments</h2>
+                <div layout="row">
+                    <md-input-container flex>
+                        <label>Comments </label>
+                        <textarea name="comment" rows="3" ng-model="userComment" md-select-on-focus></textarea>
+                        <md-button ng-click="addComment()" class="md-primary">Add Comment</md-button>
+                    </md-input-container>
+                </div>
+                <div layout="row">
+                    <div ng-repeat="comment in item.comments" layout="column" flex>
+                        <div class "md-block comment-user-info">{{comment.commentedBy}} commented on {{moment(comment.created).fromNow()}}</div>
+                        <div class "md-block comment-text">{{comment.comment}}</div>
                     </div>
                 </div>
             </form>
         </div>
     </md-dialog-content>
-    <div class="md-actions">
+    <md-dialog-actions>
         <md-button ng-click="closeDialog()" class="md-primary">Cancel</md-button>
         <md-button ng-click="addQuestion($event)" class="md-primary">Save</md-button>
-    </div>
+    </md-dialog-actions>
 </md-dialog>

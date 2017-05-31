@@ -21,10 +21,11 @@ angular.module('wpappApp')
         locals: {
           item: item
         },
+        multiple: true,
         controller: 'QuestionDialogCtrl'
       }).then(function (newItem) {
         console.log('item', newItem);
-        if (!item._id) {
+        if (!newItem._id) {
           $http.post('/api/questions', newItem).then(function (response) {
             console.log('item created successfully');
             $scope.refresh();

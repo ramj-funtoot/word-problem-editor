@@ -34,7 +34,8 @@ var QuestionSchema = new Schema({
     responses: [{
       response: [String],
       mmc: [String],
-      mh: String
+      mh: String,
+      default: Boolean
     }]
   }],
   hintText: String,
@@ -43,6 +44,7 @@ var QuestionSchema = new Schema({
   comments: [{
     created: { type: Date, default: Date.now },
     commentedBy: String,
+    comment: String
   }]
 });
 
