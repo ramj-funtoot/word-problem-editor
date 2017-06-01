@@ -14,6 +14,17 @@ angular.module('wpappApp')
         }
 
         $scope.deleteResponse = function ($event, index) {
-            $scope.step.responses.splice(index, 1);
+            var confirm = $mdDialog.confirm()
+                .title('Confirm Delete Response')
+                .textContent('Are you sure you want to delete the response patter?')
+                .ariaLabel('Delete response')
+                .targetEvent($event)
+                .ok('Yes')
+                .cancel('No')
+                .multiple(true);
+            $mdDialog.show(confirm).then(function () {
+                $scope.step.responses.splice(index, 1);
+            }, function () {
+            });
         }
     });

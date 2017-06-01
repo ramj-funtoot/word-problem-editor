@@ -43,4 +43,34 @@ angular.module('wpappApp')
         }
       });
     }
+
+    $scope.copyItem = function ($event, item) {
+      var itemCopy = angular.copy(item);
+      itemCopy.identifier = itemCopy._id = null;
+      $scope.openItem($event, itemCopy);
+    }
+
+    $scope.archiveItem = function ($event, item) {
+      var confirm = $mdDialog.confirm()
+        .title('Confirm Archive')
+        .textContent('Are you sure you want to archive question ' + item.identifier + '?')
+        .ariaLabel('Archive Item')
+        .targetEvent($event)
+        .ok('Yes')
+        .cancel('No')
+        .multiple(true);
+      $mdDialog.show(confirm).then(function () {
+        item.active = !1;
+        $http.patch('/api/questions/' + item._id, item).then(function (response) {
+          console.log('item archived successfully');
+          $scope.refresh();
+        }).catch(function (err) {
+          console.error('error', err);
+        });
+      }, function () {
+      });
+    }
+    $scope.getDisplayableTime = function (time) {
+      return moment(time).fromNow();
+    }
   });

@@ -2,23 +2,39 @@
 
 <div class="col-md-12" ng-controller="QuestionCtrl">
     <md-content>
-        <md-tabs md-dynamic-height md-border-bottom>
-            <md-tab label="All Items">
-                <md-content class="md-padding">
-                    <span ng-bind="message"></span>
-                    <md-list ng-cloak>
-                        <md-list-item class="md-2-line" ng-repeat="item in items" ng-click="null">
-                            <div class="md-list-item-text" layout="column">
-                                <h3>{{ item.identifier }}</h3>
-                                <p>{{ item.questionText }}</p>
-                            </div>
-                            <md-icon class="md-secondary" ng-click="openItem($event, item)" aria-label="Chat" md-svg-icon="editor:mode_edit"></md-icon>
-                        </md-list-item>
-                        <md-divider></md-divider>
-                    </md-list>
-                </md-content>
-            </md-tab>
-        </md-tabs>
+        <!--<md-tabs md-dynamic-height md-border-bottom>
+            <md-tab label="All Items">-->
+        <md-content class="">
+            <md-toolbar md-scroll-shrink>
+                <div class="md-toolbar-tools">
+                    <md-button class="md-icon-button" aria-label="Menu">
+                        <md-icon md-svg-icon="navigation:menu"></md-icon>
+                    </md-button>
+                    <h3>
+                        <span>List of Questions</span>
+                    </h3>
+                </div>
+            </md-toolbar>
+            <md-list class="md-dense" ng-cloak>
+                <md-list-item class="md-3-line" ng-repeat="item in items" ng-click="null">
+                    <div class="md-list-item-text" layout="column">
+                        <h3>{{ item.identifier }}</h3>
+                        <h4>{{item.state}} | created: {{item.owner}} | updated: {{getDisplayableTime(item.updated.when)}} by
+                            {{item.updated.by}}
+                        </h4>
+                        <p>
+                            {{ item.questionText | limitTo:100 }} <span ng-if="item.questionText.length > 100">...</span>
+                        </p>
+                    </div>
+                    <md-icon class="md-secondary" ng-click="copyItem($event, item)" aria-label="Copy" md-svg-icon="content:content_copy"></md-icon>
+                    <md-icon class="md-secondary" ng-click="openItem($event, item)" aria-label="Edit" md-svg-icon="editor:mode_edit"></md-icon>
+                    <md-icon class="md-secondary" ng-click="archiveItem($event, item)" aria-label="Archive" md-svg-icon="action:delete"></md-icon>
+                </md-list-item>
+                <md-divider></md-divider>
+            </md-list>
+        </md-content>
+        <!--</md-tab>
+        </md-tabs>-->
     </md-content>
     <md-button class="md-fab md-icon-button md-accent" aria-label="Add new" ng-click="openItem($event)" style="position:absolute; bottom:10px;right:10px;">
         <md-icon md-svg-icon="content:add"></md-icon>

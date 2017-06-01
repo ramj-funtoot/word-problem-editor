@@ -11,7 +11,7 @@ angular.module('wpappApp')
       "difficultyLevel": "1",
       "conceptCode": "C12",
       "active": true,
-      "owner": "ram",
+      "owner": "",
       "state": "Draft",
       "maxAttempts": 1,
       "questionText": "",
@@ -45,7 +45,11 @@ angular.module('wpappApp')
     $scope.closeDialog = function () {
       $mdDialog.cancel();
     };
-    $scope.addQuestion = function ($event) {
+    $scope.saveQuestion = function ($event) {
+      // if the owner is not set, set it now. Update the 'updated' info
+      var user = Auth.getCurrentUser();
+      if (!$scope.item.owner) $scope.item.owner = user.email;
+      $scope.item.updated = { by: user.email }
       $mdDialog.hide($scope.item);
     }
     $scope.$watch('questionImage', function (n, o) {

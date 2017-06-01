@@ -19,10 +19,10 @@ var QuestionSchema = new Schema({
   conceptCode: String,
   es_difficultyLevel: String,
   active: Boolean,
-  updated: { type: Date, default: Date.now },
+  updated: { when: { type: Date, default: Date.now }, by: String },
   owner: String,
   state: { type: String, enum: validStates },
-
+  workSheets: [{ id: String, name: String }],
   maxAttempts: { type: Number, max: 10 },
   questionText: String,
   questionImage: String,
