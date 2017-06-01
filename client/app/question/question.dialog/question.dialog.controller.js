@@ -11,7 +11,7 @@ angular.module('wpappApp')
       "difficultyLevel": "1",
       "conceptCode": "C12",
       "active": true,
-      "owner": "ram",
+      "owner": "",
       "state": "Draft",
       "maxAttempts": 1,
       "questionText": "",
@@ -41,9 +41,8 @@ angular.module('wpappApp')
         }
       ]
     };
-    if (!$scope.item.comments){
-        $scope.item.comments = [];
-    }
+    if (!$scope.item.comments)
+        $scope.item.comments = []
     $scope.keys = [$mdConstant.KEY_CODE.ENTER, $mdConstant.KEY_CODE.COMMA];
     $scope.closeDialog = function () {
       $mdDialog.cancel();
@@ -73,8 +72,10 @@ angular.module('wpappApp')
       });
     }
 
+    var user = Auth.getCurrentUser();
+    $scope.item.owner = user[user.provider].emails[0].value;
+
     $scope.addComment = function () {
-      var user = Auth.getCurrentUser();
       $scope.item.comments.push({
         commentedBy: user[user.provider].displayName,
         comment: $scope.userComment
