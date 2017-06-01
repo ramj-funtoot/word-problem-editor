@@ -29,9 +29,7 @@ angular.module('wpappApp')
           ],
           "hintText": "",
           "solutionText": "",
-          "expressions": [
-            ""
-          ],
+          "expressions": '',
           "comments": [
             {
               "commentedBy": "",

@@ -40,7 +40,7 @@ var QuestionSchema = new Schema({
   }],
   hintText: String,
   solutionText: String,
-  expressions: [String],
+  expressions: String,
   comments: [{
     created: { type: Date, default: Date.now },
     commentedBy: String,
