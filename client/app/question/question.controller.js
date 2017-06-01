@@ -43,4 +43,13 @@ angular.module('wpappApp')
         }
       });
     }
+    $scope.deleteItem = function($event, item, index){
+      
+    }
+    $scope.openCopy = function($event, item){
+      var newCopy = Object.assign({}, item);
+      newCopy.identifier = '';
+      newCopy._id = null;
+      $scope.openItem($event, newCopy)
+    }
   });
