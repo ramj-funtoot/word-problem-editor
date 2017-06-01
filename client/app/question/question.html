@@ -11,12 +11,14 @@
                         <md-icon md-svg-icon="navigation:menu"></md-icon>
                     </md-button>
                     <h3>
-                        <span>List of Questions</span>
+                        <span>All Items</span>
                     </h3>
+                    <span flex></span>
+                    <input class="search-box" ng-model="search.qId" placeholder="search">
                 </div>
             </md-toolbar>
             <md-list class="md-dense" ng-cloak>
-                <md-list-item class="md-3-line" ng-repeat="item in items" ng-click="null">
+                <md-list-item class="md-3-line" ng-repeat="item in items | filter:search.qId" ng-click="null">
                     <div class="md-list-item-text" layout="column">
                         <h3>{{ item.identifier }}</h3>
                         <h4>{{item.state}} | created: {{item.owner}} | updated: {{getDisplayableTime(item.updated.when)}} by
