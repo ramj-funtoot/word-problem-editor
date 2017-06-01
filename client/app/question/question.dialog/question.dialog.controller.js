@@ -41,6 +41,9 @@ angular.module('wpappApp')
         }
       ]
     };
+    if (!$scope.item.comments){
+        $scope.item.comments = [];
+    }
     $scope.keys = [$mdConstant.KEY_CODE.ENTER, $mdConstant.KEY_CODE.COMMA];
     $scope.closeDialog = function () {
       $mdDialog.cancel();
