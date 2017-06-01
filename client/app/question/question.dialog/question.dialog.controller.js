@@ -41,12 +41,13 @@ angular.module('wpappApp')
         }
       ]
     };
-    if (!$scope.item.comments)
-        $scope.item.comments = []
+
     $scope.keys = [$mdConstant.KEY_CODE.ENTER, $mdConstant.KEY_CODE.COMMA];
+
     $scope.closeDialog = function () {
       $mdDialog.cancel();
     };
+
     $scope.saveQuestion = function ($event) {
       // if the owner is not set, set it now. Update the 'updated' info
       var user = Auth.getCurrentUser();
@@ -54,11 +55,13 @@ angular.module('wpappApp')
       $scope.item.updated = { by: user.email }
       $mdDialog.hide($scope.item);
     }
+
     $scope.$watch('questionImage', function (n, o) {
       if (n && n.filetype && n.base64) {
         $scope.item.questionImage = 'data:' + n.filetype + ';base64,' + n.base64;
       }
     });
+
     $scope.configResponses = function ($event, step) {
       var parentEl = angular.element(document.body);
       $mdDialog.show({
@@ -76,16 +79,17 @@ angular.module('wpappApp')
       });
     }
 
-    var user = Auth.getCurrentUser();
-    $scope.item.owner = user[user.provider].emails[0].value;
-
     $scope.addComment = function () {
+      var user = Auth.getCurrentUser();
+      if (!$scope.item.comments)
+        $scope.item.comments = [];
       $scope.item.comments.push({
         commentedBy: user[user.provider].displayName,
         comment: $scope.userComment
       });
       $scope.userComment = '';
     }
+
     $scope.getDisplayableTime = function (time) {
       return moment(time).fromNow();
     }
