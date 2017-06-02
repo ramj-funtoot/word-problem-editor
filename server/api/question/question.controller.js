@@ -69,3 +69,50 @@ exports.destroy = function (req, res) {
 function handleError(res, err) {
   return res.status(500).send(err);
 }
+
+exports.publish = function (req, res) {
+  if (req.body._id) { delete req.body._id; }
+  Question.findById(req.params.id, function (err, question) {
+    if (err) { return handleError(res, err); }
+    if (!question) { return res.status(404).send('Not Found'); }
+    // upload the question to item bank
+  });
+};
+
+var item = {
+  name: '',
+  answer: {},
+  portalOwner: '562', // ram.j's userid (hopefully!)
+  domain: "Numeracy",
+  langid: 'en',
+  language: ['English'],
+  identifier: '',
+  qid: '',
+  subject: 'NUM',
+  grade: 0,
+  gradeLevel: [],
+  bloomsTaxonomyLevel: '',
+  level: '',
+  sublevel: '',
+  qindex: '',
+  qlevel: 'EASY',
+  type: 'ftb',
+  template_id: '',
+  template: 'org.ekstep.plugins.funtoot.wordproblem',
+  title: '',
+  question: '',
+  question_audio: '',
+  question_image: '',
+  max_score: 5,
+  used_for: "worksheet",
+  model: {
+    numericLangId: 'en',
+    langId: 'en',
+    hintMsg: '',
+    variables: {}
+  },
+  concepts: {
+    identifier: 'C6',
+    name: 'Counting'
+  }
+};
