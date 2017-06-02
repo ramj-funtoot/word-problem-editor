@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('wpappApp')
-  .controller('QuestionDialogCtrl', function ($scope, item, $mdConstant, $mdDialog, Auth) {
+  .controller('QuestionDialogCtrl', function ($scope, item, users, $mdConstant, $mdDialog, Auth) {
     $scope.item = item || {
       "identifier": "",
       "grade": "2",
@@ -40,6 +40,11 @@ angular.module('wpappApp')
       ]
     };
 
+    $scope.users = users;
+
+    var init = function () {
+    }();
+
     $scope.meta = {
       grades: [1, 2, 3, 4, 5],
       btlos: ['Remember', 'Understand', 'Apply', 'Analyze', 'Evaluate', 'Create'],
@@ -57,7 +62,6 @@ angular.module('wpappApp')
 
     $scope.saveQuestion = function ($event) {
       // if the owner is not set, set it now. Update the 'updated' info
-      var user = Auth.getCurrentUser();
       if (!$scope.item.owner) $scope.item.owner = user.email;
       $scope.item.updated = { by: user.email }
       $mdDialog.hide($scope.item);

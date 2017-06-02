@@ -87,6 +87,16 @@
                             <div ng-message="required">This is required.</div>
                         </div>
                     </md-input-container>
+                    <md-autocomplete required md-input-name="assignedTo" md-selected-item="user.email" md-search-text="item.owner" md-items="user in users | filter: email"
+                        md-item-text="user.email" md-min-length="1" placeholder="Assign to" md-require-match md-floating-label="Assigned to">
+                        <md-item-template>
+                            <span md-highlight-text="userSearchText" md-highlight-flags="^i">{{user.email}}</span>
+                        </md-item-template>
+                        <div ng-messages="questionForm.assignedTo.$error" ng-if="questionForm.assignedTo.$touched">
+                            <div ng-message="required">Please select an assignee.</div>
+                            <div ng-message="md-require-match">Please select an existing user.</div>
+                        </div>
+                    </md-autocomplete>
                 </div>
                 <hr />
                 <div layout="row">

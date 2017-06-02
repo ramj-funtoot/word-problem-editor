@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('wpappApp')
-  .controller('QuestionCtrl', function ($scope, $http, $mdDialog, Auth) {
+  .controller('QuestionCtrl', function ($scope, $http, $mdDialog, Auth, User) {
     $scope.showMyItems = true;
 
     $scope.refresh = function (my) {
@@ -32,7 +32,8 @@ angular.module('wpappApp')
         targetEvent: $event,
         templateUrl: 'app/question/question.dialog/question.dialog.html',
         locals: {
-          item: item
+          item: item,
+          users: $scope.users
         },
         multiple: true,
         controller: 'QuestionDialogCtrl'
@@ -102,4 +103,13 @@ angular.module('wpappApp')
         $scope.selectedItems.push(item.identifier);
       }
     }
+    $scope.users = [];
+    var init = function () {
+      //User.getAll()
+      $http.get('/api/users/').then(function (response) {
+        $scope.users = response.data;
+      }).catch(function (error) {
+        console.log('Failed when getting users. Error: ' + error)
+      });
+    }();
   });
