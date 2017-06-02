@@ -61,6 +61,7 @@ angular.module('wpappApp')
     };
 
     $scope.saveQuestion = function ($event) {
+      var user = Auth.getCurrentUser();
       $scope.item.updated = { by: user.email }
       $mdDialog.hide($scope.item);
     }
