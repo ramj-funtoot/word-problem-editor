@@ -55,3 +55,7 @@
 .comment-block{
     padding-bottom: 12px;
 }
+
+.questions-list .question-id{
+    margin-right: 30px;
+}

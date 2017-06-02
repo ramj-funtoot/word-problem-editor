@@ -5,10 +5,22 @@ var Question = require('./question.model');
 
 // Get list of questions
 exports.index = function (req, res) {
-  Question.find({ active: true }, function (err, questions) {
-    if (err) { return handleError(res, err); }
-    return res.status(200).json(questions);
-  });
+  Question.find({ active: true })
+    .sort({ "updated.when": -1 })
+    .exec(function (err, questions) {
+      if (err) { return handleError(res, err); }
+      return res.status(200).json(questions);
+    });
+};
+
+// get list of questions based on query parameters
+exports.query = function (req, res) {
+  Question.find({ active: true, owner: req.params.owner })
+    .sort({ "updated.when": -1 })
+    .exec(function (err, questions) {
+      if (err) { return handleError(res, err); }
+      return res.status(200).json(questions);
+    });
 };
 
 // Get a single question

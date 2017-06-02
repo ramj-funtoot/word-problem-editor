@@ -40,6 +40,15 @@ angular.module('wpappApp')
       ]
     };
 
+    $scope.meta = {
+      grades: [1, 2, 3, 4, 5],
+      btlos: ['Remember', 'Understand', 'Apply', 'Analyze', 'Evaluate', 'Create'],
+      diffLevels: [1, 2, 3, 4, 5],
+      states: ['Draft', 'In-Review', 'Published', 'Rejected'],
+      es_diffLevels: ['EASY', 'MEDIUM', 'HARD', 'RARE'],
+      attempts: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    };
+
     $scope.keys = [$mdConstant.KEY_CODE.ENTER, $mdConstant.KEY_CODE.COMMA];
 
     $scope.closeDialog = function () {

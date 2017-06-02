@@ -23,11 +23,7 @@
                     <md-input-container flex="10">
                         <label>Grade</label>
                         <md-select name="grade" ng-model="item.grade" required>
-                            <md-option value="1">1</md-option>
-                            <md-option value="2">2</md-option>
-                            <md-option value="3">3</md-option>
-                            <md-option value="4">4</md-option>
-                            <md-option value="5">5</md-option>
+                            <md-option ng-value="g" ng-repeat="g in meta.grades">{{g}}</md-option>
                         </md-select>
                         <div class="input-message hint" ng-if="!questionForm.grade.$dirty">Grade</div>
                         <div class="input-message error-msg" ng-messages="questionForm.grade.$error">
@@ -37,12 +33,7 @@
                     <md-input-container flex="30">
                         <label>BTLO</label>
                         <md-select name="btlo" ng-model="item.btlo" required>
-                            <md-option value="Remember">Remember</md-option>
-                            <md-option value="Understand">Understand</md-option>
-                            <md-option value="Apply">Apply</md-option>
-                            <md-option value="Analyze">Analyze</md-option>
-                            <md-option value="Evaluate">Evaluate</md-option>
-                            <md-option value="Create">Create</md-option>
+                            <md-option ng-value="btlo" ng-repeat="btlo in meta.btlos">{{btlo}}</md-option>
                         </md-select>
                         <div class="input-message hint" ng-if="!questionForm.btlo.$dirty">Blooms Level</div>
                         <div class="input-message error-msg" ng-messages="questionForm.btlo.$error">
@@ -52,11 +43,7 @@
                     <md-input-container flex="10">
                         <label>Difficulty Level</label>
                         <md-select name="difficultyLevel" ng-model="item.difficultyLevel" required>
-                            <md-option value="1">1</md-option>
-                            <md-option value="2">2</md-option>
-                            <md-option value="3">3</md-option>
-                            <md-option value="4">4</md-option>
-                            <md-option value="5">5</md-option>
+                            <md-option ng-value="dl" ng-repeat="dl in meta.diffLevels">{{dl}}</md-option>
                         </md-select>
                         <div class="input-message hint" ng-if="!questionForm.difficultyLevel.$dirty">Difficulty Level</div>
                         <div class="input-message error-msg" ng-messages="questionForm.difficultyLevel.$error">
@@ -66,10 +53,7 @@
                     <md-input-container flex="20">
                         <label>Level</label>
                         <md-select name="es_difficultyLevel" ng-model="item.es_difficultyLevel" required>
-                            <md-option value="EASY">EASY</md-option>
-                            <md-option value="MEDIUM">MEDIUM</md-option>
-                            <md-option value="HARD">HARD</md-option>
-                            <md-option value="RARE">RARE</md-option>
+                            <md-option ng-value="l" ng-repeat="l in meta.es_diffLevels">{{l}}</md-option>
                         </md-select>
                         <div class="input-message hint" ng-if="!questionForm.es_difficultyLevel.$dirty">Difficulty Level</div>
                         <div class="input-message error-msg" ng-messages="questionForm.es_difficultyLevel.$error">
@@ -86,23 +70,17 @@
                             <div ng-message="required">This is required.</div>
                         </div>
                     </md-input-container>
-                    <md-input-container class="md-block" flex="40">
+                    <md-input-container class="md-block" flex="10">
                         <label>Max Attempts</label>
-                        <input required name="maxAttempts" ng-model="item.maxAttempts" disabled flex="20">
-                        <md-slider-container flex>
-                            <md-slider flex="80" min="1" max="10" ng-model="item.maxAttempts"></md-slider>
-                            <span>{{item.maxAttempts}}</span>
-                        </md-slider-container>
+                        <md-select name="maxAttempts" ng-model="item.maxAttempts" required>
+                            <md-option ng-value="a" ng-repeat="a in meta.attempts">{{a}}</md-option>
+                        </md-select>
                         <div class="input-message hint" ng-if="!questionForm.state.$dirty">Maximum number of attempts</div>
                     </md-input-container>
-                    <md-input-container flex="20">
+                    <md-input-container flex="30">
                         <label>Status</label>
                         <md-select name="status" ng-model="item.state" required>
-                            <md-option value="Draft">Draft</md-option>
-                            <md-option value="In-Review">In-Review</md-option>
-                            <md-option value="Approved">Approved</md-option>
-                            <md-option value="Published">Published</md-option>
-                            <md-option value="Rejected">Rejected</md-option>
+                            <md-option ng-value="state" ng-repeat="state in meta.states">{{state}}</md-option>
                         </md-select>
                         <div class="input-message hint" ng-if="!questionForm.es_difficultyLevel.$dirty">Difficulty Level</div>
                         <div class="input-message error-msg" ng-messages="questionForm.es_difficultyLevel.$error">
@@ -110,6 +88,7 @@
                         </div>
                     </md-input-container>
                 </div>
+                <hr />
                 <div layout="row">
                     <div class="md-block question-image-container" flex="30">
                         <input id="qimg" type="file" ng-model="questionImage" name="questionImage" base-sixty-four-input required onload="onLoad"
@@ -166,7 +145,7 @@
                         <div class="input-message hint" ng-if="!questionForm.expressions.$dirty">Write expressions one line per expression</div>
                     </md-input-container>
                 </div>
-                <md-divider></md-divider>
+                <hr />
                 <h2>Comments</h2>
                 <div layout="row">
                     <md-input-container flex>

@@ -7,22 +7,41 @@
         <md-content class="">
             <md-toolbar md-scroll-shrink>
                 <div class="md-toolbar-tools">
-                    <md-button class="md-icon-button" aria-label="Menu">
-                        <md-icon md-svg-icon="navigation:menu"></md-icon>
-                    </md-button>
                     <h3>
-                        <span>All Items</span>
+                        <span>{{showMyItems ? 'My Items' : 'All Items'}}</span>
                     </h3>
+                    <md-menu md-offset="0 5">
+                        <md-button class="md-icon-button" aria-label="Menu" ng-click="$mdMenu.open($event)">
+                            <md-icon md-svg-icon="hardware:keyboard_arrow_down"></md-icon>
+                        </md-button>
+                        <md-menu-content width="4">
+                            <md-menu-item>
+                                <md-button ng-click="refresh(false)">
+                                    <md-icon md-svg-icon="social:group" md-menu-align-target></md-icon>
+                                    All Items
+                                </md-button>
+                            </md-menu-item>
+                            <md-menu-item>
+                                <md-button ng-click="refresh(true)">
+                                    <md-icon md-svg-icon="action:favorite"></md-icon>
+                                    My Items
+                                </md-button>
+                            </md-menu-item>
+                        </md-menu-content>
+                    </md-menu>
                     <span flex></span>
                     <input class="search-box" ng-model="search.qId" placeholder="search">
                 </div>
             </md-toolbar>
-            <md-list class="md-dense" ng-cloak>
-                <md-list-item class="md-3-line" ng-repeat="item in items | filter:search.qId" ng-click="null">
+            <md-list class="questions-list" ng-cloak>
+                <md-list-item class="md-2-line" ng-repeat="item in items track by item._id | filter:search.qId" ng-click="openItem($event, item)">
+                    <md-checkbox class="" ng-checked="isSelected(item)" ng-click="toggleSelection(item)"></md-checkbox>
+                    <h3 class="question-id">{{ item.identifier }}</h3>
                     <div class="md-list-item-text" layout="column">
-                        <h3>{{ item.identifier }}</h3>
-                        <h4>{{item.state}} | created: {{item.owner}} | updated: {{getDisplayableTime(item.updated.when)}} by
-                            {{item.updated.by}}
+                        <h4>
+                            <span>Created: {{item.owner}} </span> |
+                            <span>Updated: {{getDisplayableTime(item.updated.when)}} by {{item.updated.by}}</span> |
+                            <span><b>{{item.state}}</b></span>
                         </h4>
                         <p>
                             {{ item.questionText | limitTo:100 }} <span ng-if="item.questionText.length > 100">...</span>
