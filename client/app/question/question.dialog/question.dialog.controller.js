@@ -61,8 +61,6 @@ angular.module('wpappApp')
     };
 
     $scope.saveQuestion = function ($event) {
-      // if the owner is not set, set it now. Update the 'updated' info
-      if (!$scope.item.owner) $scope.item.owner = user.email;
       $scope.item.updated = { by: user.email }
       $mdDialog.hide($scope.item);
     }

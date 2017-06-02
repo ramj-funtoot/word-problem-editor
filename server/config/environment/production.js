@@ -21,5 +21,5 @@ module.exports = {
     'mongodb://localhost/wpapp'
   },
 
-  seedDB: true
+  seedDB: false
 };
