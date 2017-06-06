@@ -112,4 +112,13 @@ angular.module('wpappApp')
         console.log('Failed when getting users. Error: ' + error)
       });
     }();
+    $scope.publish = function ($event, item){
+      var user = Auth.getCurrentUser();
+      $http.get('/api/questions/' + item._id, item).then(function (response) {
+          alert("go to console");
+          console.log(response);
+        }).catch(function (error) {
+          $scope.message = "No items to show!";
+        });
+    }
   });
