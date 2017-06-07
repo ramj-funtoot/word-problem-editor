@@ -84,6 +84,15 @@ angular.module('wpappApp')
       }, function () {
       });
     }
+
+    $scope.publishItem = function ($event, item) {
+      $http.put('/api/questions/' + item._id, item).then(function (response) {
+        console.log('item', response.data);
+        $scope.refresh();
+      }).catch(function (err) {
+        console.error('error', err);
+      });
+    }
     $scope.getDisplayableTime = function (time) {
       return moment(time).fromNow();
     }

@@ -70,16 +70,11 @@ function handleError(res, err) {
   return res.status(500).send(err);
 }
 
-exports.publish = function (req, res) {
-  if (req.body._id) { delete req.body._id; }
-  Question.findById(req.params.id, function (err, question) {
-    if (err) { return handleError(res, err); }
-    if (!question) { return res.status(404).send('Not Found'); }
-    // upload the question to item bank
-  });
-};
-
-var item = {
+var assessmentApiUrl = "https://qa.ekstep.in/api/assessment/v3/items/";
+/*var createUrl = "https://qa.ekstep.in/api/assessment/v3/items/create";
+var updateUrl = "https://qa.ekstep.in/api/assessment/v3/items/update/"*/
+var apikey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJjZmJiOWMzNjNkZTk0ZWNiOGJiMDhjYzA0NTlmZjI3YSJ9.pvSbcuIAiu5Cty9FyZSMp3R4O0dXZ3zx6-nz8Xkkf0I";
+var itemTemplate = {
   name: '',
   answer: {},
   portalOwner: '562', // ram.j's userid (hopefully!)
@@ -94,6 +89,8 @@ var item = {
   bloomsTaxonomyLevel: '',
   level: '',
   sublevel: '',
+  author: 'funtoot',
+  keywords: 'wordproblem',
   qindex: '',
   qlevel: 'EASY',
   type: 'ftb',
@@ -109,10 +106,45 @@ var item = {
     numericLangId: 'en',
     langId: 'en',
     hintMsg: '',
+    steps: [{
+      text: '',
+      answer: '',
+      unit: { symbol: '', prefix: false },
+      responses: [{
+        default: true,
+        response: [],
+        mh: '',
+        mmc: []
+      }]
+    }],
     variables: {}
   },
   concepts: {
     identifier: 'C6',
     name: 'Counting'
   }
+};
+
+exports.publish = function (req, res) {
+  if (req.body._id) { delete req.body._id; }
+  Question.findById(req.params.id, function (err, question) {
+    if (err) { return handleError(res, err); }
+    if (!question) { return res.status(404).send('Not Found'); }
+    // upload the question to item bank
+    var item = _.cloneDeep(itemTemplate);
+    item.question = question.questionText;
+    item.model.steps = [];
+    question.steps.forEach(function (s, i) {
+      item.model.steps.push(s);
+    });
+    //item.model.steps = _.cloneDeep(question.steps);
+    item.identifier = question.identifier;
+    item.grade = question.grade;
+    item.level = question.level;
+    item.sublevel = question.sublevel;
+    item.bloomsTaxonomyLevel = question.btlo;
+    item.model.hintMsg = question.hintText;
+    console.log('item', item);
+    return res.status(200).json(item);
+  });
 };
