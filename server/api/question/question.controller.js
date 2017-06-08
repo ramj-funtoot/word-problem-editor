@@ -2,6 +2,8 @@
 
 var _ = require('lodash');
 var Question = require('./question.model');
+var restclient = require('node-rest-client').Client;
+const util = require('util')
 
 // Get list of questions
 exports.index = function (req, res) {
@@ -70,12 +72,8 @@ function handleError(res, err) {
   return res.status(500).send(err);
 }
 
-var assessmentApiUrl = "https://qa.ekstep.in/api/assessment/v3/items/";
-/*var createUrl = "https://qa.ekstep.in/api/assessment/v3/items/create";
-var updateUrl = "https://qa.ekstep.in/api/assessment/v3/items/update/"*/
-var apikey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJjZmJiOWMzNjNkZTk0ZWNiOGJiMDhjYzA0NTlmZjI3YSJ9.pvSbcuIAiu5Cty9FyZSMp3R4O0dXZ3zx6-nz8Xkkf0I";
 var itemTemplate = {
-  name: '',
+  name: 'org.ekstep.funtoot.wordproblems',
   answer: {},
   portalOwner: '562', // ram.j's userid (hopefully!)
   domain: "Numeracy",
@@ -83,6 +81,7 @@ var itemTemplate = {
   language: ['English'],
   identifier: '',
   qid: '',
+  code:'',
   subject: 'NUM',
   grade: 0,
   gradeLevel: [],
@@ -90,12 +89,12 @@ var itemTemplate = {
   level: '',
   sublevel: '',
   author: 'funtoot',
-  keywords: 'wordproblem',
+  keywords: ['wordproblem'],
   qindex: '',
   qlevel: 'EASY',
   type: 'ftb',
-  template_id: '',
-  template: 'org.ekstep.plugins.funtoot.wordproblem',
+  template_id: 'org.ekstep.funtoot.wordproblems',
+  template: '',
   title: '',
   question: '',
   question_audio: '',
@@ -139,12 +138,67 @@ exports.publish = function (req, res) {
     });
     //item.model.steps = _.cloneDeep(question.steps);
     item.identifier = question.identifier;
+    item.code = question.identifier;
     item.grade = question.grade;
     item.level = question.level;
     item.sublevel = question.sublevel;
     item.bloomsTaxonomyLevel = question.btlo;
     item.model.hintMsg = question.hintText;
+
+    var url = "https://qa.ekstep.in/api/assessment/v3/items/create";
+    var apikey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJjZmJiOWMzNjNkZTk0ZWNiOGJiMDhjYzA0NTlmZjI3YSJ9.pvSbcuIAiu5Cty9FyZSMp3R4O0dXZ3zx6-nz8Xkkf0I";
+    /*if (env == "dev") {
+        url = "https://dev.ekstep.in/api/assessment/v3/items/create";
+        apikey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiI5OGNlN2RmNmNkOTk0YWQ5YjZlYTRjNDJlNmVjYjY5MCJ9.rtr4188EwDYZywtP7S9uuv1LsivoucFxOvJFDCWvq0Y";
+    }*/
+    //var item = req.body.item;
+    /*item.i18n = req.body.i18n;
+    item.media = req.body.media;
+    item.config = req.body.config;*/
+
+    var reqBody = { "request": { "assessment_item": {} } };
+    reqBody.request.assessment_item.identifier = item.code;
+    reqBody.request.assessment_item.objectType = "AssessmentItem";
+    reqBody.request.assessment_item.metadata = item;
+
+    var authheader = 'Bearer ' + apikey;
+    var args = {
+        path: { id: item.code, tid: 'domain' },
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": authheader
+        },
+        data: reqBody,
+        requestConfig: {
+            timeout: 240000
+        },
+        responseConfig: {
+            timeout: 240000
+        }
+    };
+    var client = new restclient();
+    client.post(url, args, function (data, response) {
+      //console.log('Hello '+data.params.errmsg.indexOf("Object already exists with identifier"))
+        if (data.params.errmsg && data.params.errmsg.indexOf("Object already exists with identifier") !== -1) {
+            url = "https://qa.ekstep.in/api/assessment/v3/items/update/" + item.code;
+            console.log('client.post'+util.inspect(data, false, null))
+            client.patch(url, args, function (data, response) {
+              console.log("client.patch"+util.inspect(data, false, null))
+              res.json(data);
+            }).on('error', function (err) {
+                res.json({ error: err });
+                cli.error(err);
+            });
+        }
+        else {
+          res.json(data);
+        }
+    }).on('error', function (err) {
+        res.json({ error: err });
+        cli.error(err);
+    });
+
     console.log('item', item);
-    return res.status(200).json(item);
+    //return res.status(200).json(item);
   });
 };
