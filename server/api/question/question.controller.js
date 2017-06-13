@@ -145,23 +145,20 @@ exports.publish = function (req, res) {
     item.bloomsTaxonomyLevel = question.btlo;
     item.model.hintMsg = question.hintText;
 
-    var url = "https://qa.ekstep.in/api/assessment/v3/items/create";
-    var apikey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJjZmJiOWMzNjNkZTk0ZWNiOGJiMDhjYzA0NTlmZjI3YSJ9.pvSbcuIAiu5Cty9FyZSMp3R4O0dXZ3zx6-nz8Xkkf0I";
-    /*if (env == "dev") {
-        url = "https://dev.ekstep.in/api/assessment/v3/items/create";
-        apikey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiI5OGNlN2RmNmNkOTk0YWQ5YjZlYTRjNDJlNmVjYjY5MCJ9.rtr4188EwDYZywtP7S9uuv1LsivoucFxOvJFDCWvq0Y";
-    }*/
-    //var item = req.body.item;
-    /*item.i18n = req.body.i18n;
-    item.media = req.body.media;
-    item.config = req.body.config;*/
-
+    var ekstep_env = 'dev'; // 'qa' or 'dev' or 'community'
+    var apikey = {
+      'dev':'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiI0Y2Y3ZWM1OGU1Zjg0ZWNlODRmMWU0M2ViMTM5ZDllMCJ9.XlhqVzofiJCGPen42fno3hfJu8OVKUOyFIM1koxfy54',
+      'qa':'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJjZmJiOWMzNjNkZTk0ZWNiOGJiMDhjYzA0NTlmZjI3YSJ9.pvSbcuIAiu5Cty9FyZSMp3R4O0dXZ3zx6-nz8Xkkf0I',
+      'community': 'no-key-available-for-production-as-yet!!'
+    };
+    var url = "https://" + ekstep_env + ".ekstep.in/api/assessment/v3/items/create";
+    
     var reqBody = { "request": { "assessment_item": {} } };
     reqBody.request.assessment_item.identifier = item.code;
     reqBody.request.assessment_item.objectType = "AssessmentItem";
     reqBody.request.assessment_item.metadata = item;
 
-    var authheader = 'Bearer ' + apikey;
+    var authheader = 'Bearer ' + apikey[ekstep_env];
     var args = {
         path: { id: item.code, tid: 'domain' },
         headers: {
@@ -180,7 +177,7 @@ exports.publish = function (req, res) {
     client.post(url, args, function (data, response) {
       //console.log('Hello '+data.params.errmsg.indexOf("Object already exists with identifier"))
         if (data.params.errmsg && data.params.errmsg.indexOf("Object already exists with identifier") !== -1) {
-            url = "https://qa.ekstep.in/api/assessment/v3/items/update/" + item.code;
+            url = "https://" + ekstep_env + ".ekstep.in/api/assessment/v3/items/update/" + item.code;
             console.log('client.post'+util.inspect(data, false, null))
             client.patch(url, args, function (data, response) {
               console.log("client.patch"+util.inspect(data, false, null))
