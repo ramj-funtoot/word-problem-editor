@@ -14,7 +14,7 @@
                 <div layout="row">
                     <md-input-container class="md-block" flex="30">
                         <label>Question ID</label>
-                        <input required name="identifier" ng-model="item.identifier">
+                        <input required name="identifier" ng-model="item.identifier" ng-disabled="{{item._id ? true: false;}}">
                         <div class="input-message hint" ng-if="!questionForm.identifier.$dirty">The unique question identifier</div>
                         <div class="input-message error-msg" ng-messages="questionForm.identifier.$error">
                             <div ng-message="required">This is required.</div>

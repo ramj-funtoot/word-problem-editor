@@ -8,7 +8,7 @@ angular.module('wpappApp')
       $scope.showMyItems = my;
       if ($scope.showMyItems) {
         var user = Auth.getCurrentUser();
-        $http.get('/api/questions/' + user.email).then(function (response) {
+        $http.get('/api/questions/', { params: { owner: user.email } }).then(function (response) {
           $scope.items = response.data;
         }).catch(function (error) {
           $scope.message = "No items to show!";
@@ -25,8 +25,15 @@ angular.module('wpappApp')
 
     $scope.refresh($scope.showMyItems);
 
-    $scope.openItem = function ($event, item) {
-      var parentEl = angular.element(document.body);
+    var getItem = function (item) {
+      return $http.get('/api/questions/', { params: { id: item._id, type: 'detail' } }).then(function (response) {
+        return response.data;
+      }).catch(function (error) {
+        console.error(error);
+      });
+    }
+
+    var editItem = function ($event, item, parentEl) {
       $mdDialog.show({
         parent: parentEl,
         targetEvent: $event,
@@ -58,10 +65,22 @@ angular.module('wpappApp')
       });
     }
 
+    $scope.openItem = function ($event, item) {
+      var parentEl = angular.element(document.body);
+      getItem(item).then(function (fItem) {
+        if (fItem) {
+          editItem($event, fItem, parentEl);
+        }
+      });
+    }
+
     $scope.copyItem = function ($event, item) {
-      var itemCopy = angular.copy(item);
-      itemCopy.identifier = itemCopy._id = null;
-      $scope.openItem($event, itemCopy);
+      getItem(item).then(function (fItem) {
+        var itemCopy = angular.copy(fItem);
+        itemCopy.identifier = itemCopy._id = null;
+        var parentEl = angular.element(document.body);
+        editItem($event, itemCopy, parentEl)
+      });
     }
 
     $scope.archiveItem = function ($event, item) {
@@ -77,7 +96,7 @@ angular.module('wpappApp')
         item.active = !1;
         $http.patch('/api/questions/' + item._id, item).then(function (response) {
           console.log('item archived successfully');
-          $scope.refresh();
+          $scope.refresh($scope.showMyItems);
         }).catch(function (err) {
           console.error('error', err);
         });
@@ -88,7 +107,7 @@ angular.module('wpappApp')
     $scope.publishItem = function ($event, item) {
       $http.put('/api/questions/' + item._id, item).then(function (response) {
         console.log('item', response.data);
-        $scope.refresh();
+        $scope.refresh($scope.showMyItems);
       }).catch(function (err) {
         console.error('error', err);
       });

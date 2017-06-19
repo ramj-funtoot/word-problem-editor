@@ -8,6 +8,28 @@ var validStates = ['Draft', 'In-Review', 'Published', 'Rejected'];
 var validBtlos = ['Remember', 'Understand', 'Apply', 'Analyze', 'Evaluate', 'Create'];
 var validDifficultyLevels = [1, 2, 3, 4, 5]
 
+var commentsSchema = new Schema({
+  created: { type: Date, default: Date.now },
+  commentedBy: String,
+  comment: String,
+  _id: { id: false }
+});
+var responsesSchema = new Schema({
+  response: [String],
+  mmc: [String],
+  mh: String,
+  default: Boolean,
+  _id: { id: false }
+});
+var stepSchema = new Schema({
+  text: String,
+  answer: String,
+  unit: String,
+  unitPlacement: { type: String, enum: validUnitPlacements },
+  responses: [responsesSchema],
+  _id: { id: false }
+});
+
 var QuestionSchema = new Schema({
   identifier: { type: String, unique: true },
   grade: { type: Number, min: 1, max: 5 },
@@ -26,26 +48,11 @@ var QuestionSchema = new Schema({
   maxAttempts: { type: Number, max: 10 },
   questionText: String,
   questionImage: String,
-  steps: [{
-    text: String,
-    answer: String,
-    unit: String,
-    unitPlacement: { type: String, enum: validUnitPlacements },
-    responses: [{
-      response: [String],
-      mmc: [String],
-      mh: String,
-      default: Boolean
-    }]
-  }],
+  steps: [stepSchema],
   hintText: String,
   solutionText: String,
   expressions: String,
-  comments: [{
-    created: { type: Date, default: Date.now },
-    commentedBy: String,
-    comment: String
-  }]
+  comments: [commentsSchema]
 });
 
 module.exports = mongoose.model('Question', QuestionSchema);

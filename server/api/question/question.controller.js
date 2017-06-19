@@ -3,14 +3,45 @@
 var _ = require('lodash');
 var Question = require('./question.model');
 
+function getFilterClause(a, o) {
+  var filter = { active: a };
+  if (o) filter['owner'] = o;
+  return filter;
+}
+function getSelectClause(type) {
+  if (!type || type == 'summary')
+    return { 'questionImage': 0, 'steps': 0, 'comments': 0, 'hintText': 0 }
+}
 // Get list of questions
 exports.index = function (req, res) {
-  Question.find({ active: true })
-    .sort({ "updated.when": -1 })
-    .exec(function (err, questions) {
-      if (err) { return handleError(res, err); }
-      return res.status(200).json(questions);
-    });
+  var active = req.query.active || true;
+  var owner = req.query.owner;
+  if (!req.query.type || req.query.type == 'summary') {
+    Question.find(getFilterClause(active, owner))
+      .select(getSelectClause(req.query.type))
+      .sort({ "updated.when": -1 })
+      .exec(function (err, questions) {
+        if (err) { return handleError(res, err); }
+        return res.status(200).json(questions);
+      });
+  }
+  else if (req.query.type && req.query.type == 'detail') {
+    if (req.query.id) {
+      Question.findById(req.query.id, function (err, question) {
+        if (err) { return handleError(res, err); }
+        if (!question) { return res.status(404).send('Not Found'); }
+        return res.json(question);
+      });
+    }
+    else {
+      Question.find(getFilterClause(active, owner))
+        .sort({ "updated.when": -1 })
+        .exec(function (err, questions) {
+          if (err) { return handleError(res, err); }
+          return res.status(200).json(questions);
+        });
+    }
+  }
 };
 
 // get list of questions based on query parameters
@@ -137,7 +168,6 @@ exports.publish = function (req, res) {
     question.steps.forEach(function (s, i) {
       item.model.steps.push(s);
     });
-    //item.model.steps = _.cloneDeep(question.steps);
     item.identifier = question.identifier;
     item.grade = question.grade;
     item.level = question.level;
@@ -148,3 +178,45 @@ exports.publish = function (req, res) {
     return res.status(200).json(item);
   });
 };
+
+function uploadItem(item) {
+  var reqBody = { "request": { "assessment_item": {} } };
+  reqBody.request.assessment_item.identifier = item.code;
+  reqBody.request.assessment_item.objectType = "AssessmentItem";
+  reqBody.request.assessment_item.metadata = item;
+
+  var authheader = 'Bearer ' + apikey;
+  var args = {
+    path: { id: item.code, tid: 'domain' },
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": authheader
+    },
+    data: reqBody,
+    requestConfig: {
+      timeout: 240000
+    },
+    responseConfig: {
+      timeout: 240000
+    }
+  };
+  var client = new restclient();
+  client.post(url, args, function (data, response) {
+    if (data.result.messages && data.result.messages[0].indexOf("Object already exists with identifier") !== -1) {
+      url = "https://qa.ekstep.in/api/assessment/v3/items/update/" + item.code;
+      client.patch(url, args, function (data, response) {
+        res.json(data);
+      }).on('error', function (err) {
+        res.json({ error: err });
+        cli.error(err);
+      });
+    }
+    else {
+      res.json(data);
+    }
+  }).on('error', function (err) {
+    res.json({ error: err });
+    cli.error(err);
+  });
+
+}
