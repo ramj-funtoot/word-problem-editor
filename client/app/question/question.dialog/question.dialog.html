@@ -14,7 +14,7 @@
                 <div layout="row">
                     <md-input-container class="md-block" flex="30">
                         <label>Question ID</label>
-                        <input required name="identifier" ng-model="item.identifier">
+                        <input required name="identifier" ng-model="item.identifier" ng-disabled="{{item._id ? true: false;}}">
                         <div class="input-message hint" ng-if="!questionForm.identifier.$dirty">The unique question identifier</div>
                         <div class="input-message error-msg" ng-messages="questionForm.identifier.$error">
                             <div ng-message="required">This is required.</div>
@@ -88,7 +88,7 @@
                         </div>
                     </md-input-container>
                     <md-autocomplete required md-input-name="assignedTo" md-selected-item="user.email" md-search-text="item.owner" md-items="user in users | filter: email"
-                        md-item-text="user.email" md-min-length="1" placeholder="Assign to" md-require-match md-floating-label="Assigned to">
+                        md-item-text="user.email" md-min-length="0" placeholder="Assign to" md-require-match md-floating-label="Assigned to">
                         <md-item-template>
                             <span md-highlight-text="userSearchText" md-highlight-flags="^i">{{user.email}}</span>
                         </md-item-template>
