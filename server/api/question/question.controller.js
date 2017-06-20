@@ -2,6 +2,8 @@
 
 var _ = require('lodash');
 var Question = require('./question.model');
+var restclient = require('node-rest-client').Client;
+const util = require('util')
 
 function getFilterClause(a, o) {
   var filter = { active: a };
@@ -114,6 +116,7 @@ var itemTemplate = {
   language: ['English'],
   identifier: '',
   qid: '',
+  code:'',
   subject: 'NUM',
   grade: 0,
   gradeLevel: [],
@@ -121,12 +124,12 @@ var itemTemplate = {
   level: '',
   sublevel: '',
   author: 'funtoot',
-  keywords: 'wordproblem',
+  keywords: ['wordproblem'],
   qindex: '',
   qlevel: 'EASY',
   type: 'ftb',
-  template_id: '',
-  template: 'org.ekstep.plugins.funtoot.wordproblem',
+  template_id: 'org.ekstep.funtoot.wordproblems',
+  template: '',
   title: '',
   question: '',
   question_audio: '',
@@ -169,54 +172,64 @@ exports.publish = function (req, res) {
       item.model.steps.push(s);
     });
     item.identifier = question.identifier;
+    item.code = question.identifier;
     item.grade = question.grade;
     item.level = question.level;
     item.sublevel = question.sublevel;
     item.bloomsTaxonomyLevel = question.btlo;
     item.model.hintMsg = question.hintText;
+    
+    var ekstep_env = 'dev'; // 'qa' or 'dev' or 'community'
+    var apikey = {
+      'dev':'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiI0Y2Y3ZWM1OGU1Zjg0ZWNlODRmMWU0M2ViMTM5ZDllMCJ9.XlhqVzofiJCGPen42fno3hfJu8OVKUOyFIM1koxfy54',
+      'qa':'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJjZmJiOWMzNjNkZTk0ZWNiOGJiMDhjYzA0NTlmZjI3YSJ9.pvSbcuIAiu5Cty9FyZSMp3R4O0dXZ3zx6-nz8Xkkf0I',
+      'community': 'no-key-available-for-production-as-yet!!'
+    };
+    var url = "https://" + ekstep_env + ".ekstep.in/api/assessment/v3/items/create";
+    
+    var reqBody = { "request": { "assessment_item": {} } };
+    reqBody.request.assessment_item.identifier = item.code;
+    reqBody.request.assessment_item.objectType = "AssessmentItem";
+    reqBody.request.assessment_item.metadata = item;
+
+    var authheader = 'Bearer ' + apikey[ekstep_env];
+    var args = {
+        path: { id: item.code, tid: 'domain' },
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": authheader
+        },
+        data: reqBody,
+        requestConfig: {
+            timeout: 240000
+        },
+        responseConfig: {
+            timeout: 240000
+        }
+    };
+    var client = new restclient();
+    client.post(url, args, function (data, response) {
+      //console.log('Hello '+data.params.errmsg.indexOf("Object already exists with identifier"))
+        if (data.params.errmsg && data.params.errmsg.indexOf("Object already exists with identifier") !== -1) {
+            url = "https://" + ekstep_env + ".ekstep.in/api/assessment/v3/items/update/" + item.code;
+            console.log('client.post'+util.inspect(data, false, null))
+            client.patch(url, args, function (data, response) {
+              console.log("client.patch"+util.inspect(data, false, null))
+              res.json(data);
+            }).on('error', function (err) {
+                res.json({ error: err });
+                cli.error(err);
+            });
+        }
+        else {
+          res.json(data);
+        }
+    }).on('error', function (err) {
+        res.json({ error: err });
+        cli.error(err);
+    });
+
     console.log('item', item);
     return res.status(200).json(item);
   });
 };
-
-function uploadItem(item) {
-  var reqBody = { "request": { "assessment_item": {} } };
-  reqBody.request.assessment_item.identifier = item.code;
-  reqBody.request.assessment_item.objectType = "AssessmentItem";
-  reqBody.request.assessment_item.metadata = item;
-
-  var authheader = 'Bearer ' + apikey;
-  var args = {
-    path: { id: item.code, tid: 'domain' },
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": authheader
-    },
-    data: reqBody,
-    requestConfig: {
-      timeout: 240000
-    },
-    responseConfig: {
-      timeout: 240000
-    }
-  };
-  var client = new restclient();
-  client.post(url, args, function (data, response) {
-    if (data.result.messages && data.result.messages[0].indexOf("Object already exists with identifier") !== -1) {
-      url = "https://qa.ekstep.in/api/assessment/v3/items/update/" + item.code;
-      client.patch(url, args, function (data, response) {
-        res.json(data);
-      }).on('error', function (err) {
-        res.json({ error: err });
-        cli.error(err);
-      });
-    }
-    else {
-      res.json(data);
-    }
-  }).on('error', function (err) {
-    res.json({ error: err });
-    cli.error(err);
-  });
-
-}
