@@ -16,15 +16,17 @@ var path = require('path');
 var config = require('./environment');
 var passport = require('passport');
 
-module.exports = function(app) {
+module.exports = function (app) {
   var env = app.get('env');
 
   app.set('views', config.root + '/server/views');
   app.engine('html', require('ejs').renderFile);
   app.set('view engine', 'html');
   app.use(compression());
-  app.use(bodyParser.urlencoded({ extended: false }));
-  app.use(bodyParser.json());
+  app.use(bodyParser.urlencoded({ extended: false, limit: '5mb' }));
+  app.use(bodyParser.json({ limit: '5mb' }));
+  /*app.use(bodyParser.json({ limit: '5mb' }));
+  app.use(bodyParser.urlencoded({ extended: true, limit: '5mb', parameterLimit: 50000 }));*/
   app.use(methodOverride());
   app.use(cookieParser());
   app.use(passport.initialize());

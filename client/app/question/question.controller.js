@@ -1,11 +1,24 @@
 'use strict';
 
 angular.module('wpappApp')
-  .controller('QuestionCtrl', function ($scope, $http, $mdDialog, Auth, User) {
+  .controller('QuestionCtrl', function ($scope, $http, $mdDialog, Auth, User, $timeout) {
+
+    $scope.vm = {
+      items: {
+        getItemAtIndex: function (index) {
+          return $scope.items[index];
+        },
+        getLength: function () {
+          return $scope.items ? $scope.items.length : 0;
+        }
+      }
+    };
+
     $scope.showMyItems = true;
 
     $scope.refresh = function (my) {
       $scope.showMyItems = my;
+      $scope.items = [];
       if ($scope.showMyItems) {
         var user = Auth.getCurrentUser();
         $http.get('/api/questions/', { params: { owner: user.email } }).then(function (response) {
@@ -22,11 +35,12 @@ angular.module('wpappApp')
         });
       }
     }
+    $timeout(function () {
+      $scope.refresh($scope.showMyItems);
+    });
 
-    $scope.refresh($scope.showMyItems);
-
-    var getItem = function (item) {
-      return $http.get('/api/questions/', { params: { id: item._id, type: 'detail' } }).then(function (response) {
+    var getItem = function (id) {
+      return $http.get('/api/questions/', { params: { id: id, type: 'detail' } }).then(function (response) {
         return response.data;
       }).catch(function (error) {
         console.error(error);
@@ -65,9 +79,18 @@ angular.module('wpappApp')
       });
     }
 
+    $scope.openItemById = function ($event, itemId) {
+      var parentEl = angular.element(document.body);
+      getItem(itemId).then(function (fItem) {
+        if (fItem) {
+          editItem($event, fItem, parentEl);
+        }
+      });
+    }
+
     $scope.openItem = function ($event, item) {
       var parentEl = angular.element(document.body);
-      getItem(item).then(function (fItem) {
+      getItem(item.identifier).then(function (fItem) {
         if (fItem) {
           editItem($event, fItem, parentEl);
         }
@@ -75,7 +98,7 @@ angular.module('wpappApp')
     }
 
     $scope.copyItem = function ($event, item) {
-      getItem(item).then(function (fItem) {
+      getItem(item.identifier).then(function (fItem) {
         var itemCopy = angular.copy(fItem);
         itemCopy.identifier = itemCopy._id = null;
         var parentEl = angular.element(document.body);
@@ -141,3 +164,16 @@ angular.module('wpappApp')
       });
     }();
   });
+
+angular.module('wpappApp').directive('ngEnter', function () {
+  return function (scope, element, attrs) {
+    element.bind("keydown keypress", function (event) {
+      if (event.which === 13) {
+        scope.$apply(function () {
+          scope.$eval(attrs.ngEnter);
+        });
+        event.preventDefault();
+      }
+    });
+  };
+});

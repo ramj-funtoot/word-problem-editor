@@ -30,11 +30,11 @@
                         </md-menu-content>
                     </md-menu>
                     <span flex></span>
-                    <input class="search-box" ng-model="search.qId" placeholder="Search by Question Id">
+                    <input class="search-box" ng-model="search.qId" placeholder="Search by Question Id" ng-enter="openItemById($event, search.qId)">
                 </div>
             </md-toolbar>
-            <md-list class="questions-list" ng-cloak>
-                <md-list-item class="md-2-line" ng-repeat="item in items track by item._id | filter:search.qId" ng-click="openItem($event, item)">
+            <md-list md-virtual-repeat-container class="questions-list" style="height:500px;" ng-cloak>
+                <md-list-item class="md-2-line" md-virtual-repeat="item in vm.items" ng-click="openItem($event, item)" md-on-demand>
                     <md-checkbox class="" ng-checked="isSelected(item)" ng-click="toggleSelection(item)"></md-checkbox>
                     <h3 class="question-id">{{ item.identifier }}</h3>
                     <div class="md-list-item-text" layout="column">

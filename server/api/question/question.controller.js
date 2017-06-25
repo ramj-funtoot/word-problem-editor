@@ -22,6 +22,7 @@ exports.index = function (req, res) {
     Question.find(getFilterClause(active, owner))
       .select(getSelectClause(req.query.type))
       .sort({ "updated.when": -1 })
+      .lean()
       .exec(function (err, questions) {
         if (err) { return handleError(res, err); }
         return res.status(200).json(questions);
@@ -29,15 +30,18 @@ exports.index = function (req, res) {
   }
   else if (req.query.type && req.query.type == 'detail') {
     if (req.query.id) {
-      Question.findById(req.query.id, function (err, question) {
-        if (err) { return handleError(res, err); }
-        if (!question) { return res.status(404).send('Not Found'); }
-        return res.json(question);
-      });
+      Question.findOne({ 'identifier': req.query.id })
+        .lean()
+        .exec(function (err, question) {
+          if (err) { return handleError(res, err); }
+          if (!question) { return res.status(404).send('Not Found'); }
+          return res.json(question);
+        });
     }
     else {
       Question.find(getFilterClause(active, owner))
         .sort({ "updated.when": -1 })
+        .lean()
         .exec(function (err, questions) {
           if (err) { return handleError(res, err); }
           return res.status(200).json(questions);
@@ -50,6 +54,7 @@ exports.index = function (req, res) {
 exports.query = function (req, res) {
   Question.find({ active: true, owner: req.params.owner })
     .sort({ "updated.when": -1 })
+    .lean()
     .exec(function (err, questions) {
       if (err) { return handleError(res, err); }
       return res.status(200).json(questions);
@@ -61,7 +66,7 @@ exports.show = function (req, res) {
   Question.findById(req.params.id, function (err, question) {
     if (err) { return handleError(res, err); }
     if (!question) { return res.status(404).send('Not Found'); }
-    return res.json(question);
+    return res.json(question.toObject());
   });
 };
 
@@ -69,21 +74,17 @@ exports.show = function (req, res) {
 exports.create = function (req, res) {
   Question.create(req.body, function (err, question) {
     if (err) { return handleError(res, err); }
-    return res.status(201).json(question);
+    return res.status(201).json(question.toObject());
   });
 };
 
 // Updates an existing question in the DB.
 exports.update = function (req, res) {
   if (req.body._id) { delete req.body._id; }
-  Question.findById(req.params.id, function (err, question) {
+  Question.findByIdAndUpdate(req.params.id, { $set: req.body }, function (err, question) {
     if (err) { return handleError(res, err); }
     if (!question) { return res.status(404).send('Not Found'); }
-    var updated = _.merge(question, req.body);
-    updated.save(function (err) {
-      if (err) { return handleError(res, err); }
-      return res.status(200).json(question);
-    });
+    return res.status(200).json(question.toObject());
   });
 };
 
@@ -103,10 +104,6 @@ function handleError(res, err) {
   return res.status(500).send(err);
 }
 
-var assessmentApiUrl = "https://qa.ekstep.in/api/assessment/v3/items/";
-/*var createUrl = "https://qa.ekstep.in/api/assessment/v3/items/create";
-var updateUrl = "https://qa.ekstep.in/api/assessment/v3/items/update/"*/
-var apikey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJjZmJiOWMzNjNkZTk0ZWNiOGJiMDhjYzA0NTlmZjI3YSJ9.pvSbcuIAiu5Cty9FyZSMp3R4O0dXZ3zx6-nz8Xkkf0I";
 var itemTemplate = {
   name: '',
   answer: {},
@@ -116,7 +113,7 @@ var itemTemplate = {
   language: ['English'],
   identifier: '',
   qid: '',
-  code:'',
+  code: '',
   subject: 'NUM',
   grade: 0,
   gradeLevel: [],
@@ -171,22 +168,21 @@ exports.publish = function (req, res) {
     question.steps.forEach(function (s, i) {
       item.model.steps.push(s);
     });
-    item.identifier = question.identifier;
-    item.code = question.identifier;
+    item.identifier = item.code = item.name = question.identifier;
     item.grade = question.grade;
     item.level = question.level;
     item.sublevel = question.sublevel;
     item.bloomsTaxonomyLevel = question.btlo;
     item.model.hintMsg = question.hintText;
-    
+
     var ekstep_env = 'dev'; // 'qa' or 'dev' or 'community'
     var apikey = {
-      'dev':'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiI0Y2Y3ZWM1OGU1Zjg0ZWNlODRmMWU0M2ViMTM5ZDllMCJ9.XlhqVzofiJCGPen42fno3hfJu8OVKUOyFIM1koxfy54',
-      'qa':'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJjZmJiOWMzNjNkZTk0ZWNiOGJiMDhjYzA0NTlmZjI3YSJ9.pvSbcuIAiu5Cty9FyZSMp3R4O0dXZ3zx6-nz8Xkkf0I',
+      'dev': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiI0Y2Y3ZWM1OGU1Zjg0ZWNlODRmMWU0M2ViMTM5ZDllMCJ9.XlhqVzofiJCGPen42fno3hfJu8OVKUOyFIM1koxfy54',
+      'qa': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJjZmJiOWMzNjNkZTk0ZWNiOGJiMDhjYzA0NTlmZjI3YSJ9.pvSbcuIAiu5Cty9FyZSMp3R4O0dXZ3zx6-nz8Xkkf0I',
       'community': 'no-key-available-for-production-as-yet!!'
     };
     var url = "https://" + ekstep_env + ".ekstep.in/api/assessment/v3/items/create";
-    
+
     var reqBody = { "request": { "assessment_item": {} } };
     reqBody.request.assessment_item.identifier = item.code;
     reqBody.request.assessment_item.objectType = "AssessmentItem";
@@ -194,42 +190,40 @@ exports.publish = function (req, res) {
 
     var authheader = 'Bearer ' + apikey[ekstep_env];
     var args = {
-        path: { id: item.code, tid: 'domain' },
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": authheader
-        },
-        data: reqBody,
-        requestConfig: {
-            timeout: 240000
-        },
-        responseConfig: {
-            timeout: 240000
-        }
+      path: { id: item.code, tid: 'domain' },
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": authheader
+      },
+      data: reqBody,
+      requestConfig: {
+        timeout: 240000
+      },
+      responseConfig: {
+        timeout: 240000
+      }
     };
     var client = new restclient();
     client.post(url, args, function (data, response) {
       //console.log('Hello '+data.params.errmsg.indexOf("Object already exists with identifier"))
-        if (data.params.errmsg && data.params.errmsg.indexOf("Object already exists with identifier") !== -1) {
-            url = "https://" + ekstep_env + ".ekstep.in/api/assessment/v3/items/update/" + item.code;
-            console.log('client.post'+util.inspect(data, false, null))
-            client.patch(url, args, function (data, response) {
-              console.log("client.patch"+util.inspect(data, false, null))
-              res.json(data);
-            }).on('error', function (err) {
-                res.json({ error: err });
-                cli.error(err);
-            });
-        }
-        else {
+      if (data.params.errmsg && data.params.errmsg.indexOf("Object already exists with identifier") !== -1) {
+        url = "https://" + ekstep_env + ".ekstep.in/api/assessment/v3/items/update/" + item.code;
+        console.log('client.post' + util.inspect(data, false, null))
+        client.patch(url, args, function (data, response) {
+          console.log("client.patch" + util.inspect(data, false, null))
           res.json(data);
-        }
+        }).on('error', function (err) {
+          res.json({ error: err });
+          cli.error(err);
+        });
+      }
+      else {
+        res.status(200).json(data);
+      }
     }).on('error', function (err) {
-        res.json({ error: err });
-        cli.error(err);
+      res.status(500).json({ error: err });
+      //cli.error(err);
     });
-
-    console.log('item', item);
-    return res.status(200).json(item);
+    //return res.status(200).json(item);
   });
 };
