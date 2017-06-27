@@ -2,6 +2,7 @@
 
 angular.module('wpappApp')
     .controller('ResponseConfigDialogCtrl', function ($scope, step, $mdConstant, $mdDialog) {
+        $scope.meta = { unitPlacements: ['pre', 'post'] };
         $scope.step = step;
         $scope.closeDialog = function () {
             $mdDialog.cancel();

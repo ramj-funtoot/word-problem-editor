@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('wpappApp')
-  .controller('QuestionCtrl', function ($scope, $http, $mdDialog, Auth, User, $timeout) {
+  .controller('QuestionCtrl', function ($scope, $http, $mdDialog, Auth, User, $timeout, $filter) {
 
     $scope.vm = {
       items: {
@@ -14,7 +14,21 @@ angular.module('wpappApp')
       }
     };
 
+    $scope.allItems = [];
+    $scope.search = { qId: '' };
+
     $scope.showMyItems = true;
+
+    $scope.filterItems = function (my, filter) {
+      $scope.showMyItems = my;
+      if (my) {
+        var user = Auth.getCurrentUser();
+        $scope.items = $filter('filter')($scope.allItems, { owner: user.email, identifier: $scope.search.qId })
+      }
+      else {
+        $scope.items = $filter('filter')($scope.allItems, { identifier: $scope.search.qId })
+      }
+    }
 
     $scope.refresh = function (my) {
       $scope.showMyItems = my;
@@ -29,14 +43,16 @@ angular.module('wpappApp')
       }
       else {
         $http.get('/api/questions').then(function (response) {
-          $scope.items = response.data;
+          $scope.allItems = response.data;
+          $scope.filterItems(false);
         }).catch(function (error) {
           $scope.message = "No items to show!";
         });
       }
     }
+
     $timeout(function () {
-      $scope.refresh($scope.showMyItems);
+      $scope.refresh(false);
     });
 
     var getItem = function (id) {
@@ -128,11 +144,41 @@ angular.module('wpappApp')
     }
 
     $scope.publishItem = function ($event, item) {
-      $http.put('/api/questions/' + item._id, item).then(function (response) {
-        console.log('item', response.data);
-        $scope.refresh($scope.showMyItems);
-      }).catch(function (err) {
-        console.error('error', err);
+      var confirm = $mdDialog.confirm()
+        .title('Confirm Publish')
+        .textContent('Are you sure you want to publish question ' + item.identifier + '?')
+        .ariaLabel('Publish Item')
+        .targetEvent($event)
+        .ok('Yes')
+        .cancel('No')
+        .multiple(true);
+      $mdDialog.show(confirm).then(function () {
+        $http.put('/api/questions/' + item._id, item).then(function (response) {
+          $mdDialog.show(
+            $mdDialog.alert()
+              .parent(angular.element(document.body))
+              .clickOutsideToClose(true)
+              .title('Published Successfully')
+              .textContent('Question with id ' + item.identifier + ' got published successfully!')
+              .ariaLabel('Publish Success')
+              .ok('YAY!')
+              .targetEvent($event)
+          );
+          $scope.refresh($scope.showMyItems);
+        }).catch(function (err) {
+          console.error('error', err);
+          $mdDialog.show(
+            $mdDialog.alert()
+              .parent(angular.element(document.body))
+              .clickOutsideToClose(true)
+              .title('Publish failed!')
+              .textContent(err.data.error.errmsg)
+              .ariaLabel('Publish Failed')
+              .ok('Got it!')
+              .targetEvent($event)
+          );
+        });
+      }, function () {
       });
     }
     $scope.getDisplayableTime = function (time) {
@@ -170,7 +216,7 @@ angular.module('wpappApp').directive('ngEnter', function () {
     element.bind("keydown keypress", function (event) {
       if (event.which === 13) {
         scope.$apply(function () {
-          scope.$eval(attrs.ngEnter);
+          //scope.$eval(attrs.ngEnter);
         });
         event.preventDefault();
       }

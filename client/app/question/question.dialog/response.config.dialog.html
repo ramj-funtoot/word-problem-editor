@@ -25,6 +25,13 @@
                         <input name="units" rows="1" ng-model="step.unit">
                         <div class="input-message hint" ng-if="!responseForm.units.$dirty">Units</div>
                     </md-input-container>
+                    <md-input-container flex="20">
+                        <label>Unit Placement</label>
+                        <md-select name="unitPlacement" ng-model="step.unitPlacement" required>
+                            <md-option ng-value="up" ng-repeat="up in meta.unitPlacements">{{up}}</md-option>
+                        </md-select>
+                        <div class="input-message hint" ng-if="!responseForm.units.$dirty">Unit Placement</div>
+                    </md-input-container>
                 </div>
                 <div layout="row">
                     <div layout="column" flex layout-fill ng-cloak>

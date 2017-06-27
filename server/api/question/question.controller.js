@@ -124,8 +124,9 @@ var itemTemplate = {
   keywords: ['wordproblem'],
   qindex: '',
   qlevel: 'EASY',
+  qtype: 'legacy-word-problem',
   type: 'ftb',
-  template_id: 'org.ekstep.funtoot.wordproblems',
+  template_id: 'org.ekstep.plugins.funtoot.fibWordProblem',
   template: '',
   title: '',
   question: '',
@@ -170,11 +171,20 @@ exports.publish = function (req, res) {
     });
     item.identifier = item.code = item.name = question.identifier;
     item.grade = question.grade;
+    item.gradeLevel = ["Grade " + question.grade];
     item.level = question.level;
     item.sublevel = question.sublevel;
     item.bloomsTaxonomyLevel = question.btlo;
     item.model.hintMsg = question.hintText;
-
+    item.keywords = item.keywords || ['wordproblem'];
+    _.each(question.workSheets, function (w, k) {
+      if (w.id)
+        item.keywords.push(w.id);
+    });
+    _.each(question.expressions.split('\r\n'), function (exp) {
+      var tokens = exp.split('=');
+      item.model.variables[tokens[0]] = tokens[1];
+    });
     var ekstep_env = 'dev'; // 'qa' or 'dev' or 'community'
     var apikey = {
       'dev': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiI0Y2Y3ZWM1OGU1Zjg0ZWNlODRmMWU0M2ViMTM5ZDllMCJ9.XlhqVzofiJCGPen42fno3hfJu8OVKUOyFIM1koxfy54',
@@ -205,25 +215,25 @@ exports.publish = function (req, res) {
     };
     var client = new restclient();
     client.post(url, args, function (data, response) {
-      //console.log('Hello '+data.params.errmsg.indexOf("Object already exists with identifier"))
-      if (data.params.errmsg && data.params.errmsg.indexOf("Object already exists with identifier") !== -1) {
-        url = "https://" + ekstep_env + ".ekstep.in/api/assessment/v3/items/update/" + item.code;
-        console.log('client.post' + util.inspect(data, false, null))
-        client.patch(url, args, function (data, response) {
-          console.log("client.patch" + util.inspect(data, false, null))
-          res.json(data);
-        }).on('error', function (err) {
-          res.json({ error: err });
-          cli.error(err);
-        });
+      if (data.params.errmsg) {
+        if (data.params.errmsg.indexOf("Object already exists with identifier") !== -1) {
+          url = "https://" + ekstep_env + ".ekstep.in/api/assessment/v3/items/update/" + item.code;
+          client.patch(url, args, function (data, response) {
+            res.status(200).json(data);
+          }).on('error', function (err) {
+            res.json({ error: err });
+            cli.error(err);
+          });
+        }
+        else {
+          res.status(500).json({ error: data.params });
+        }
       }
       else {
         res.status(200).json(data);
       }
     }).on('error', function (err) {
       res.status(500).json({ error: err });
-      //cli.error(err);
     });
-    //return res.status(200).json(item);
   });
 };

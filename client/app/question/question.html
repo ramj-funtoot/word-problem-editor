@@ -16,13 +16,13 @@
                         </md-button>
                         <md-menu-content width="4">
                             <md-menu-item>
-                                <md-button ng-click="refresh(false)">
+                                <md-button ng-click="filterItems(false)">
                                     <md-icon md-svg-icon="social:group" md-menu-align-target></md-icon>
                                     All Items
                                 </md-button>
                             </md-menu-item>
                             <md-menu-item>
-                                <md-button ng-click="refresh(true)">
+                                <md-button ng-click="filterItems(true)">
                                     <md-icon md-svg-icon="action:favorite"></md-icon>
                                     My Items
                                 </md-button>
@@ -30,7 +30,8 @@
                         </md-menu-content>
                     </md-menu>
                     <span flex></span>
-                    <input class="search-box" ng-model="search.qId" placeholder="Search by Question Id" ng-enter="openItemById($event, search.qId)">
+                    <input class="search-box" ng-model="search.qId" placeholder="Search by Question Id" ng-enter="openItemById($event, search.qId)"
+                        ng-change="filterItems(showMyItems)">
                 </div>
             </md-toolbar>
             <md-list md-virtual-repeat-container class="questions-list" style="height:500px;" ng-cloak>
