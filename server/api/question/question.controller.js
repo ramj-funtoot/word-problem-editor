@@ -101,7 +101,7 @@ exports.destroy = function (req, res) {
 };
 
 function handleError(res, err) {
-  return res.status(500).send(err);
+  return res.status(500).json(err);
 }
 
 var itemTemplate = {
@@ -181,7 +181,7 @@ exports.publish = function (req, res) {
       if (w.id)
         item.keywords.push(w.id);
     });
-    _.each(question.expressions.split('\r\n'), function (exp) {
+    _.each(question.expressions.split(/\r?\n/), function (exp) {
       var tokens = exp.split('=');
       item.model.variables[tokens[0]] = tokens[1];
     });

@@ -82,6 +82,15 @@ angular.module('wpappApp')
             $scope.refresh($scope.showMyItems);
           }).catch(function (err) {
             console.error('error', err);
+            $mdDialog.show(
+              $mdDialog.alert()
+                .parent(angular.element(document.body))
+                .clickOutsideToClose(true)
+                .title('Save failed!')
+                .textContent("Could not save question " + newItem.identifier)
+                .ariaLabel('Save Failed')
+                .ok('OK')
+                .targetEvent($event));
           });
         }
         else {
@@ -90,6 +99,15 @@ angular.module('wpappApp')
             $scope.refresh($scope.showMyItems);
           }).catch(function (err) {
             console.error('error', err);
+            $mdDialog.show(
+              $mdDialog.alert()
+                .parent(angular.element(document.body))
+                .clickOutsideToClose(true)
+                .title('Save failed!')
+                .textContent("Could not save question " + newItem.identifier)
+                .ariaLabel('Save Failed')
+                .ok('OK')
+                .targetEvent($event));
           });
         }
       });
