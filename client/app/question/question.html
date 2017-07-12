@@ -32,6 +32,10 @@
                     <span flex></span>
                     <input class="search-box" ng-model="search.qId" placeholder="Search by Question Id" ng-enter="openItemById($event, search.qId)"
                         ng-change="filterItems(showMyItems)">
+                    <md-button ng-click="publishSelected()">
+                        <md-icon md-svg-icon="editor:publish"></md-icon>
+                        Publish Selected
+                    </md-button>
                 </div>
             </md-toolbar>
             <md-list md-virtual-repeat-container class="questions-list" style="height:500px;" ng-cloak>

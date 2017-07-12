@@ -4,7 +4,7 @@ var mongoose = require('mongoose'),
   Schema = mongoose.Schema;
 
 var validUnitPlacements = ['pre', 'post'];
-var validStates = ['Draft', 'In-Review', 'Published', 'Rejected'];
+var validStates = ['Draft', 'In-Review', 'Reviewed', 'Published', 'Rejected'];
 var validBtlos = ['Remember', 'Understand', 'Apply', 'Analyze', 'Evaluate', 'Create'];
 var validDifficultyLevels = [1, 2, 3, 4, 5]
 
@@ -29,6 +29,10 @@ var stepSchema = new Schema({
   responses: [responsesSchema],
   _id: { id: false }
 });
+var workSheetSchema = new Schema({
+  _id: String,
+  name: String
+});
 
 var QuestionSchema = new Schema({
   identifier: { type: String, unique: true },
@@ -44,7 +48,7 @@ var QuestionSchema = new Schema({
   updated: { when: { type: Date, default: Date.now }, by: String },
   owner: String,
   state: { type: String, enum: validStates },
-  workSheets: [{ id: String, name: String }],
+  workSheets: [workSheetSchema],
   maxAttempts: { type: Number, max: 10 },
   questionText: String,
   questionImage: String,

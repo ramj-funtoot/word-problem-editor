@@ -157,83 +157,119 @@ var itemTemplate = {
   }
 };
 
-exports.publish = function (req, res) {
-  if (req.body._id) { delete req.body._id; }
-  Question.findById(req.params.id, function (err, question) {
-    if (err) { return handleError(res, err); }
-    if (!question) { return res.status(404).send('Not Found'); }
-    // upload the question to item bank
-    var item = _.cloneDeep(itemTemplate);
-    item.question = question.questionText;
-    item.model.steps = [];
-    question.steps.forEach(function (s, i) {
-      item.model.steps.push(s);
-    });
-    item.identifier = item.code = item.name = question.identifier;
-    item.grade = question.grade;
-    item.gradeLevel = ["Grade " + question.grade];
-    item.level = question.level;
-    item.sublevel = question.sublevel;
-    item.bloomsTaxonomyLevel = question.btlo;
-    item.model.hintMsg = question.hintText;
-    item.keywords = item.keywords || ['wordproblem'];
-    _.each(question.workSheets, function (w, k) {
-      if (w.id)
-        item.keywords.push(w.id);
-    });
-    _.each(question.expressions.split(/\r?\n/), function (exp) {
-      var tokens = exp.split('=');
-      item.model.variables[tokens[0]] = tokens[1];
-    });
-    var ekstep_env = 'dev'; // 'qa' or 'dev' or 'community'
-    var apikey = {
-      'dev': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiI0Y2Y3ZWM1OGU1Zjg0ZWNlODRmMWU0M2ViMTM5ZDllMCJ9.XlhqVzofiJCGPen42fno3hfJu8OVKUOyFIM1koxfy54',
-      'qa': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJjZmJiOWMzNjNkZTk0ZWNiOGJiMDhjYzA0NTlmZjI3YSJ9.pvSbcuIAiu5Cty9FyZSMp3R4O0dXZ3zx6-nz8Xkkf0I',
-      'community': 'no-key-available-for-production-as-yet!!'
-    };
-    var url = "https://" + ekstep_env + ".ekstep.in/api/assessment/v3/items/create";
-
-    var reqBody = { "request": { "assessment_item": {} } };
-    reqBody.request.assessment_item.identifier = item.code;
-    reqBody.request.assessment_item.objectType = "AssessmentItem";
-    reqBody.request.assessment_item.metadata = item;
-
-    var authheader = 'Bearer ' + apikey[ekstep_env];
-    var args = {
-      path: { id: item.code, tid: 'domain' },
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": authheader
-      },
-      data: reqBody,
-      requestConfig: {
-        timeout: 240000
-      },
-      responseConfig: {
-        timeout: 240000
-      }
-    };
-    var client = new restclient();
-    client.post(url, args, function (data, response) {
-      if (data.params.errmsg) {
-        if (data.params.errmsg.indexOf("Object already exists with identifier") !== -1) {
-          url = "https://" + ekstep_env + ".ekstep.in/api/assessment/v3/items/update/" + item.code;
-          client.patch(url, args, function (data, response) {
-            res.status(200).json(data);
-          }).on('error', function (err) {
-            res.json({ error: err });
-            cli.error(err);
-          });
-        }
-        else {
-          res.status(500).json({ error: data.params });
-        }
-      }
-      else {
-        res.status(200).json(data);
-      }
-    }).on('error', function (err) {
-      res.status(500).json({ error: err });
-    });
+function updateItemStatus(qId, status) {
+  Question.findByIdAndUpdate(qId, { $set: { 'state': status, 'updated.when': new Date() } }, function (err, question) {
+    if (err) { console.log(err); }
+    else if (!question) { console.log(qId + ' Not Found') }
   });
 };
+
+function publishQuestion(qIds, messages, res) {
+  var qs = qIds.splice(0, 1);
+  if (qs.length == 0) {
+    res.status(200).json(messages);
+    return;
+  }
+  var qid = qs[0];
+  Question.findOne({ 'identifier': qid }, function (err, question) {
+    if (err) {
+      messages[qid] = err;
+      publishQuestion(qIds, messages, res);
+    }
+    else if (!question) {
+      messages[qid] = 'Not Found';
+      publishQuestion(qIds, messages, res);
+    }
+    else {
+      // upload the question to item bank
+      var item = _.cloneDeep(itemTemplate);
+      item.question = question.questionText;
+      item.model.steps = [];
+      question.steps.forEach(function (s, i) {
+        item.model.steps.push(s);
+      });
+      item.identifier = item.code = item.name = question.identifier;
+      item.grade = question.grade;
+      item.gradeLevel = ["Grade " + question.grade];
+      item.level = question.level;
+      item.sublevel = question.sublevel;
+      item.bloomsTaxonomyLevel = question.btlo;
+      item.model.hintMsg = question.hintText;
+      item.keywords = item.keywords || ['wordproblem'];
+      _.each(question.workSheets, function (w, k) {
+        if (w.id)
+          item.keywords.push(w.id);
+      });
+      _.each(question.expressions.split(/\r?\n/), function (exp) {
+        var tokens = exp.split('=');
+        item.model.variables[tokens[0]] = tokens[1];
+      });
+      var ekstep_env = 'qa'; // 'qa' or 'dev' or 'community'
+      var apikey = {
+        'dev': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiI0Y2Y3ZWM1OGU1Zjg0ZWNlODRmMWU0M2ViMTM5ZDllMCJ9.XlhqVzofiJCGPen42fno3hfJu8OVKUOyFIM1koxfy54',
+        'qa': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJjZmJiOWMzNjNkZTk0ZWNiOGJiMDhjYzA0NTlmZjI3YSJ9.pvSbcuIAiu5Cty9FyZSMp3R4O0dXZ3zx6-nz8Xkkf0I',
+        'community': 'no-key-available-for-production-as-yet!!'
+      };
+      var url = "https://" + ekstep_env + ".ekstep.in/api/assessment/v3/items/create";
+
+      var reqBody = { "request": { "assessment_item": {} } };
+      reqBody.request.assessment_item.identifier = item.code;
+      reqBody.request.assessment_item.objectType = "AssessmentItem";
+      reqBody.request.assessment_item.metadata = item;
+
+      var authheader = 'Bearer ' + apikey[ekstep_env];
+      var args = {
+        path: { id: item.code, tid: 'domain' },
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": authheader
+        },
+        data: reqBody,
+        requestConfig: {
+          timeout: 240000
+        },
+        responseConfig: {
+          timeout: 240000
+        }
+      };
+      var client = new restclient();
+      client.post(url, args, function (data, response) {
+        if (data.params && data.params.errmsg) {
+          if (data.params.errmsg.indexOf("Object already exists with identifier") !== -1) {
+            url = "https://" + ekstep_env + ".ekstep.in/api/assessment/v3/items/update/" + item.code;
+            client.patch(url, args, function (data, response) {
+              messages[qid] = 'Published';
+              updateItemStatus(question._id, 'Published');
+              publishQuestion(qIds, messages, res);
+            }).on('error', function (err) {
+              messages[qid] = err;
+              publishQuestion(qIds, messages, res);
+            });
+          }
+          else {
+            messages[qid] = data.params;
+            publishQuestion(qIds, messages, res);
+          }
+        }
+        else {
+          messages[qid] = 'Published';
+          updateItemStatus(question._id, 'Published');
+          publishQuestion(qIds, messages, res);
+        }
+      }).on('error', function (err) {
+        messages[qid] = err;
+        publishQuestion(qIds, messages, res);
+      });
+    }
+  });
+}
+
+exports.publish = function (req, res) {
+  if (req.body._id) { delete req.body._id; }
+  var qIds = req.body;
+  var messages = {};
+  qIds.forEach(function (qid) {
+    messages[qid] = '';
+  });
+  publishQuestion(qIds, messages, res);
+}

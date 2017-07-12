@@ -171,7 +171,7 @@ angular.module('wpappApp')
         .cancel('No')
         .multiple(true);
       $mdDialog.show(confirm).then(function () {
-        $http.put('/api/questions/' + item._id, item).then(function (response) {
+        $http.put('/api/questions/' + item._id, [item.identifier]).then(function (response) {
           $mdDialog.show(
             $mdDialog.alert()
               .parent(angular.element(document.body))
@@ -199,6 +199,35 @@ angular.module('wpappApp')
       }, function () {
       });
     }
+
+    $scope.publishSelected = function () {
+      $http.put('/api/questions/' + 'multi', $scope.selectedItems).then(function (response) {
+        $mdDialog.show(
+          $mdDialog.alert()
+            .parent(angular.element(document.body))
+            .clickOutsideToClose(true)
+            .title('Published Successfully')
+            .textContent('Question with id ' + item.identifier + ' got published successfully!')
+            .ariaLabel('Publish Success')
+            .ok('YAY!')
+            .targetEvent($event)
+        );
+        $scope.refresh($scope.showMyItems);
+      }).catch(function (err) {
+        console.error('error', err);
+        $mdDialog.show(
+          $mdDialog.alert()
+            .parent(angular.element(document.body))
+            .clickOutsideToClose(true)
+            .title('Publish failed!')
+            .textContent(err.data.error.errmsg)
+            .ariaLabel('Publish Failed')
+            .ok('Got it!')
+            .targetEvent($event)
+        );
+      });
+    }
+
     $scope.getDisplayableTime = function (time) {
       return moment(time).fromNow();
     }
