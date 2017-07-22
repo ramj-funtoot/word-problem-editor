@@ -14,6 +14,9 @@ angular.module('wpappApp')
       }
     };
 
+    $scope.envs = [{ id: 'dev', name: 'Dev' }, { id: 'qa', name: 'QA' }, { id: 'prod', name: 'Prod' }]
+    $scope.env = $scope.envs[1]; // qa
+
     $scope.allItems = [];
     $scope.search = { qId: '' };
 
@@ -171,7 +174,7 @@ angular.module('wpappApp')
         .cancel('No')
         .multiple(true);
       $mdDialog.show(confirm).then(function () {
-        $http.put('/api/questions/' + item._id, [item.identifier]).then(function (response) {
+        $http.put('/api/questions/' + item._id + '/' + $scope.env.id, [item.identifier]).then(function (response) {
           $mdDialog.show(
             $mdDialog.alert()
               .parent(angular.element(document.body))
@@ -190,7 +193,7 @@ angular.module('wpappApp')
               .parent(angular.element(document.body))
               .clickOutsideToClose(true)
               .title('Publish failed!')
-              .textContent(err.data.error.errmsg)
+              .textContent('Failed to publish question ' + item.identifier + '!')
               .ariaLabel('Publish Failed')
               .ok('Got it!')
               .targetEvent($event)
@@ -200,14 +203,14 @@ angular.module('wpappApp')
       });
     }
 
-    $scope.publishSelected = function () {
-      $http.put('/api/questions/' + 'multi', $scope.selectedItems).then(function (response) {
+    $scope.publishSelected = function ($event) {
+      $http.put('/api/questions/' + 'multi' + '/' + $scope.env.id, $scope.selectedItems).then(function (response) {
         $mdDialog.show(
           $mdDialog.alert()
             .parent(angular.element(document.body))
             .clickOutsideToClose(true)
             .title('Published Successfully')
-            .textContent('Question with id ' + item.identifier + ' got published successfully!')
+            .textContent('Selected question got published successfully!')
             .ariaLabel('Publish Success')
             .ok('YAY!')
             .targetEvent($event)
@@ -220,7 +223,7 @@ angular.module('wpappApp')
             .parent(angular.element(document.body))
             .clickOutsideToClose(true)
             .title('Publish failed!')
-            .textContent(err.data.error.errmsg)
+            .textContent('Failed to publish the selected questions!')
             .ariaLabel('Publish Failed')
             .ok('Got it!')
             .targetEvent($event)

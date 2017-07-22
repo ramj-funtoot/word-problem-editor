@@ -152,8 +152,8 @@ var itemTemplate = {
     variables: {}
   },
   concepts: {
-    identifier: 'C6',
-    name: 'Counting'
+    identifier: '',
+    name: ''
   }
 };
 
@@ -164,21 +164,25 @@ function updateItemStatus(qId, status) {
   });
 };
 
-function publishQuestion(qIds, messages, res) {
+function publishQuestion(qIds, env, messages, res, code) {
+  if (code && code != 200) {
+    res.status(code).json(messages);
+    return;
+  }
   var qs = qIds.splice(0, 1);
   if (qs.length == 0) {
-    res.status(200).json(messages);
+    res.status(code).json(messages);
     return;
   }
   var qid = qs[0];
   Question.findOne({ 'identifier': qid }, function (err, question) {
     if (err) {
       messages[qid] = err;
-      publishQuestion(qIds, messages, res);
+      publishQuestion(qIds, env, messages, res);
     }
     else if (!question) {
       messages[qid] = 'Not Found';
-      publishQuestion(qIds, messages, res);
+      publishQuestion(qIds, env, messages, res);
     }
     else {
       // upload the question to item bank
@@ -204,22 +208,32 @@ function publishQuestion(qIds, messages, res) {
         var tokens = exp.split('=');
         item.model.variables[tokens[0]] = tokens[1];
       });
-      var ekstep_env = 'qa'; // 'qa' or 'dev' or 'community'
-      var apikey = {
-        'dev': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiI0Y2Y3ZWM1OGU1Zjg0ZWNlODRmMWU0M2ViMTM5ZDllMCJ9.XlhqVzofiJCGPen42fno3hfJu8OVKUOyFIM1koxfy54',
-        'qa': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJjZmJiOWMzNjNkZTk0ZWNiOGJiMDhjYzA0NTlmZjI3YSJ9.pvSbcuIAiu5Cty9FyZSMp3R4O0dXZ3zx6-nz8Xkkf0I',
-        'community': 'no-key-available-for-production-as-yet!!'
-      };
-      var url = "https://" + ekstep_env + ".ekstep.in/api/assessment/v3/items/create";
+      item.concepts.id = question.conceptCode;
+      var ekstep_env = env; // 'qa' or 'dev' or 'prod'
+      var envData = {
+        'dev': {
+          'apiKey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiI0Y2Y3ZWM1OGU1Zjg0ZWNlODRmMWU0M2ViMTM5ZDllMCJ9.XlhqVzofiJCGPen42fno3hfJu8OVKUOyFIM1koxfy54',
+          'url': 'https://dev.ekstep.in/api/assessment/v3/items/'
+        },
+        'qa': {
+          'apiKey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJjZmJiOWMzNjNkZTk0ZWNiOGJiMDhjYzA0NTlmZjI3YSJ9.pvSbcuIAiu5Cty9FyZSMp3R4O0dXZ3zx6-nz8Xkkf0I',
+          'url': 'https://qa.ekstep.in/api/assessment/v3/items/'
+        },
+        'prod': {
+          'apiKey': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJiNjM3NGYxZGI5NjM0NDcxYmZhZWUzOWQ0ZDFhYjY1OSIsImlhdCI6bnVsbCwiZXhwIjpudWxsLCJhdWQiOiIiLCJzdWIiOiIifQ.tl1gKaHP8s5M6cAFKqNZwJDkGp4TVIpzJ804FNLtfmo',
+          'url': 'https://api.ekstep.in/assessment/v3/items/'
+        }
+      }
+      var url = envData[ekstep_env].url; //"https://" + ekstep_env + ".ekstep.in/api/assessment/v3/items/create";
 
       var reqBody = { "request": { "assessment_item": {} } };
       reqBody.request.assessment_item.identifier = item.code;
       reqBody.request.assessment_item.objectType = "AssessmentItem";
       reqBody.request.assessment_item.metadata = item;
 
-      var authheader = 'Bearer ' + apikey[ekstep_env];
+      var authheader = 'Bearer ' + envData[ekstep_env].apiKey;
       var args = {
-        path: { id: item.code, tid: 'domain' },
+        //path: { id: item.code, tid: 'domain' },
         headers: {
           "Content-Type": "application/json",
           "Authorization": authheader
@@ -233,32 +247,46 @@ function publishQuestion(qIds, messages, res) {
         }
       };
       var client = new restclient();
-      client.post(url, args, function (data, response) {
-        if (data.params && data.params.errmsg) {
-          if (data.params.errmsg.indexOf("Object already exists with identifier") !== -1) {
-            url = "https://" + ekstep_env + ".ekstep.in/api/assessment/v3/items/update/" + item.code;
-            client.patch(url, args, function (data, response) {
-              messages[qid] = 'Published';
-              updateItemStatus(question._id, 'Published');
-              publishQuestion(qIds, messages, res);
-            }).on('error', function (err) {
-              messages[qid] = err;
-              publishQuestion(qIds, messages, res);
-            });
+      //console.log('args', JSON.stringify(args));
+      client.post(url + 'create/', args, function (data, response) {
+        if (response.statusCode == 200 || response.statusCode == 400) {
+          if (data.params && data.params.errmsg) {
+            if (data.params.errmsg.indexOf("Object already exists with identifier") !== -1) {
+              console.log(item.code + ' already exists. Updating..')
+              url = url + 'update/' + item.code;
+              client.patch(url, args, function (data, response) {
+                if (response.statusCode == 200) {
+                  messages[qid] = { message: 'Published', statusCode: response.statusCode };
+                  updateItemStatus(question._id, 'Published');
+                  publishQuestion(qIds, env, messages, res, response.statusCode);
+                }
+                else {
+                  messages[qid] = { message: err, statusCode: response.statusCode };
+                  publishQuestion(qIds, env, messages, res, response.statusCode);
+                }
+              }).on('error', function (err) {
+                messages[qid] = { message: err, statusCode: response.statusCode };
+                publishQuestion(qIds, env, messages, res, response.statusCode);
+              });
+            }
+            else {
+              messages[qid] = { message: data.params, statusCode: response.statusCode };
+              publishQuestion(qIds, env, messages, res, response.statusCode);
+            }
           }
           else {
-            messages[qid] = data.params;
-            publishQuestion(qIds, messages, res);
+            messages[qid] = { message: 'Published', statusCode: response.statusCode };
+            updateItemStatus(question._id, 'Published');
+            publishQuestion(qIds, env, messages, res, response.statusCode);
           }
         }
         else {
-          messages[qid] = 'Published';
-          updateItemStatus(question._id, 'Published');
-          publishQuestion(qIds, messages, res);
+          messages[qid] = { message: data, statusCode: response.statusCode };
+          publishQuestion(qIds, env, messages, res, response.statusCode);
         }
       }).on('error', function (err) {
-        messages[qid] = err;
-        publishQuestion(qIds, messages, res);
+        messages[qid] = { message: err, statusCode: response.statusCode };
+        publishQuestion(qIds, env, messages, res, response.statusCode);
       });
     }
   });
@@ -268,8 +296,6 @@ exports.publish = function (req, res) {
   if (req.body._id) { delete req.body._id; }
   var qIds = req.body;
   var messages = {};
-  qIds.forEach(function (qid) {
-    messages[qid] = '';
-  });
-  publishQuestion(qIds, messages, res);
+  var env = req.params.env;
+  publishQuestion(qIds, env, messages, res);
 }

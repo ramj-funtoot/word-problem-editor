@@ -32,6 +32,9 @@
                     <span flex></span>
                     <input class="search-box" ng-model="search.qId" placeholder="Search by Question Id" ng-enter="openItemById($event, search.qId)"
                         ng-change="filterItems(showMyItems)">
+                    <md-select name="env" ng-model="env" required>
+                        <md-option ng-value="e" ng-repeat="e in envs">{{e.name}}</md-option>
+                    </md-select>
                     <md-button ng-click="publishSelected()">
                         <md-icon md-svg-icon="editor:publish"></md-icon>
                         Publish Selected
