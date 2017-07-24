@@ -1,2 +1,2 @@
-# word-problem-editor
-Editor Application for authoring word problems for using in EkStep-funtoot project
+# zCAT
+Application for authoring/curating funtoot questions for importing/publishing to EkStep Item bank
