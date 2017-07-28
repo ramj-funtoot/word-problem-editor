@@ -1,0 +1,71 @@
+{
+    "wpmongomodel": {
+        "identifier": "",
+        "grade": "2",
+        "level": 0,
+        "subLevel": 1,
+        "btlo": "Remember",
+        "difficultyLevel": "1",
+        "conceptCode": "C12",
+        "active": true,
+        "owner": "",
+        "state": "Draft",
+        "maxAttempts": 1,
+        "questionText": "",
+        "steps": [
+            {
+                "text": "",
+                "answer": "",
+                "responses": [
+                    {
+                        "default": true,
+                        "response": "",
+                        "mmc": [],
+                        "mh": ""
+                    }
+                ]
+            }
+        ],
+        "hintText": "",
+        "solutionText": "",
+        "expressions": "",
+        "comments": [
+            {
+                "commentedBy": "",
+                "comment": ""
+            }
+        ]
+    },
+    "mcqmongomodel": {
+        "identifier": "",
+        "grade": "2",
+        "level": 0,
+        "subLevel": 1,
+        "btlo": "Remember",
+        "difficultyLevel": "1",
+        "conceptCode": "C12",
+        "active": true,
+        "owner": "",
+        "state": "Draft",
+        "maxAttempts": 1,
+        "questionText": "",
+        "options": [
+            {
+                "text": "",
+                "image": null,
+                "answer": "",
+                "mh": "",
+                "mmc": []
+            }
+        ],
+        "hintText": "",
+        "solutionText": "",
+        "expressions": "",
+        "comments": [
+            {
+                "commentedBy": "",
+                "comment": ""
+            }
+        ]
+    }
+}

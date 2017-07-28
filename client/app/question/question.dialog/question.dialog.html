@@ -3,6 +3,11 @@
         <div class="md-toolbar-tools">
             <h2>{{item._id ? 'Edit ' + item.identifier : 'New Question'}}</h2>
             <span flex></span>
+            <md-input-container flex="20">
+                <md-select name="grade" ng-model="English" required>
+                    <md-option value="English" ng-selected="true">English</md-option>
+                </md-select>
+            </md-input-container>
             <md-button class="md-icon-button" ng-click="closeDialog()">
                 <md-icon md-svg-src="navigation:close" aria-label="Close dialog"></md-icon>
             </md-button>
@@ -52,11 +57,21 @@
                     </md-input-container>
                     <md-input-container flex="20">
                         <label>Level</label>
-                        <md-select name="es_difficultyLevel" ng-model="item.es_difficultyLevel" required>
-                            <md-option ng-value="l" ng-repeat="l in meta.es_diffLevels">{{l}}</md-option>
+                        <md-select name="level" ng-model="item.level" required>
+                            <md-option ng-value="l" ng-repeat="l in meta.levels">{{l}}</md-option>
                         </md-select>
-                        <div class="input-message hint" ng-if="!questionForm.es_difficultyLevel.$dirty">Difficulty Level</div>
-                        <div class="input-message error-msg" ng-messages="questionForm.es_difficultyLevel.$error">
+                        <div class="input-message hint" ng-if="!questionForm.level.$dirty"> Level</div>
+                        <div class="input-message error-msg" ng-messages="questionForm.level.$error">
+                            <div ng-message="required">This is required.</div>
+                        </div>
+                    </md-input-container>
+                    <md-input-container flex="20">
+                        <label>Sub Level</label>
+                        <md-select name="subLevel" ng-model="item.subLevel" required>
+                            <md-option ng-value="sl" ng-repeat="sl in meta.sub_levels">{{sl}}</md-option>
+                        </md-select>
+                        <div class="input-message hint" ng-if="!questionForm.subLevel.$dirty">Sub Level</div>
+                        <div class="input-message error-msg" ng-messages="questionForm.subLevel.$error">
                             <div ng-message="required">This is required.</div>
                         </div>
                     </md-input-container>
@@ -99,7 +114,7 @@
                     </md-autocomplete>
                 </div>
                 <hr />
-                <div layout="row">
+                <div layout="row" ng-if="item.qtype=='legacy-word-problem'">
                     <div class="md-block question-image-container" flex="30">
                         <input id="qimg" type="file" ng-model="questionImage" name="questionImage" base-sixty-four-input required onload="onLoad"
                             maxsize="500" accept="image/*" class="question-image-input">
@@ -117,31 +132,45 @@
                         </div>
                     </md-input-container>
                 </div>
+
+                <div layout="row" ng-if="item.qtype=='mcq'">
+                    <div class="md-block question-image-container" flex="30">
+                        <input id="qimg" type="file" ng-model="questionImage" name="questionImage" base-sixty-four-input required onload="onLoad"
+                            maxsize="500" accept="image/*" class="question-image-input">
+                        <label for="qimg">
+                            <!--<div ng-style="{'background-image': url({{item.questionImage || 'http://placehold.it/300x200'}})}"></div>-->
+                            <img ng-src="{{item.questionImages[0] || 'http://placehold.it/300x200'}}" />
+                        </label>
+                    </div>
+                    <md-input-container class="md-block" flex="70">
+                        <label>Question Stem</label>
+                        <textarea required name="questionStem" rows="3" ng-model="item.i18n[langId][item.questionText]" md-select-on-focus></textarea>
+                        <div class="input-message hint" ng-if="!questionForm.questionStem.$dirty">Write the question stem</div>
+                        <div class="input-message error-msg" ng-messages="questionForm.questionStem.$error">
+                            <div ng-message="required">This is required.</div>
+                        </div>
+                    </md-input-container>
+                </div>
+
                 <br />
                 <md-divider></md-divider>
-                <div layout="row" ng-repeat="step in item.steps">
-                    <div layout="column" flex layout-fill ng-cloak>
-                        <h4 class="md-primary">Step #{{$index+1}}</h4>
-                        <div layout="row">
-                            <md-input-container flex="70">
-                                <label>Step text</label>
-                                <textarea required name="step" rows="1" ng-model="step.text" md-select-on-focus></textarea>
-                                <div class="input-message hint" ng-if="!questionForm.step.$dirty">Write the step</div>
-                                <div class="input-message error-msg" ng-messages="questionForm.step.$error">
-                                    <div ng-message="required">This is required.</div>
-                                </div>
-                            </md-input-container>
-                            <md-input-container flex="30">
-                                <md-button class="md-primary md-hue-1" ng-click="configResponses($event, step)">Configure Responses</md-button>
-                            </md-input-container>
-                        </div>
-                    </div>
+                <!-- -->
+                <div id="steps" ng-if="item.qtype=='legacy-word-problem'">
+                    <div ng-include src="'./app/question/question.dialog/wp.dialog.steps.html'"></div>
+                </div>
+                <div id="steps" ng-if="item.qtype=='mcq'">
+                    <div ng-include src="'./app/question/question.dialog/mcq.dialog.options.html'"></div>
                 </div>
                 <md-divider></md-divider>
                 <div layout="row">
                     <md-input-container flex>
                         <label>Hint </label>
-                        <textarea required name="hint" rows="1" ng-model="item.hintText" md-select-on-focus></textarea>
+                        <div layout="row" ng-if="item.qtype=='legacy-word-problem'">
+                            <textarea required name="hint" rows="1" ng-model="item.hintText" md-select-on-focus></textarea>
+                        </div>
+                        <div layout="row" ng-if="item.qtype=='mcq'">
+                            <textarea required name="hint" rows="1" ng-model="item.i18n[langId][item.hintText]" md-select-on-focus></textarea>
+                        </div>
                         <div class="input-message hint" ng-if="!questionForm.hint.$dirty">Write the step</div>
                         <div class="input-message error-msg" ng-messages="questionForm.hint.$error">
                             <div ng-message="required">This is required.</div>

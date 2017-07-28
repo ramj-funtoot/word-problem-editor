@@ -2,44 +2,37 @@
 
 angular.module('wpappApp')
   .controller('QuestionDialogCtrl', function ($scope, item, users, $mdConstant, $mdDialog, Auth) {
-    $scope.item = item || {
-      "identifier": "",
-      "grade": "2",
-      "level": 0,
-      "subLevel": 1,
-      "btlo": "Remember",
-      "difficultyLevel": "1",
-      "conceptCode": "C12",
-      "active": true,
-      "owner": "",
-      "state": "Draft",
-      "maxAttempts": 1,
-      "questionText": "",
-      "steps": [
-        {
-          "text": "",
-          "answer": "",
-          "responses": [
-            {
-              "default": true,
-              "response": "",
-              "mmc": [],
-              "mh": ""
-            }
-          ],
-          "hintText": "",
-          "solutionText": "",
-          "expressions": '',
-          "comments": [
-            {
-              "commentedBy": "",
-              "comment": ""
-            }
-          ]
+
+    $scope.loadJSON = function (callback) {
+      var xobj = new XMLHttpRequest();
+      xobj.overrideMimeType("application/json");
+      xobj.open('GET', '/app/question/question.dialog/modeltemps.json', true); // Replace 'my_data' with the path to your file
+      xobj.onreadystatechange = function () {
+        if (xobj.readyState == 4 && xobj.status == "200") {
+          // Required use of an anonymous callback as .open will NOT return a value but simply returns undefined in asynchronous mode
+          callback(xobj.responseText);
         }
-      ]
+      };
+      xobj.send(null);
+    };
+    $scope.getJSONObj = function (response) {
+      $scope.mongoModelJSON = JSON.parse(response);
+    };
+    $scope.isMCQAnswerSet = false;
+    $scope.loadJSON($scope.getJSONObj);
+
+    switch (item.qtype) {
+      case "legacy-word-problem":
+        $scope.item = item || $scope.mongoModelJSON.wpmongomodel;
+        break;
+      case "mcq":
+        $scope.item = item || $scope.mongoModelJSON.mcqmongomodel;
+        var answerSet = _.filter($scope.item.options, { 'answer': true });
+        $scope.isMCQAnswerSet = answerSet.length > 0 ? true : false;
+        break;
     };
 
+    $scope.langId = 'en';
     $scope.users = users;
 
     var init = function () {
@@ -51,7 +44,9 @@ angular.module('wpappApp')
       diffLevels: [1, 2, 3, 4, 5],
       states: ['Draft', 'In-Review', 'Published', 'Rejected'],
       es_diffLevels: ['EASY', 'MEDIUM', 'HARD', 'RARE'],
-      attempts: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+      attempts: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+      levels: [1, 2, 3, 4, 5, 6],
+      sub_levels: [1, 2, 3, 4, 5, 6]
     };
 
     $scope.keys = [$mdConstant.KEY_CODE.ENTER, $mdConstant.KEY_CODE.COMMA];
@@ -59,16 +54,39 @@ angular.module('wpappApp')
     $scope.closeDialog = function () {
       $mdDialog.cancel();
     };
-
+    $scope.toggleSelection = function (option) {
+      if ($scope.isMCQAnswerSet && !option.answer) {
+        var r = confirm("Please deselect already selected option to choose another");
+      }
+      else {
+        option.answer ? (option.answer = false, $scope.isMCQAnswerSet = false) : (option.answer = true, $scope.isMCQAnswerSet = true);
+      }
+    };
     $scope.saveQuestion = function ($event) {
-      var user = Auth.getCurrentUser();
-      $scope.item.updated = { by: user.email }
-      $mdDialog.hide($scope.item);
+      if ($scope.item.qtype == "mcq" && !$scope.isMCQAnswerSet) {
+        var r = confirm("Please select an answer for MCQ to save");
+      }
+      else {
+        var user = Auth.getCurrentUser();
+        $scope.item.updated = { by: user.email }
+        $mdDialog.hide($scope.item);
+      }
     }
 
     $scope.$watch('questionImage', function (n, o) {
       if (n && n.filetype && n.base64) {
-        $scope.item.questionImage = 'data:' + n.filetype + ';base64,' + n.base64;
+        if ($scope.item.questionImage)
+          $scope.item.questionImage = 'data:' + n.filetype + ';base64,' + n.base64;
+        else if ($scope.item.questionImages) {
+          $scope.item.questionImages = [];
+          $scope.item.questionImages.push('data:' + n.filetype + ';base64,' + n.base64)
+        }
+      }
+    });
+    $scope.$watch('optionImage', function (n, o) {
+      if (n && n.filetype && n.base64) {
+        if ($scope.item.option.image)
+          $scope.item.option.image = 'data:' + n.filetype + ';base64,' + n.base64;
       }
     });
 

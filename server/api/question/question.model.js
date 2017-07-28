@@ -29,6 +29,13 @@ var stepSchema = new Schema({
   responses: [responsesSchema],
   _id: { id: false }
 });
+var optionSchema = new Schema({
+  text: String,
+  image: String,
+  answer: Boolean,
+  mh: String,
+  mmc: [String]
+});
 var workSheetSchema = new Schema({
   _id: String,
   name: String
@@ -44,6 +51,7 @@ var QuestionSchema = new Schema({
   subject: { type: String, default: 'NUM' },
   conceptCode: String,
   es_difficultyLevel: String,
+  qtype: String,
   active: Boolean,
   updated: { when: { type: Date, default: Date.now }, by: String },
   owner: String,
@@ -53,6 +61,7 @@ var QuestionSchema = new Schema({
   questionText: String,
   questionImage: String,
   steps: [stepSchema],
+  options: [optionSchema],
   hintText: String,
   solutionText: String,
   expressions: String,

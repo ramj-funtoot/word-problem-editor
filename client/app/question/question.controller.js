@@ -13,7 +13,7 @@ angular.module('wpappApp')
         }
       }
     };
-
+    $scope.langId = 'en';
     $scope.envs = [{ id: 'dev', name: 'Dev' }, { id: 'qa', name: 'QA' }, { id: 'prod', name: 'Prod' }]
     $scope.env = $scope.envs[1]; // qa
 
@@ -97,6 +97,7 @@ angular.module('wpappApp')
           });
         }
         else {
+          console.log("update data===>>> " + newItem);
           $http.patch('/api/questions/' + newItem._id, newItem).then(function (response) {
             console.log('item updated successfully');
             $scope.refresh($scope.showMyItems);
