@@ -208,7 +208,7 @@ function publishQuestion(qIds, env, messages, res, code) {
         var tokens = exp.split('=');
         item.model.variables[tokens[0]] = tokens[1];
       });
-      item.concepts.id = question.conceptCode;
+      item.concepts.identifier = question.conceptCode;
       var ekstep_env = env; // 'qa' or 'dev' or 'prod'
       var envData = {
         'dev': {
@@ -246,6 +246,7 @@ function publishQuestion(qIds, env, messages, res, code) {
           timeout: 240000
         }
       };
+      console.log(args, JSON.stringify(args));
       var client = new restclient();
       //console.log('args', JSON.stringify(args));
       client.post(url + 'create/', args, function (data, response) {
