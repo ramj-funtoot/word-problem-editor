@@ -11,7 +11,7 @@
     <md-dialog-content>
         <div class="md-dialog-content">
             <form name="responseForm">
-                <div layout="row">
+                <div layout="row" ng-if="item.qtype=='legacy-word-problem'">
                     <md-input-container flex="30">
                         <label>Correct Answer</label>
                         <input required name="correctAnswer" rows="1" ng-model="step.answer">
@@ -52,9 +52,14 @@
                                         <input name="response" rows="1" ng-model="res.response">
                                         <div class="input-message hint" ng-if="!responseForm.response.$dirty">Response</div>
                                     </md-input-container>
-                                    <md-input-container flex="75">
+                                    <md-input-container flex="75" ng-if="qtype=='legacy-word-problem'">
                                         <label>Micro Hint</label>
                                         <input name="mh" rows="1" ng-model="res.mh">
+                                        <div class="input-message hint" ng-if="!responseForm.mh.$dirty">Write the Micro hint</div>
+                                    </md-input-container>
+                                    <md-input-container flex="75" ng-if="qtype=='freeResponse'">
+                                        <label>Micro Hint</label>
+                                        <input name="mh" rows="1" ng-model="i18n[langId][res.mh]">
                                         <div class="input-message hint" ng-if="!responseForm.mh.$dirty">Write the Micro hint</div>
                                     </md-input-container>
                                 </div>

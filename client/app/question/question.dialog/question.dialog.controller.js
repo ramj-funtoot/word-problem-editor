@@ -30,6 +30,9 @@ angular.module('wpappApp')
         var answerSet = _.filter($scope.item.options, { 'answer': true });
         $scope.isMCQAnswerSet = answerSet.length > 0 ? true : false;
         break;
+      case "freeResponse":
+        $scope.item = item || $scope.mongoModelJSON.freeResponsemongomodel;
+        break;
     };
 
     $scope.langId = 'en';
@@ -68,7 +71,7 @@ angular.module('wpappApp')
       }
       else {
         var user = Auth.getCurrentUser();
-        $scope.item.updated = { by: user.email }
+        $scope.item.updated = { by: user.email };
         $mdDialog.hide($scope.item);
       }
     }
@@ -97,7 +100,9 @@ angular.module('wpappApp')
         targetEvent: $event,
         templateUrl: 'app/question/question.dialog/response.config.dialog.html',
         locals: {
-          step: angular.copy(step)
+          step: angular.copy(step),
+          i18n: item.i18n || {},
+          qtype: item.qtype
         },
         multiple: true,
         controller: 'ResponseConfigDialogCtrl'

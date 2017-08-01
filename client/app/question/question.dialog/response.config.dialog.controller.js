@@ -1,9 +1,12 @@
 'use strict';
 
 angular.module('wpappApp')
-    .controller('ResponseConfigDialogCtrl', function ($scope, step, $mdConstant, $mdDialog) {
+    .controller('ResponseConfigDialogCtrl', function ($scope, step, i18n, qtype, $mdConstant, $mdDialog) {
         $scope.meta = { unitPlacements: ['pre', 'post'] };
         $scope.step = step;
+        $scope.i18n = i18n;
+        $scope.qtype = qtype;
+        $scope.langId = 'en';
         $scope.closeDialog = function () {
             $mdDialog.cancel();
         };
@@ -17,7 +20,7 @@ angular.module('wpappApp')
         $scope.deleteResponse = function ($event, index) {
             var confirm = $mdDialog.confirm()
                 .title('Confirm Delete Response')
-                .textContent('Are you sure you want to delete the response patter?')
+                .textContent('Are you sure you want to delete the response pattern?')
                 .ariaLabel('Delete response')
                 .targetEvent($event)
                 .ok('Yes')
