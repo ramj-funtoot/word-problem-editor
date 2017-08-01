@@ -184,14 +184,11 @@ function publishQuestion(qIds, env, messages, res, code) {
       messages[qid] = 'Not Found';
       publishQuestion(qIds, env, messages, res);
     }
+    
     else {
-      // upload the question to item bank
+      // cloning and applying  common properties of questions into item template
       var item = _.cloneDeep(itemTemplate);
       item.question = question.questionText;
-      item.model.steps = [];
-      question.steps.forEach(function (s, i) {
-        item.model.steps.push(s);
-      });
       item.identifier = item.code = item.name = question.identifier;
       item.grade = question.grade;
       item.gradeLevel = ["Grade " + question.grade];
@@ -199,7 +196,8 @@ function publishQuestion(qIds, env, messages, res, code) {
       item.sublevel = question.sublevel;
       item.bloomsTaxonomyLevel = question.btlo;
       item.model.hintMsg = question.hintText;
-      item.keywords = item.keywords || ['wordproblem'];
+      item.concepts.id = question.conceptCode;
+      item.qtype = question.qtype;
       _.each(question.workSheets, function (w, k) {
         if (w.id)
           item.keywords.push(w.id);
@@ -208,7 +206,46 @@ function publishQuestion(qIds, env, messages, res, code) {
         var tokens = exp.split('=');
         item.model.variables[tokens[0]] = tokens[1];
       });
-      item.concepts.identifier = question.conceptCode;
+      
+      //applying question type specific properties into item template
+      switch(question.qtype){
+        case "legacy-word-problem":{
+          item.type = 'ftb';
+          item.template_id = 'org.ekstep.plugins.funtoot.fibWordProblem';
+          item.keywords = ['wordproblem'];          
+          item.model.steps = [];
+          question.steps.forEach(function (s, i) {
+            item.model.steps.push(s);
+          });
+          break;
+        }
+        case "mcq":{
+          item.type = 'mcq';
+          item.template_id = 'org.ekstep.plugins.funtoot.genericmcq';
+          item.keywords = ['mcq'];
+          item = _.assign({},item,create.mcq_template);
+          _.forEach(question.options, function(option){
+            item.option[i] = create.mcq_option_template;
+            item.option[i].value.text = option.text;
+            item.option[i].value.audio = null;
+            item.option[i].value.imaage = option.image;
+            item.option[i].value.count = null;
+            item.option[i].answer = option.answer;
+            item.option[i].mmc = option.mmc;
+            item.option[i].mh = option.mh;
+          }); 
+          item.model = question.mcqType;
+          item.i18n = question.i18n;
+          break;
+        }
+        case "freeResponse":{
+          item.keywords = ['fib'];
+          item.type = 'ftb';
+          item.template_id = 'org.ekstep.plugins.funtoot.genericfib';
+          break;
+        }
+      }
+
       var ekstep_env = env; // 'qa' or 'dev' or 'prod'
       var envData = {
         'dev': {
@@ -246,9 +283,9 @@ function publishQuestion(qIds, env, messages, res, code) {
           timeout: 240000
         }
       };
-      console.log(args, JSON.stringify(args));
       var client = new restclient();
       //console.log('args', JSON.stringify(args));
+      publishQuestion(qIds, env, messages, res, response.statusCode);
       client.post(url + 'create/', args, function (data, response) {
         if (response.statusCode == 200 || response.statusCode == 400) {
           if (data.params && data.params.errmsg) {
