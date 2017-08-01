@@ -3,6 +3,7 @@
 var _ = require('lodash');
 var Question = require('./question.model');
 var restclient = require('node-rest-client').Client;
+var create = require('./question.item.template.js');
 const util = require('util')
 
 function getFilterClause(a, o) {
@@ -184,10 +185,14 @@ function publishQuestion(qIds, env, messages, res, code) {
       messages[qid] = 'Not Found';
       publishQuestion(qIds, env, messages, res);
     }
-    
+    //will remove this code once mcq publishing successful
+    else if(question.qtype == "freeResponse"){
+      messages[qid] = 'Currently FIB question not allowed for publishing';
+      publishQuestion(qIds, env, messages, res);
+    }
     else {
       // cloning and applying  common properties of questions into item template
-      var item = _.cloneDeep(itemTemplate);
+      var item = create.common_template();
       item.question = question.questionText;
       item.identifier = item.code = item.name = question.identifier;
       item.grade = question.grade;
@@ -198,6 +203,7 @@ function publishQuestion(qIds, env, messages, res, code) {
       item.model.hintMsg = question.hintText;
       item.concepts.id = question.conceptCode;
       item.qtype = question.qtype;
+      
       _.each(question.workSheets, function (w, k) {
         if (w.id)
           item.keywords.push(w.id);
@@ -223,16 +229,18 @@ function publishQuestion(qIds, env, messages, res, code) {
           item.type = 'mcq';
           item.template_id = 'org.ekstep.plugins.funtoot.genericmcq';
           item.keywords = ['mcq'];
-          item = _.assign({},item,create.mcq_template);
-          _.forEach(question.options, function(option){
-            item.option[i] = create.mcq_option_template;
-            item.option[i].value.text = option.text;
-            item.option[i].value.audio = null;
-            item.option[i].value.imaage = option.image;
-            item.option[i].value.count = null;
-            item.option[i].answer = option.answer;
-            item.option[i].mmc = option.mmc;
-            item.option[i].mh = option.mh;
+          var mcq_option_template =  create.mcq_template();
+          item = _.assign({},item, mcq_option_template);
+          console.log(item.options);
+          _.forEach(question.options, function(option,i){
+            item.options.push(create.mcq_option_template());
+            item.options[i].value.text = option.text;
+            item.options[i].value.audio = null;
+            item.options[i].value.imaage = option.image;
+            item.options[i].value.count = null;
+            item.options[i].answer = option.answer;
+            item.options[i].mmc = option.mmc;
+            item.options[i].mh = option.mh;
           }); 
           item.model = question.mcqType;
           item.i18n = question.i18n;
@@ -284,8 +292,6 @@ function publishQuestion(qIds, env, messages, res, code) {
         }
       };
       var client = new restclient();
-      //console.log('args', JSON.stringify(args));
-      publishQuestion(qIds, env, messages, res, response.statusCode);
       client.post(url + 'create/', args, function (data, response) {
         if (response.statusCode == 200 || response.statusCode == 400) {
           if (data.params && data.params.errmsg) {
