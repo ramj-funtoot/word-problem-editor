@@ -5,10 +5,11 @@ MAIN TEMPLATE FOR  QUESTION
 Currently common properties for Word problems and MCQs
 */
 var common = {
-    q_id:"",
+    qid:"",
     identifier:"",
     name:"",
     code:"",
+    answer:{},
     grade:"",
     level:"",
     subLevel:"",
@@ -31,7 +32,7 @@ var common = {
     keywords:[],
     qindex:"",
     title:"",
-    max_score:"5",
+    max_score:5,
     used_for:"worksheet",
     concepts:{
             identifier:"" ,
@@ -62,6 +63,7 @@ var mcq = {
 
 var mcq_option = {
     value: {
+            type:"text",
             text: "",
             audio: "",
             image: "",
@@ -72,15 +74,15 @@ var mcq_option = {
           mmc: []
 }
 
-exports.common_template = function(qType){
+exports.getCommonTemplate = function(qType){
     return _.cloneDeep(common);
 }
 
-exports.mcq_template = function(){
+exports.getMCQTemplate = function(){
     return _.cloneDeep(mcq);
 }
 
-exports.mcq_option_template = function(){
+exports.mcqOptionTemplate = function(){
     return _.cloneDeep(mcq_option);
 }
 

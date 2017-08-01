@@ -3,7 +3,7 @@
 var _ = require('lodash');
 var Question = require('./question.model');
 var restclient = require('node-rest-client').Client;
-var create = require('./question.item.template.js');
+var quesTemplate = require('./question.item.template.js');
 const util = require('util')
 
 function getFilterClause(a, o) {
@@ -105,58 +105,6 @@ function handleError(res, err) {
   return res.status(500).json(err);
 }
 
-var itemTemplate = {
-  name: '',
-  answer: {},
-  portalOwner: '562', // ram.j's userid (hopefully!)
-  domain: "Numeracy",
-  langid: 'en',
-  language: ['English'],
-  identifier: '',
-  qid: '',
-  code: '',
-  subject: 'NUM',
-  grade: 0,
-  gradeLevel: [],
-  bloomsTaxonomyLevel: '',
-  level: '',
-  sublevel: '',
-  author: 'funtoot',
-  keywords: ['wordproblem'],
-  qindex: '',
-  qlevel: 'EASY',
-  qtype: 'legacy-word-problem',
-  type: 'ftb',
-  template_id: 'org.ekstep.plugins.funtoot.fibWordProblem',
-  template: '',
-  title: '',
-  question: '',
-  question_audio: '',
-  question_image: '',
-  max_score: 5,
-  used_for: "worksheet",
-  model: {
-    numericLangId: 'en',
-    langId: 'en',
-    hintMsg: '',
-    steps: [{
-      text: '',
-      answer: '',
-      unit: { symbol: '', prefix: false },
-      responses: [{
-        default: true,
-        response: [],
-        mh: '',
-        mmc: []
-      }]
-    }],
-    variables: {}
-  },
-  concepts: {
-    identifier: '',
-    name: ''
-  }
-};
 
 function updateItemStatus(qId, status) {
   Question.findByIdAndUpdate(qId, { $set: { 'state': status, 'updated.when': new Date() } }, function (err, question) {
@@ -192,16 +140,16 @@ function publishQuestion(qIds, env, messages, res, code) {
     }
     else {
       // cloning and applying  common properties of questions into item template
-      var item = create.common_template();
+      var item = quesTemplate.getCommonTemplate();
       item.question = question.questionText;
-      item.identifier = item.code = item.name = question.identifier;
+      item.identifier = qid = item.code = item.name = question.identifier;
       item.grade = question.grade;
       item.gradeLevel = ["Grade " + question.grade];
       item.level = question.level;
       item.sublevel = question.sublevel;
       item.bloomsTaxonomyLevel = question.btlo;
       item.model.hintMsg = question.hintText;
-      item.concepts.id = question.conceptCode;
+      item.concepts.identifier = question.conceptCode;
       item.qtype = question.qtype;
       
       _.each(question.workSheets, function (w, k) {
@@ -229,18 +177,20 @@ function publishQuestion(qIds, env, messages, res, code) {
           item.type = 'mcq';
           item.template_id = 'org.ekstep.plugins.funtoot.genericmcq';
           item.keywords = ['mcq'];
-          var mcq_option_template =  create.mcq_template();
-          item = _.assign({},item, mcq_option_template);
-          console.log(item.options);
+          var mcqTemplate =  quesTemplate.getMCQTemplate();
+          item = _.assign({},item, mcqTemplate);
           _.forEach(question.options, function(option,i){
-            item.options.push(create.mcq_option_template());
+            item.options.push(quesTemplate.mcqOptionTemplate());
             item.options[i].value.text = option.text;
             item.options[i].value.audio = null;
-            item.options[i].value.imaage = option.image;
+            item.options[i].value.image = option.image;
             item.options[i].value.count = null;
             item.options[i].answer = option.answer;
             item.options[i].mmc = option.mmc;
             item.options[i].mh = option.mh;
+            if(option.text == "" || option.text == undefined){
+              item.options.type = "image";
+            }
           }); 
           item.model = question.mcqType;
           item.i18n = question.i18n;
