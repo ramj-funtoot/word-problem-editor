@@ -1,0 +1,17 @@
+<form name="fibsForm">
+    <div layout="row" ng-repeat="fib in item.fibs">
+        <div layout="column" flex layout-fill ng-cloak>
+            <h4 class="md-primary">fib #{{fib.identifier}}</h4>
+            <div layout="row">
+                <md-input-container flex="70">
+                    <label>Answer</label>
+                    <input name="fibAnswer" +{{$index+1}} ng-model="fib.answer">
+                    <div class="input-message hint" ng-if="!fibsForm.fibAnswer.$dirty">Write the answer</div>
+                </md-input-container>
+                <md-input-container flex="30">
+                    <md-button class="md-primary md-hue-1" ng-click="configResponses($event, fib)">Configure Responses</md-button>
+                </md-input-container>
+            </div>
+        </div>
+    </div>
+</form>

@@ -6,7 +6,7 @@ var mongoose = require('mongoose'),
 var validUnitPlacements = ['pre', 'post'];
 var validStates = ['Draft', 'In-Review', 'Reviewed', 'Published', 'Rejected'];
 var validBtlos = ['Remember', 'Understand', 'Apply', 'Analyze', 'Evaluate', 'Create'];
-var validDifficultyLevels = [1, 2, 3, 4, 5]
+var validDifficultyLevels = [1, 2, 3, 4, 5];
 
 var commentsSchema = new Schema({
   created: { type: Date, default: Date.now },
@@ -20,6 +20,9 @@ var responsesSchema = new Schema({
   mh: String,
   default: Boolean,
   _id: { id: false }
+});
+var i18nSchema = new Schema({
+  en: Object
 });
 var stepSchema = new Schema({
   text: String,
@@ -35,6 +38,11 @@ var optionSchema = new Schema({
   answer: Boolean,
   mh: String,
   mmc: [String]
+});
+var fibSchema = new Schema({
+  identifier: { type: String, unique: true },
+  answer: String,
+  responses: [responsesSchema]
 });
 var workSheetSchema = new Schema({
   _id: String,
@@ -59,12 +67,14 @@ var QuestionSchema = new Schema({
   workSheets: [workSheetSchema],
   maxAttempts: { type: Number, max: 10 },
   questionText: String,
-  questionImage: String,
+  questionImage: [String],
   steps: [stepSchema],
   options: [optionSchema],
+  fibs: [fibSchema],
   hintText: String,
   solutionText: String,
   expressions: String,
+  i18n: [i18nSchema],
   comments: [commentsSchema]
 });
 

@@ -54,7 +54,7 @@
                         <p ng-if="item.qtype=='legacy-word-problem'">
                             {{ item.questionText | limitTo:100 }} <span ng-if="item.questionText.length > 100">...</span>
                         </p>
-                        <p ng-if="item.qtype=='mcq'">
+                        <p ng-if="item.qtype=='mcq' || item.qtype=='freeResponse'">
                             {{ item.i18n[langId][item.questionText] | limitTo:100 }} <span ng-if="item.questionText.length > 100">...</span>
                         </p>
                     </div>
