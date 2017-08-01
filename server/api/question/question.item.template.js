@@ -28,7 +28,7 @@ var common = {
     gradeLevel:"",
     bloomsTaxonomyLevel:"",
     author:"funtoot",
-    keywords:"",
+    keywords:[],
     qindex:"",
     title:"",
     max_score:"5",
@@ -41,7 +41,7 @@ var common = {
         hintMsg: "HINT_TEXT",
         numericLangId: "en",
         langId: "en",
-        variables
+        variables:[]
     },
     i18n:{
 
@@ -77,7 +77,7 @@ exports.common_template = function(qType){
 }
 
 exports.mcq_template = function(){
-    return _.cloneDeep(mcq_template);
+    return _.cloneDeep(mcq);
 }
 
 exports.mcq_option_template = function(){

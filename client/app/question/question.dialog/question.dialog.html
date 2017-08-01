@@ -120,7 +120,7 @@
                             maxsize="500" accept="image/*" class="question-image-input">
                         <label for="qimg">
                             <!--<div ng-style="{'background-image': url({{item.questionImage || 'http://placehold.it/300x200'}})}"></div>-->
-                            <img ng-src="{{item.questionImage || 'http://placehold.it/300x200'}}" />
+                            <img ng-if="item.questionImage[0]!=undefined" ng-src="{{item.questionImage[0] || 'http://placehold.it/300x200'}}" />
                         </label>
                     </div>
                     <md-input-container class="md-block" flex="70">
