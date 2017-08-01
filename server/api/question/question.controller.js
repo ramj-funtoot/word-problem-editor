@@ -6,6 +6,24 @@ var restclient = require('node-rest-client').Client;
 var quesTemplate = require('./question.item.template.js');
 const util = require('util')
 
+var envData = {
+  'dev': {
+    'apiKey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiI0Y2Y3ZWM1OGU1Zjg0ZWNlODRmMWU0M2ViMTM5ZDllMCJ9.XlhqVzofiJCGPen42fno3hfJu8OVKUOyFIM1koxfy54',
+    'url': 'https://dev.ekstep.in/api/assessment/v3/items/',
+    'contentApiUrl': 'https://dev.ekstep.in/action/content/v3/'
+  },
+  'qa': {
+    'apiKey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJjZmJiOWMzNjNkZTk0ZWNiOGJiMDhjYzA0NTlmZjI3YSJ9.pvSbcuIAiu5Cty9FyZSMp3R4O0dXZ3zx6-nz8Xkkf0I',
+    'url': 'https://qa.ekstep.in/api/assessment/v3/items/',
+    'contentApiUrl': 'https://qa.ekstep.in/action/content/v3/'
+  },
+  'prod': {
+    'apiKey': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJiNjM3NGYxZGI5NjM0NDcxYmZhZWUzOWQ0ZDFhYjY1OSIsImlhdCI6bnVsbCwiZXhwIjpudWxsLCJhdWQiOiIiLCJzdWIiOiIifQ.tl1gKaHP8s5M6cAFKqNZwJDkGp4TVIpzJ804FNLtfmo',
+    'url': 'https://api.ekstep.in/assessment/v3/items/',
+    'contentApiUrl': 'https://community.ekstep.in/action/content/v3/'
+  }
+}
+
 function getFilterClause(a, o) {
   var filter = { active: a };
   if (o) filter['owner'] = o;
@@ -13,7 +31,7 @@ function getFilterClause(a, o) {
 }
 function getSelectClause(type) {
   if (!type || type == 'summary')
-    return { 'questionImage': 0, 'steps': 0, 'comments': 0, 'hintText': 0 }
+    return { 'questionImage': 0, 'steps': 0, 'options': 0, 'fibs': 0, 'comments': 0, 'hintText': 0, 'expressions': 0, 'comments': 0 }
 }
 // Get list of questions
 exports.index = function (req, res) {
@@ -113,6 +131,21 @@ function updateItemStatus(qId, status) {
   });
 };
 
+function uploadImage(base64img) {
+
+}
+
+function uploadImages(question) {
+  switch (question.qtype) {
+    case "legacy-word-problem":
+      break;
+    case "mcq":
+      break;
+    case "freeResponse":
+      break;
+  }
+}
+
 function publishQuestion(qIds, env, messages, res, code) {
   if (code && code != 200) {
     res.status(code).json(messages);
@@ -133,11 +166,6 @@ function publishQuestion(qIds, env, messages, res, code) {
       messages[qid] = 'Not Found';
       publishQuestion(qIds, env, messages, res);
     }
-    //will remove this code once mcq publishing successful
-    else if(question.qtype == "freeResponse"){
-      messages[qid] = 'Currently FIB question not allowed for publishing';
-      publishQuestion(qIds, env, messages, res);
-    }
     else {
       // cloning and applying  common properties of questions into item template
       var item = quesTemplate.getCommonTemplate();
@@ -151,35 +179,37 @@ function publishQuestion(qIds, env, messages, res, code) {
       item.model.hintMsg = question.hintText;
       item.concepts.identifier = question.conceptCode;
       item.qtype = question.qtype;
-      
+
       _.each(question.workSheets, function (w, k) {
         if (w.id)
           item.keywords.push(w.id);
       });
-      _.each(question.expressions.split(/\r?\n/), function (exp) {
-        var tokens = exp.split('=');
-        item.model.variables[tokens[0]] = tokens[1];
-      });
-      
+      if (question.expressions && typeof (question.expressions) == "string") {
+        _.each(question.expressions.split(/\r?\n/), function (exp) {
+          var tokens = exp.split('=');
+          item.model.variables[tokens[0]] = tokens[1];
+        });
+      }
+
       //applying question type specific properties into item template
-      switch(question.qtype){
-        case "legacy-word-problem":{
+      switch (question.qtype) {
+        case "legacy-word-problem": {
           item.type = 'ftb';
           item.template_id = 'org.ekstep.plugins.funtoot.fibWordProblem';
-          item.keywords = ['wordproblem'];          
+          item.keywords = ['wordproblem'];
           item.model.steps = [];
           question.steps.forEach(function (s, i) {
             item.model.steps.push(s);
           });
           break;
         }
-        case "mcq":{
+        case "mcq": {
           item.type = 'mcq';
           item.template_id = 'org.ekstep.plugins.funtoot.genericmcq';
           item.keywords = ['mcq'];
-          var mcqTemplate =  quesTemplate.getMCQTemplate();
-          item = _.assign({},item, mcqTemplate);
-          _.forEach(question.options, function(option,i){
+          var mcqTemplate = quesTemplate.getMCQTemplate();
+          item = _.assign({}, item, mcqTemplate);
+          _.forEach(question.options, function (option, i) {
             item.options.push(quesTemplate.mcqOptionTemplate());
             item.options[i].value.text = option.text;
             item.options[i].value.audio = null;
@@ -188,15 +218,15 @@ function publishQuestion(qIds, env, messages, res, code) {
             item.options[i].answer = option.answer;
             item.options[i].mmc = option.mmc;
             item.options[i].mh = option.mh;
-            if(option.text == "" || option.text == undefined){
+            if (option.text == "" || option.text == undefined) {
               item.options.type = "image";
             }
-          }); 
+          });
           item.model = question.mcqType;
           item.i18n = question.i18n;
           break;
         }
-        case "freeResponse":{
+        case "freeResponse": {
           item.keywords = ['fib'];
           item.type = 'ftb';
           item.template_id = 'org.ekstep.plugins.funtoot.genericfib';
@@ -205,20 +235,6 @@ function publishQuestion(qIds, env, messages, res, code) {
       }
 
       var ekstep_env = env; // 'qa' or 'dev' or 'prod'
-      var envData = {
-        'dev': {
-          'apiKey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiI0Y2Y3ZWM1OGU1Zjg0ZWNlODRmMWU0M2ViMTM5ZDllMCJ9.XlhqVzofiJCGPen42fno3hfJu8OVKUOyFIM1koxfy54',
-          'url': 'https://dev.ekstep.in/api/assessment/v3/items/'
-        },
-        'qa': {
-          'apiKey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJjZmJiOWMzNjNkZTk0ZWNiOGJiMDhjYzA0NTlmZjI3YSJ9.pvSbcuIAiu5Cty9FyZSMp3R4O0dXZ3zx6-nz8Xkkf0I',
-          'url': 'https://qa.ekstep.in/api/assessment/v3/items/'
-        },
-        'prod': {
-          'apiKey': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJiNjM3NGYxZGI5NjM0NDcxYmZhZWUzOWQ0ZDFhYjY1OSIsImlhdCI6bnVsbCwiZXhwIjpudWxsLCJhdWQiOiIiLCJzdWIiOiIifQ.tl1gKaHP8s5M6cAFKqNZwJDkGp4TVIpzJ804FNLtfmo',
-          'url': 'https://api.ekstep.in/assessment/v3/items/'
-        }
-      }
       var url = envData[ekstep_env].url; //"https://" + ekstep_env + ".ekstep.in/api/assessment/v3/items/create";
 
       var reqBody = { "request": { "assessment_item": {} } };
@@ -279,7 +295,7 @@ function publishQuestion(qIds, env, messages, res, code) {
           publishQuestion(qIds, env, messages, res, response.statusCode);
         }
       }).on('error', function (err) {
-        messages[qid] = { message: err, statusCode: response.statusCode };
+        messages[qid] = { message: err, statusCode: '' };
         publishQuestion(qIds, env, messages, res, response.statusCode);
       });
     }

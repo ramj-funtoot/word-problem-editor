@@ -274,3 +274,26 @@ angular.module('wpappApp').directive('ngEnter', function () {
     });
   };
 });
+
+angular.module('wpappApp').factory('ItemTemplateService', function ($timeout, $http) {
+  var itemTemplates = {};
+  var init = function () {
+    return $http.get('/app/question/question.dialog/modeltemps.json').then(function (response) {
+      itemTemplates = JSON.parse(response.data);
+      return itemTemplates;
+    });
+  }
+  return {
+    getDefaultItem: function (type) {
+      if (!itemTemplates) {
+        return init().then(function (it) {
+          itemTemplates = it;
+          return itemTemplates[type];
+        });
+      }
+      return $timeout(function () {
+        return itemTemplates[type];
+      });
+    }
+  }
+});

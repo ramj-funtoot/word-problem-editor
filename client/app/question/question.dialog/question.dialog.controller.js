@@ -1,40 +1,9 @@
 'use strict';
 
 angular.module('wpappApp')
-  .controller('QuestionDialogCtrl', function ($scope, item, users, $mdConstant, $mdDialog, Auth) {
-
-    $scope.loadJSON = function (callback) {
-      var xobj = new XMLHttpRequest();
-      xobj.overrideMimeType("application/json");
-      xobj.open('GET', '/app/question/question.dialog/modeltemps.json', true); // Replace 'my_data' with the path to your file
-      xobj.onreadystatechange = function () {
-        if (xobj.readyState == 4 && xobj.status == "200") {
-          // Required use of an anonymous callback as .open will NOT return a value but simply returns undefined in asynchronous mode
-          callback(xobj.responseText);
-        }
-      };
-      xobj.send(null);
-    };
-    $scope.getJSONObj = function (response) {
-      $scope.mongoModelJSON = JSON.parse(response);
-    };
+  .controller('QuestionDialogCtrl', function ($scope, item, users, $mdConstant, $mdDialog, Auth, $http, ItemTemplateService) {
     $scope.isMCQAnswerSet = false;
-    $scope.loadJSON($scope.getJSONObj);
-
-    switch (item.qtype) {
-      case "legacy-word-problem":
-        $scope.item = item || $scope.mongoModelJSON.wpmongomodel;
-        break;
-      case "mcq":
-        $scope.item = item || $scope.mongoModelJSON.mcqmongomodel;
-        var answerSet = _.filter($scope.item.options, { 'answer': true });
-        $scope.isMCQAnswerSet = answerSet.length > 0 ? true : false;
-        break;
-      case "freeResponse":
-        $scope.item = item || $scope.mongoModelJSON.freeResponsemongomodel;
-        break;
-    };
-
+    $scope.item = item || ItemTemplateService.getDefaultItem('legacy-word-problem');
     $scope.langId = 'en';
     $scope.users = users;
 
@@ -57,19 +26,12 @@ angular.module('wpappApp')
     $scope.closeDialog = function () {
       $mdDialog.cancel();
     };
-    $scope.toggleSelection = function (option) {
-      if ($scope.isMCQAnswerSet && !option.answer) {
-        var r = confirm("Please deselect already selected option to choose another");
-      }
-      else {
-        option.answer ? (option.answer = false, $scope.isMCQAnswerSet = false) : (option.answer = true, $scope.isMCQAnswerSet = true);
-      }
-    };
+
+    // child controllers must implement this
+    $scope.validate = function () { return true; };
+
     $scope.saveQuestion = function ($event) {
-      if ($scope.item.qtype == "mcq" && !$scope.isMCQAnswerSet) {
-        var r = confirm("Please select an answer for MCQ to save");
-      }
-      else {
+      if ($scope.validate()) {
         var user = Auth.getCurrentUser();
         $scope.item.updated = { by: user.email };
         $mdDialog.hide($scope.item);
@@ -78,18 +40,19 @@ angular.module('wpappApp')
 
     $scope.$watch('questionImage', function (n, o) {
       if (n && n.filetype && n.base64) {
-        if ($scope.item.questionImage)
-          $scope.item.questionImage = 'data:' + n.filetype + ';base64,' + n.base64;
-        else if ($scope.item.questionImages) {
-          $scope.item.questionImages = [];
-          $scope.item.questionImages.push('data:' + n.filetype + ';base64,' + n.base64)
+        if (!$scope.item.questionImage)
+          $scope.item.questionImage = [];
+        else if ($scope.item.questionImage.length == 0) {
+          $scope.item.questionImage.push({
+            base64: 'data:' + n.filetype + ';base64,' + n.base64,
+            assetId: '',
+            isValid: true
+          });
         }
-      }
-    });
-    $scope.$watch('optionImage', function (n, o) {
-      if (n && n.filetype && n.base64) {
-        if ($scope.item.option.image)
-          $scope.item.option.image = 'data:' + n.filetype + ';base64,' + n.base64;
+        else {
+          $scope.item.questionImage[0].base64 = 'data:' + n.filetype + ';base64,' + n.base64;
+          $scope.item.questionImage[0].isValid = true;
+        }
       }
     });
 
@@ -125,5 +88,53 @@ angular.module('wpappApp')
 
     $scope.getDisplayableTime = function (time) {
       return moment(time).fromNow();
+    }
+  });
+
+angular.module('wpappApp')
+  .controller('MCQOptionsCtrl', function ($scope, item, users, $mdConstant, $mdDialog, Auth, $http) {
+    $scope.optionImages = [];
+    var init = function () {
+      _.each($scope.item.options, function (o, i) {
+        $scope.optionImages.push(o.image.base64);
+      });
+    }();
+    $scope.toggleSelection = function (option) {
+      //option.answer = !option.answer;
+      /*if ($scope.isMCQAnswerSet && !option.answer) {
+        var r = confirm("Please deselect already selected option to choose another");
+      }
+      else {
+        option.answer ? (option.answer = false, $scope.isMCQAnswerSet = false) : (option.answer = true, $scope.isMCQAnswerSet = true);
+      }*/
+    }
+
+    $scope.validate = function () {
+      if (!_.some(item.options, 'answer')) {
+        confirm("Please select an answer for MCQ to save");
+        return false;
+      }
+      return true;
+    }
+
+    $scope.$watch('optionImages', function (n, o) {
+      _.each($scope.optionImages, function (img, i) {
+        $scope.item.option[i].image.base64 = 'data:' + n[i].filetype + ';base64,' + n[i].base64;
+        $scope.item.option[i].image.isValid = true;
+      });
+    }, true);
+  });
+
+angular.module('wpappApp')
+  .controller('WordProblemCtrl', function ($scope, item, users, $mdConstant, $mdDialog, Auth, $http) {
+    $scope.validate = function () {
+      return true;
+    }
+  });
+
+angular.module('wpappApp')
+  .controller('FreeResponseCtrl', function ($scope, item, users, $mdConstant, $mdDialog, Auth, $http) {
+    $scope.validate = function () {
+      return true;
     }
   });

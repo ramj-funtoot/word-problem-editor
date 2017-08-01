@@ -1,14 +1,14 @@
-<form name="optionForm">
+<form name="optionForm" ng-controller="MCQOptionsCtrl">
     <div layout="row" ng-repeat="option in item.options">
         <div layout="column" flex layout-fill ng-cloak>
             <h4 class="md-primary">Option #{{$index+1}}</h4>
             <div layout="row">
                 <div class="md-block option-image-container" flex="30">
-                    <input id="optimg" type="file" ng-model="optionImage" name="optionImage" base-sixty-four-input required onload="onLoad" maxsize="500"
-                        accept="image/*" class="option-image-input">
+                    <input id="optimg" type="file" ng-model="optionImages[$index]" name="optionImage" base-sixty-four-input required onload="onLoad"
+                        maxsize="500" accept="image/*" class="option-image-input">
                     <label for="optimg">
-                            <img ng-src="{{option.image|| 'http://placehold.it/300x200'}}" />
-                 </label>
+                        <img ng-src="{{option.image.base64|| 'http://placehold.it/300x200'}}" />
+                    </label>
                 </div>
                 <md-input-container class="md-block" flex="70">
                     <div layout="row">
@@ -18,13 +18,13 @@
                             <div class="input-message hint" ng-if="!optionForm.option.$dirty">Write the option</div>
                         </md-input-container>
                         <md-input-container class="md-block" flex="30">
-                            <md-checkbox class="" ng-checked="option.answer == true" ng-click="toggleSelection(option)">Answer</md-checkbox>
+                            <md-checkbox class="" ng-model="option.answer">Answer</md-checkbox>
                         </md-input-container>
                     </div>
                     <div layout="row">
                         <md-input-container class="md-block" flex="50">
                             <label>Micro Hint</label>
-                            <input name="optmh" ng-disabled="option.answer" ng-model="item.i18n[langId][option.mh]">
+                            <input name="optmh" ng-disabled="option.answer" ng-model="item.i18n[langId][option.mh]" style="color:inherit;">
                             <div class="input-message hint" ng-if="!optionForm.optmh.$dirty">Write the Micro hint</div>
                         </md-input-container>
                         <md-input-container class="md-block" flex="50">

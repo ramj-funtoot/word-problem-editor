@@ -8,6 +8,13 @@ var validStates = ['Draft', 'In-Review', 'Reviewed', 'Published', 'Rejected'];
 var validBtlos = ['Remember', 'Understand', 'Apply', 'Analyze', 'Evaluate', 'Create'];
 var validDifficultyLevels = [1, 2, 3, 4, 5];
 
+var imageSchema = new Schema({
+  base64: String,
+  assetId: String,
+  urls: Object,
+  isValid: Boolean
+});
+
 var commentsSchema = new Schema({
   created: { type: Date, default: Date.now },
   commentedBy: String,
@@ -32,9 +39,10 @@ var stepSchema = new Schema({
   responses: [responsesSchema],
   _id: { id: false }
 });
+
 var optionSchema = new Schema({
   text: String,
-  image: String,
+  image: [imageSchema],
   answer: Boolean,
   mh: String,
   mmc: [String]
@@ -48,7 +56,6 @@ var workSheetSchema = new Schema({
   _id: String,
   name: String
 });
-
 var QuestionSchema = new Schema({
   identifier: { type: String, unique: true },
   grade: { type: Number, min: 1, max: 5 },
@@ -67,7 +74,7 @@ var QuestionSchema = new Schema({
   workSheets: [workSheetSchema],
   maxAttempts: { type: Number, max: 10 },
   questionText: String,
-  questionImage: [String],
+  questionImage: [imageSchema],
   steps: [stepSchema],
   options: [optionSchema],
   fibs: [fibSchema],

@@ -1,5 +1,5 @@
 {
-    "wpmongomodel": {
+    "legacy-word-problem": {
         "identifier": "",
         "grade": "2",
         "level": 0,
@@ -36,7 +36,7 @@
             }
         ]
     },
-    "mcqmongomodel": {
+    "mcq": {
         "identifier": "",
         "grade": "2",
         "level": 0,
@@ -68,7 +68,7 @@
             }
         ]
     },
-    "freeResponsemongomodel": {
+    "freeResponse": {
         "identifier": "",
         "grade": "2",
         "level": 0,
