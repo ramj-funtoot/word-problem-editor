@@ -222,7 +222,7 @@ function publishQuestion(qIds, env, messages, res, code) {
               item.options.type = "image";
             }
           });
-          item.model = question.mcqType;
+          item.model.mcqType = question.mcqType;
           item.i18n = question.i18n;
           break;
         }
@@ -267,7 +267,8 @@ function publishQuestion(qIds, env, messages, res, code) {
               client.patch(url, args, function (data, response) {
                 if (response.statusCode == 200) {
                   messages[qid] = { message: 'Published', statusCode: response.statusCode };
-                  updateItemStatus(question._id, 'Published');
+                  if (env == 'prod')
+                    updateItemStatus(question._id, 'Published');
                   publishQuestion(qIds, env, messages, res, response.statusCode);
                 }
                 else {
@@ -286,7 +287,8 @@ function publishQuestion(qIds, env, messages, res, code) {
           }
           else {
             messages[qid] = { message: 'Published', statusCode: response.statusCode };
-            updateItemStatus(question._id, 'Published');
+            if (env == 'prod')
+              updateItemStatus(question._id, 'Published');
             publishQuestion(qIds, env, messages, res, response.statusCode);
           }
         }

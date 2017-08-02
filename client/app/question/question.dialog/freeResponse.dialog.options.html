@@ -5,7 +5,7 @@
             <div layout="row">
                 <md-input-container flex="70">
                     <label>Answer</label>
-                    <input name="fibAnswer" +{{$index+1}} ng-model="fib.answer">
+                    <input name="'fibAnswer'+{{$index+1}}" ng-model="fib.answer">
                     <div class="input-message hint" ng-if="!fibsForm.fibAnswer.$dirty">Write the answer</div>
                 </md-input-container>
                 <md-input-container flex="30">

@@ -156,13 +156,13 @@
                 <md-divider></md-divider>
                 <!-- -->
                 <div id="steps" ng-if="item.qtype=='legacy-word-problem'">
-                    <div ng-include src="'./app/question/question.dialog/wp.dialog.steps.html'"></div>
+                    <div ng-include src="'app/question/question.dialog/wp.dialog.steps.html'"></div>
                 </div>
                 <div id="steps" ng-if="item.qtype=='mcq'">
-                    <div ng-include src="'./app/question/question.dialog/mcq.dialog.options.html'"></div>
+                    <div ng-include src="'app/question/question.dialog/mcq.dialog.options.html'"></div>
                 </div>
                 <div id="steps" ng-if="item.qtype=='freeResponse'">
-                    <div ng-include src="'./app/question/question.dialog/freeResponse.dialog.options.html'"></div>
+                    <div ng-include src="'app/question/question.dialog/freeResponse.dialog.options.html'"></div>
                 </div>
                 <md-divider></md-divider>
                 <div layout="row" ng-if="item.qtype=='legacy-word-problem'">

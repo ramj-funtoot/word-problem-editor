@@ -4,7 +4,7 @@ var mongoose = require('mongoose'),
   Schema = mongoose.Schema;
 
 var validUnitPlacements = ['pre', 'post'];
-var validStates = ['Draft', 'In-Review', 'Reviewed', 'Published', 'Rejected'];
+var validStates = ['Draft', 'In-Review', 'Reviewed', 'Ready For Publish', 'Published', 'Rejected'];
 var validBtlos = ['Remember', 'Understand', 'Apply', 'Analyze', 'Evaluate', 'Create'];
 var validDifficultyLevels = [1, 2, 3, 4, 5];
 
@@ -78,6 +78,7 @@ var QuestionSchema = new Schema({
   steps: [stepSchema],
   options: [optionSchema],
   fibs: [fibSchema],
+  mcqType: Number,
   hintText: String,
   solutionText: String,
   expressions: String,

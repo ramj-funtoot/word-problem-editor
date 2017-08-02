@@ -14,7 +14,7 @@ angular.module('wpappApp')
       grades: [1, 2, 3, 4, 5],
       btlos: ['Remember', 'Understand', 'Apply', 'Analyze', 'Evaluate', 'Create'],
       diffLevels: [1, 2, 3, 4, 5],
-      states: ['Draft', 'In-Review', 'Published', 'Rejected'],
+      states: ['Draft', 'In-Review', 'Reviewed', 'Ready For Publish', 'Published', 'Rejected'],
       es_diffLevels: ['EASY', 'MEDIUM', 'HARD', 'RARE'],
       attempts: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
       levels: [1, 2, 3, 4, 5, 6],
