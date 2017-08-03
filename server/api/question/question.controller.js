@@ -41,6 +41,7 @@ var envData = {
   }
 }
 
+
 function getFilterClause(a, o) {
   var filter = { active: a };
   if (o) filter['owner'] = o;
@@ -331,6 +332,7 @@ function publishQuestion(qIds, env, messages, res, code) {
           _.forEach(question.options, function (option, i) {
             item.options.push(quesTemplate.mcqOptionTemplate());
             item.options[i].value.asset = option.text;
+
             item.options[i].value.image = option.image;
             item.options[i].value.count = null;
             item.options[i].answer = option.answer;
@@ -386,8 +388,6 @@ function publishQuestion(qIds, env, messages, res, code) {
         }
       };
       var client = new restclient();
-
-      storeLog(JSON.stringify(args), 'mcq_publish.json');
 
       client.post(url + 'create/', args, function (data, response) {
         if (response.statusCode == 200 || response.statusCode == 400) {

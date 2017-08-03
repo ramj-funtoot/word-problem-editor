@@ -97,7 +97,6 @@ angular.module('wpappApp')
           });
         }
         else {
-
           $http.patch('/api/questions/' + newItem._id, newItem).then(function (response) {
             console.log('item updated successfully');
             $scope.refresh($scope.showMyItems);

@@ -116,8 +116,8 @@
                 <hr />
                 <div layout="row" ng-if="item.qtype=='legacy-word-problem'">
                     <div class="md-block question-image-container" flex="30">
-                        <input id="qimg" type="file" ng-model="questionImage" name="questionImage" base-sixty-four-input required onload="onLoad"
-                            maxsize="500" accept="image/*" class="question-image-input">
+                        <input id="qimg" type="file" ng-model="images.qImage" name="questionImage" base-sixty-four-input required maxsize="500" accept="image/*"
+                            class="question-image-input">
                         <label for="qimg">
                             <!--<div ng-style="{'background-image': url({{item.questionImage || 'http://placehold.it/300x200'}})}"></div>-->
                             <img ng-src="{{item.questionImage[0].base64 || 'http://placehold.it/300x200'}}" />
@@ -135,8 +135,8 @@
 
                 <div layout="row" ng-if="item.qtype=='mcq' || item.qtype=='freeResponse'">
                     <div class="md-block question-image-container" flex="30">
-                        <input id="qimg" type="file" ng-model="questionImage" name="questionImage" base-sixty-four-input required onload="onLoad"
-                            maxsize="500" accept="image/*" class="question-image-input">
+                        <input id="qimg" type="file" ng-model="images.qImage" name="questionImage" base-sixty-four-input required maxsize="500" accept="image/*"
+                            class="question-image-input">
                         <label for="qimg">
                             <!--<div ng-style="{'background-image': url({{item.questionImage || 'http://placehold.it/300x200'}})}"></div>-->
                             <img ng-src="{{item.questionImage[0].base64 || 'http://placehold.it/300x200'}}" />
