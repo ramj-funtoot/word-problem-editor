@@ -64,7 +64,7 @@ var mcq = {
 var mcq_option = {
     value: {
             type:"text",
-            text: "",
+            asset: "",
             audio: "",
             image: "",
             count: ""
@@ -72,6 +72,23 @@ var mcq_option = {
           answer: false,
           mh: "",
           mmc: []
+}
+
+var imageAsset = {
+    request: {
+		content: {
+			identifier: "",
+			osId: "org.ekstep.quiz.app",
+			mediaType: "image",
+			visibility: "Default",
+			description: "",
+			name: "",
+			language:["English"],
+			contentType: "Asset",
+			code: "",
+			mimeType: "" 
+		}
+	}
 }
 
 exports.getCommonTemplate = function(qType){
@@ -86,3 +103,6 @@ exports.mcqOptionTemplate = function(){
     return _.cloneDeep(mcq_option);
 }
 
+exports.imageAssetTemplate = function(){
+    return _.cloneDeep(imageAsset);
+}
