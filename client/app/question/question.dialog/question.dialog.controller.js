@@ -7,9 +7,6 @@ angular.module('wpappApp')
     $scope.langId = 'en';
     $scope.users = users;
 
-    var init = function () {
-    }();
-
     $scope.meta = {
       grades: [1, 2, 3, 4, 5],
       btlos: ['Remember', 'Understand', 'Apply', 'Analyze', 'Evaluate', 'Create'],
@@ -18,7 +15,10 @@ angular.module('wpappApp')
       es_diffLevels: ['EASY', 'MEDIUM', 'HARD', 'RARE'],
       attempts: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
       levels: [1, 2, 3, 4, 5, 6],
-      sub_levels: [1, 2, 3, 4, 5, 6]
+      sub_levels: [1, 2, 3, 4, 5, 6],
+      validate: function () {
+        return true;
+      }
     };
 
     $scope.keys = [$mdConstant.KEY_CODE.ENTER, $mdConstant.KEY_CODE.COMMA];
@@ -28,17 +28,24 @@ angular.module('wpappApp')
     };
 
     // child controllers must implement this
-    $scope.validate = function () { return true; };
+    //$scope.validate = function () { return true; };
 
     $scope.saveQuestion = function ($event) {
-      if ($scope.validate()) {
+      if ($scope.meta.validate()) {
         var user = Auth.getCurrentUser();
         $scope.item.updated = { by: user.email };
         $mdDialog.hide($scope.item);
       }
     }
 
-    $scope.$watch('questionImage', function (n, o) {
+    $scope.images = {
+      qImage: null,
+      optionImages: []
+    }
+
+    $scope.$watch(function () {
+      return $scope.images.qImage;
+    }, function (n, o) {
       if (n && n.filetype && n.base64) {
         if (!$scope.item.questionImage)
           $scope.item.questionImage = [];
@@ -54,7 +61,7 @@ angular.module('wpappApp')
           $scope.item.questionImage[0].isValid = true;
         }
       }
-    });
+    }, true);
 
     $scope.configResponses = function ($event, step) {
       var parentEl = angular.element(document.body);
@@ -92,11 +99,11 @@ angular.module('wpappApp')
   });
 
 angular.module('wpappApp')
-  .controller('MCQOptionsCtrl', function ($scope, item, users, $mdConstant, $mdDialog, Auth, $http) {
-    $scope.optionImages = [];
+  .controller('MCQOptionsCtrl', function ($scope) {
+    $scope.images = { optionImages: [] };
     var init = function () {
       _.each($scope.item.options, function (o, i) {
-        $scope.optionImages.push(o.image.base64);
+        $scope.images.optionImages.push({});
       });
     }();
     $scope.toggleSelection = function (option) {
@@ -109,32 +116,38 @@ angular.module('wpappApp')
       }*/
     }
 
-    $scope.validate = function () {
-      if (!_.some(item.options, 'answer')) {
+    $scope.meta.validate = function () {
+      if (!_.some($scope.item.options, 'answer')) {
         confirm("Please select an answer for MCQ to save");
         return false;
       }
       return true;
     }
 
-    $scope.$watch('optionImages', function (n, o) {
-      _.each($scope.optionImages, function (img, i) {
-        $scope.item.option[i].image.base64 = 'data:' + n[i].filetype + ';base64,' + n[i].base64;
-        $scope.item.option[i].image.isValid = true;
+    $scope.$watch(function () {
+      return $scope.images.optionImages;
+    }, function (n, o) {
+      _.each($scope.images.optionImages, function (img, i) {
+        if (img.base64) {
+          if (!$scope.item.options[i].image)
+            $scope.item.options[i].image = { base64: null, assetId: '', isValid: true };
+          $scope.item.options[i].image.base64 = 'data:' + img.filetype + ';base64,' + img.base64;
+          $scope.item.options[i].image.isValid = true;
+        }
       });
     }, true);
   });
 
 angular.module('wpappApp')
-  .controller('WordProblemCtrl', function ($scope, item, users, $mdConstant, $mdDialog, Auth, $http) {
-    $scope.validate = function () {
+  .controller('WordProblemCtrl', function ($scope) {
+    $scope.meta.validate = function () {
       return true;
     }
   });
 
 angular.module('wpappApp')
-  .controller('FreeResponseCtrl', function ($scope, item, users, $mdConstant, $mdDialog, Auth, $http) {
-    $scope.validate = function () {
+  .controller('FreeResponseCtrl', function ($scope) {
+    $scope.meta.validate = function () {
       return true;
     }
   });
