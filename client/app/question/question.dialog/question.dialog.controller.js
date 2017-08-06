@@ -5,6 +5,7 @@ angular.module('wpappApp')
     $scope.isMCQAnswerSet = false;
     $scope.item = item || ItemTemplateService.getDefaultItem('legacy-word-problem');
     $scope.langId = 'en';
+    var langId = $scope.langId;
     $scope.users = users;
 
     $scope.meta = {
@@ -16,6 +17,7 @@ angular.module('wpappApp')
       attempts: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
       levels: [1, 2, 3, 4, 5, 6],
       sub_levels: [1, 2, 3, 4, 5, 6],
+      mcqType: [1, 2, 3, 4, 5, 6, 7, 8],
       validate: function () {
         return true;
       }
@@ -33,7 +35,9 @@ angular.module('wpappApp')
     $scope.saveQuestion = function ($event) {
       if ($scope.meta.validate()) {
         var user = Auth.getCurrentUser();
-        $scope.item.updated = { by: user.email };
+        $scope.item.updated = {
+          by: user.email
+        };
         $mdDialog.hide($scope.item);
       }
     }
@@ -55,8 +59,7 @@ angular.module('wpappApp')
             assetId: '',
             isValid: true
           });
-        }
-        else {
+        } else {
           $scope.item.questionImage[0].base64 = 'data:' + n.filetype + ';base64,' + n.base64;
           $scope.item.questionImage[0].isValid = true;
         }
@@ -93,6 +96,68 @@ angular.module('wpappApp')
       $scope.userComment = '';
     }
 
+    $scope.addNewOption = function ($event, index) {
+      var max = 0;
+      Object.keys(item.i18n["en"]).forEach(function (k) {
+        if (k.slice(0, 3) == "MH_") {
+          if (max < k.slice(-1)) {
+            max = k.slice(-1)
+          }
+        }
+      });
+      max++;
+      $scope.item.options.push({
+        image: null,
+        text: 'OPT_' + max,
+        answer: false,
+        mh: 'MH_' + max,
+        mmc: []
+      });
+    }
+
+    $scope.deleteOption = function ($event, index) {
+      var confirm = $mdDialog.confirm()
+        .title('Confirm Delete Option')
+        .textContent('Are you sure you want to delete this option?')
+        .ariaLabel('Delete option')
+        .targetEvent($event)
+        .ok('Yes')
+        .cancel('No')
+        .multiple(true);
+      $mdDialog.show(confirm).then(function () {
+        //Remove particular option
+        console.log("following was option removed :", $scope.item.options[index])
+        $scope.item.options.splice(index, 1);
+        //Update remaining options
+        $scope.item.options.forEach(function (o) {
+          if (parseInt(o.mh.slice(-1)) > index) {
+            var d = parseInt(o.mh.split("_")[1]);
+            d = d - 1;
+
+            var s = o.mh.split("_")[0]
+            o.mh = s + "_" + d;
+
+            s = o.text.split("_")[0]
+            o.text = s + "_" + d;
+          }
+        })
+        delete item.i18n["en"]["MH_" + index]
+        delete item.i18n["en"]["OPT_" + index]
+        //Update i18n
+        for (var i = index + 1; item.i18n["en"]["MH_" + i] != undefined && item.i18n["en"]["OPT_" + i] != undefined; i++) {
+          var str = item.i18n["en"]["MH_" + i];
+          var r = i - 1;
+          item.i18n["en"]["MH_" + r] = str;
+          delete item.i18n["en"]["MH_" + i]
+
+          str = item.i18n["en"]["OPT_" + i];
+          item.i18n["en"]["OPT_" + r] = str;
+          delete item.i18n["en"]["OPT_" + i]
+        }
+      }, function () {});
+    }
+
+
     $scope.getDisplayableTime = function (time) {
       return moment(time).fromNow();
     }
@@ -100,7 +165,9 @@ angular.module('wpappApp')
 
 angular.module('wpappApp')
   .controller('MCQOptionsCtrl', function ($scope) {
-    $scope.images = { optionImages: [] };
+    $scope.images = {
+      optionImages: []
+    };
     var init = function () {
       _.each($scope.item.options, function (o, i) {
         $scope.images.optionImages.push({});
@@ -130,7 +197,11 @@ angular.module('wpappApp')
       _.each($scope.images.optionImages, function (img, i) {
         if (img.base64) {
           if (!$scope.item.options[i].image)
-            $scope.item.options[i].image = { base64: null, assetId: '', isValid: true };
+            $scope.item.options[i].image = {
+              base64: null,
+              assetId: '',
+              isValid: true
+            };
           $scope.item.options[i].image.base64 = 'data:' + img.filetype + ';base64,' + img.base64;
           $scope.item.options[i].image.isValid = true;
         }
