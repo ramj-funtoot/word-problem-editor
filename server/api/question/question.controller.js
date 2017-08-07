@@ -7,18 +7,18 @@ var quesTemplate = require('./question.item.template.js');
 var fs = require('fs')
 const util = require('util')
 
-function storeLog(dataToStore, fileName){
-  fs.writeFile(__dirname+'/'+fileName, dataToStore, function(err){
-    if(err){
-      console.log('!!!!!!!!!!!!--writing log file of '+ fileName + ' fails--!!!!!!!!!!!!');
+function storeLog(dataToStore, fileName) {
+  fs.writeFile(__dirname + '/' + fileName, dataToStore, function (err) {
+    if (err) {
+      console.log('!!!!!!!!!!!!--writing log file of ' + fileName + ' fails--!!!!!!!!!!!!');
       console.log(err)
       return;
     }
-    console.log('------------writing log file of '+ fileName + 'success--------------');
+    console.log('------------writing log file of ' + fileName + 'success--------------');
   })
 }
 
-function getImageMimeTypeFromBase64(base64Data){
+function getImageMimeTypeFromBase64(base64Data) {
   return base64Data.substring("data:image/".length, base64Data.indexOf(";base64"))
 }
 
@@ -27,17 +27,17 @@ var envData = {
   'dev': {
     'apiKey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiI0Y2Y3ZWM1OGU1Zjg0ZWNlODRmMWU0M2ViMTM5ZDllMCJ9.XlhqVzofiJCGPen42fno3hfJu8OVKUOyFIM1koxfy54',
     'url': 'https://dev.ekstep.in/api/assessment/v3/items/',
-    'contentApiUrl': 'https://dev.ekstep.in/action/content/v3/'
+    'contentApiUrl': 'https://dev.ekstep.in/content/v3/'
   },
   'qa': {
     'apiKey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJjZmJiOWMzNjNkZTk0ZWNiOGJiMDhjYzA0NTlmZjI3YSJ9.pvSbcuIAiu5Cty9FyZSMp3R4O0dXZ3zx6-nz8Xkkf0I',
     'url': 'https://qa.ekstep.in/api/assessment/v3/items/',
-    'contentApiUrl': 'https://qa.ekstep.in/action/content/v3/'
+    'contentApiUrl': 'https://qa.ekstep.in/content/v3/'
   },
   'prod': {
-    'apiKey': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJiNjM3NGYxZGI5NjM0NDcxYmZhZWUzOWQ0ZDFhYjY1OSIsImlhdCI6bnVsbCwiZXhwIjpudWxsLCJhdWQiOiIiLCJzdWIiOiIifQ.tl1gKaHP8s5M6cAFKqNZwJDkGp4TVIpzJ804FNLtfmo',
+    'apiKey': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiIzY2M5ODMxYjI0ZDc0ZDA5OGM5ZTk0ZTc4M2JlZTY4YiIsImlhdCI6bnVsbCwiZXhwIjpudWxsLCJhdWQiOiIiLCJzdWIiOiIifQ.skn0NOtGIARj7yxBb6g_I6-oQ8rs0Y2RTTI8hALfuYs',
     'url': 'https://api.ekstep.in/assessment/v3/items/',
-    'contentApiUrl': 'https://community.ekstep.in/action/content/v3/'
+    'contentApiUrl': 'https://api.ekstep.in/content/v3/'
   }
 }
 
@@ -184,30 +184,30 @@ function uploadImage(imgObj, env, assetId) {
         client.patch(url + 'update/' + assetId, args, function (data, response) {
           // check the response
         });
-      }else {
+      } else {
         var args = imageToFormData(imgObj.base64);
         return;
         client.post(url + 'update/' + assetId, args, function (data, response) {
         });
       }
     });
-  }else {
+  } else {
     // create the assetId creation request Object builder
     imgObj.assetId = assetId;
     var reqObj = quesTemplate.imageAssetTemplate();
     reqObj.request.content.identifier = assetId;
     reqObj.request.content.name = assetId;
-    reqObj.request.content.code = assetId; 
+    reqObj.request.content.code = assetId;
     reqObj.request.content.mimeType = 'image/' + getImageMimeTypeFromBase64(imgObj.base64);//need to get through getting substring of image base 64 string
 
     client.post(url + 'create/', reqObj, function (data, response) {
       if (response.statusCode == 200 && data.params.errmsg == null) {
 
-        storeLog(JSON.stringify(data), 'assetIdCreate_Response.json');   
+        storeLog(JSON.stringify(data), 'assetIdCreate_Response.json');
 
         var args = imageToFormData(imgObj.base64);
 
-        storeLog(JSON.stringify(data), 'imagePost_request_argument.json');   
+        storeLog(JSON.stringify(data), 'imagePost_request_argument.json');
 
         return;
         client.post(url + 'update/' + assetId, args, function (data, response) {
@@ -216,7 +216,7 @@ function uploadImage(imgObj, env, assetId) {
             imgObj.url[env] = url;
           }
         });
-      }else if (response.statusCode == 400) {
+      } else if (response.statusCode == 400) {
         // asset already exists.. post the image
         var args = imageToFormData(imgObj.base64);
         client.post(url + 'update/' + assetId, args, function (data, response) {
@@ -230,9 +230,9 @@ function uploadImage(imgObj, env, assetId) {
             });
           }
         });
-      }else{
+      } else {
         console.log('the response Code is ' + response.statusCode);
-         storeLog(JSON.stringify(data), 'assetIdCreate_Response_403.json'); 
+        storeLog(JSON.stringify(data), 'assetIdCreate_Response_403.json');
       }
     });
   }
@@ -243,16 +243,16 @@ function uploadImages(question, env) {
   var assetId = (!question.questionImage[0].assetId)
     ? 'org.ekstep.funtoot.' + question.identifier + '.image' + Math.random().toString().replace("0", "")
     : question.questionImage[0].assetId;
-    
+
   uploadImage(question.questionImage[0], env, assetId);
   return;
   if (question.qtype == "mcq") {
     question.options.forEach(function (option, i) {
       //check if the option is having image property with out null
-      if(option.image != null){
+      if (option.image != null) {
         var opAssetId = (option.image.assetId.length == 0)
-        ? 'org.ekstep.funtoot.' + question.identifier + '.image' + Math.random().toString().replace("0", "")
-        : option.image.assetId;
+          ? 'org.ekstep.funtoot.' + question.identifier + '.image' + Math.random().toString().replace("0", "")
+          : option.image.assetId;
         uploadImage(option.image, env, opAssetId);
       }
     });
@@ -281,10 +281,10 @@ function publishQuestion(qIds, env, messages, res, code) {
     }
     else {
       //starting upload or update process of imges in ekstep db
-      if(question.questionImage.length > 0){
+      if (question.questionImage.length > 0) {
         //uploadImages(question, env);
       }
-      
+
       // cloning and applying  common properties of questions into item template
       var item = quesTemplate.getCommonTemplate();
       item.question = question.questionText;
@@ -340,7 +340,7 @@ function publishQuestion(qIds, env, messages, res, code) {
             item.options[i].mh = option.mh;
             if (option.text == "" || option.text == undefined) {
               item.options[i].value.type = "image";
-              if(option.image.assetId){
+              if (option.image.assetId) {
                 item.options[i].value.asset = optoin.image.assetId;
               }
             }
@@ -395,6 +395,7 @@ function publishQuestion(qIds, env, messages, res, code) {
             if (data.params.errmsg.indexOf("Object already exists with identifier") !== -1) {
               console.log(item.code + ' already exists. Updating..')
               url = url + 'update/' + item.code;
+              //console.log(JSON.stringify(args));
               client.patch(url, args, function (data, response) {
                 if (response.statusCode == 200) {
                   messages[qid] = { message: 'Published', statusCode: response.statusCode };

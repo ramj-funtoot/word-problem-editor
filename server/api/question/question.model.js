@@ -12,7 +12,8 @@ var imageSchema = new Schema({
   base64: String,
   assetId: String,
   urls: Object,
-  isValid: Boolean
+  isValid: Boolean,
+  _id: { id: false }
 });
 
 var commentsSchema = new Schema({
@@ -42,10 +43,17 @@ var stepSchema = new Schema({
 
 var optionSchema = new Schema({
   text: String,
-  image: [imageSchema],
+  image: {
+    base64: String,
+    assetId: String,
+    urls: Object,
+    isValid: Boolean,
+    _id: { id: false }
+  },
   answer: Boolean,
   mh: String,
-  mmc: [String]
+  mmc: [String],
+  _id: { id: false }
 });
 var fibSchema = new Schema({
   identifier: { type: String, unique: true },
