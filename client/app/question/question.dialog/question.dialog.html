@@ -4,8 +4,8 @@
             <h2>{{item._id ? 'Edit ' + item.identifier : 'New Question'}}</h2>
             <span flex></span>
             <md-input-container flex="20">
-                <md-select name="grade" ng-model="English" required>
-                    <md-option value="English" ng-selected="true">English</md-option>
+                <md-select name="locale" ng-model="langId" required>
+                    <md-option ng-value="l.id" ng-repeat="l in meta.locales">{{l.name}}</md-option>
                 </md-select>
             </md-input-container>
             <md-button class="md-icon-button" ng-click="closeDialog()">

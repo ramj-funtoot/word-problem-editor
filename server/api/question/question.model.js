@@ -30,7 +30,8 @@ var responsesSchema = new Schema({
   _id: { id: false }
 });
 var i18nSchema = new Schema({
-  en: Object
+  en: Object,
+  _id: { id: false }
 });
 var stepSchema = new Schema({
   text: String,
