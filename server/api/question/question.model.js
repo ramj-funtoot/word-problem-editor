@@ -29,10 +29,6 @@ var responsesSchema = new Schema({
   default: Boolean,
   _id: { id: false }
 });
-var i18nSchema = new Schema({
-  en: Object,
-  _id: { id: false }
-});
 var stepSchema = new Schema({
   text: String,
   answer: String,
@@ -91,7 +87,7 @@ var QuestionSchema = new Schema({
   hintText: String,
   solutionText: String,
   expressions: String,
-  i18n: [i18nSchema],
+  i18n: Object,
   comments: [commentsSchema]
 });
 
