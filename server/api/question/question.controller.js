@@ -42,7 +42,7 @@ var envData = {
     'contentApiUrl': 'https://dev.ekstep.in/content/v3/'
   },
   'qa': {
-    'apiKey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJjZmJiOWMzNjNkZTk0ZWNiOGJiMDhjYzA0NTlmZjI3YSJ9.pvSbcuIAiu5Cty9FyZSMp3R4O0dXZ3zx6-nz8Xkkf0I',
+    'apiKey': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiI5MGNhMmNiYmM3N2Y0MGE2YjFhNDc5NjNlYmZkMzcwYyIsImlhdCI6bnVsbCwiZXhwIjpudWxsLCJhdWQiOiIiLCJzdWIiOiIifQ.nSiNRJccW0p4SQdB1MHONVJHIbG483PPbbtsmSMC_ZU',
     'url': 'https://qa.ekstep.in/api/assessment/v3/items/',
     'contentApiUrl': 'https://qa.ekstep.in/content/v3/'
   },
@@ -480,9 +480,8 @@ function publishQuestion(qIds, env, messages, res, code) {
               item.options[i].answer = option.answer;
               item.options[i].mmc = option.mmc;
               item.options[i].mh = option.mh;
-              item.options[i].value.type = 'text';
+              item.options[i].value.type = (option.image && option.image.assetId) ? 'image' : 'text';
               if (!option.text || option.text.length == 0) {
-                item.options[i].value.type = "image";
                 if (option.image.assetId) {
                   item.options[i].value.asset = option.image.assetId;
                   item.media.push({
