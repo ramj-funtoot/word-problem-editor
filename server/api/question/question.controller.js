@@ -3,25 +3,37 @@
 var _ = require('lodash');
 var Question = require('./question.model');
 var restclient = require('node-rest-client').Client;
+var request = require('request');
 var quesTemplate = require('./question.item.template.js');
 var fs = require('fs')
+var Promise = require('bluebird');
+var winston = require('winston');
 const util = require('util')
 
-function storeLog(dataToStore, fileName) {
-  fs.writeFile(__dirname + '/' + fileName, dataToStore, function (err) {
-    if (err) {
-      console.log('!!!!!!!!!!!!--writing log file of ' + fileName + ' fails--!!!!!!!!!!!!');
-      console.log(err)
-      return;
-    }
-    console.log('------------writing log file of ' + fileName + 'success--------------');
-  })
-}
+var logger = new (winston.Logger)({
+  transports: [
+    new (winston.transports.Console)(),
+    new (winston.transports.File)({ filename: 'zcat.server.log' })
+  ]
+});
 
 function getImageMimeTypeFromBase64(base64Data) {
   return base64Data.substring("data:image/".length, base64Data.indexOf(";base64"))
 }
 
+function decodeBase64Image(dataString) {
+  var matches = dataString.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/),
+    response = {};
+
+  if (matches.length !== 3) {
+    return new Error('Invalid input string');
+  }
+
+  response.type = matches[1];
+  response.data = new Buffer(matches[2], 'base64');
+
+  return response;
+}
 
 var envData = {
   'dev': {
@@ -41,7 +53,6 @@ var envData = {
   }
 }
 
-
 function getFilterClause(a, o) {
   var filter = { active: a };
   if (o) filter['owner'] = o;
@@ -51,6 +62,118 @@ function getSelectClause(type) {
   if (!type || type == 'summary')
     return { 'questionImage': 0, 'steps': 0, 'options': 0, 'fibs': 0, 'comments': 0, 'hintText': 0, 'expressions': 0, 'comments': 0 }
 }
+
+function getImageUpdateObject(opts) {
+  var updateObj = {};
+  updateObj[opts.imageType + opts.index + '.assetId']
+  if (opts.imageType == 'questionImage') {
+    updateObj["questionImage." + opts.index + ".assetId"] = opts.assetId;
+    updateObj["questionImage." + opts.index + ".urls." + opts.env] = opts.url
+  } else if (opts.imageType == "option") {
+    updateObj["options." + opts.index + ".image.assetId"] = opts.assetId
+    updateObj["options." + opts.index + ".image.urls." + opts.env] = opts.url
+  }
+  return updateObj
+}
+
+function createImageContent(assetId, imageMimeType, env, callback) {
+  var options = {
+    method: 'POST',
+    url: envData[env].contentApiUrl + 'create', //need to replaced based on the env type
+    headers: {
+      'cache-control': 'no-cache',
+      authorization: 'Bearer ' + envData[env].apiKey,
+      'content-type': 'application/json'
+    },
+    body: {
+      request: {
+        content: {
+          identifier: assetId,
+          osId: 'org.ekstep.quiz.app',
+          mediaType: 'image',
+          visibility: 'Default',
+          description: 'Test_QA',
+          name: assetId,
+          language: ['English'],
+          contentType: 'Asset',
+          code: assetId,
+          mimeType: 'image/' + imageMimeType //need to get through getting substring of image base 64 string 
+        }
+      }
+    },
+    json: true
+  };
+
+  request(options, function (error, response, body) {
+    if (error) {
+      logger.error(JSON.stringify(error));
+      callback(null);
+    }
+    logger.info(JSON.stringify(body));
+
+    if (response.statusCode == 200 && body.params.errmsg == null) {
+      callback(response);
+    }
+  });
+}
+
+function readImageAsset(assetID, env, callback) {
+  var options = {
+    method: 'GET',
+    url: envData[env].contentApiUrl + 'read/' + assetID, //need to replaced based on the env type
+    headers: {
+      'cache-control': 'no-cache',
+      authorization: 'Bearer ' + envData[env].apiKey,
+      'content-type': 'application/json'
+    }
+  }
+  request.get(options, function (err, response) {
+    if (err) {
+      logger.error(err);
+      callback(null);
+    }
+    else
+      callback(response);
+  })
+}
+
+function uploadImageToContent(env, assetId, imageMimeType, callback) {
+  var boundary = (new Date()).getTime();
+  var options = {
+    method: 'POST',
+    'url': envData[env].contentApiUrl + 'upload/' + assetId,
+    'headers': {
+      'cache-control': 'no-cache',
+      'authorization': 'Bearer ' + envData[env].apiKey,
+      'content-type': 'multipart/form-data; boundary=----' + boundary
+    },
+    'formData': {
+      'file': {
+        'value': fs.createReadStream(assetId + '.' + imageMimeType),
+        'options': {
+          'filename': assetId + '.' + imageMimeType,
+          'content-type': 'image/' + imageMimeType
+        }
+      }
+    }
+  }
+  var req = request.post(options, function (err, response, body) {
+    if (err) {
+      logger.error(err);
+      callback(null);
+    } else {
+      callback(response);
+    }
+    return; //currently no need to delete the images as they were useful for debugging
+    fs.unlink('./' + assetId + '.' + imageMimeType, function (err) {
+      if (err) {
+        return console.log(err);
+      }
+      console.log(assetId + '.' + imageMimeType + '  deleted successfully');
+    });
+  });
+}
+
 // Get list of questions
 exports.index = function (req, res) {
   var active = req.query.active || true;
@@ -141,7 +264,6 @@ function handleError(res, err) {
   return res.status(500).json(err);
 }
 
-
 function updateItemStatus(qId, status) {
   Question.findByIdAndUpdate(qId, { $set: { 'state': status, 'updated.when': new Date() } }, function (err, question) {
     if (err) { console.log(err); }
@@ -149,112 +271,127 @@ function updateItemStatus(qId, status) {
   });
 };
 
-function imageToFormData(image) {
-  var boundary = '----' + (new Date()).getTime();
-  var bodyString = [];
-  bodyString.push(
-    '--' + boundary,
-    //file name and jpg needs to be changed
-    'Content-Disposition: form-data; name="' + "file" + '";' + 'filename="' + "my_file.jpg" + '"',
-    'Content-Type: ' + "image/jpeg", //change the file type
-    'Content-Transfer-Encoding: base64', '', //need /r/n twice here
-    image.substring(23) //remove the data:image/jpeg;base64,
-  );
-  bodyString.push('--' + boundary + '--', '');
-  var content = bodyString.join('\r\n');
-  return {
-    content: content,
-    headers: {
-      'Content-Type': 'multipart/form-data; boundary=' + boundary,
-      'Content-Length': content.length
-    }
-  }
-}
-
-function uploadImage(imgObj, env, assetId) {
-  var url = envData[env].contentApiUrl;
-  var client = new restclient();
-  //checking asset ID present for the Image
-  if (imgObj.assetId && imgObj.assetId.length > 0) {
-    client.get(url + 'read/' + imgObj.assetId, function (data, response) {
-      //if url is readable then image already exists then upload
-      if (response.statusCode == 200 && data.params.errmsg == null) {
-        var args = imageToFormData(imgObj.base64);
-        return;
-        client.patch(url + 'update/' + assetId, args, function (data, response) {
-          // check the response
-        });
-      } else {
-        var args = imageToFormData(imgObj.base64);
-        return;
-        client.post(url + 'update/' + assetId, args, function (data, response) {
-        });
+function uploadImageAndUpdateQuestion(data) {
+  return new Promise(function (resolve, reject) {
+    var fileName = data.assetId + '.' + data.imageMimeType;
+    fs.writeFile(fileName, data.imageBuffer.data, function (err) {
+      if (err) {
+        logger.error(err);
+        // resolve with an empty object instead of reject
+        resolve({});
       }
-    });
-  } else {
-    // create the assetId creation request Object builder
-    imgObj.assetId = assetId;
-    var reqObj = quesTemplate.imageAssetTemplate();
-    reqObj.request.content.identifier = assetId;
-    reqObj.request.content.name = assetId;
-    reqObj.request.content.code = assetId;
-    reqObj.request.content.mimeType = 'image/' + getImageMimeTypeFromBase64(imgObj.base64);//need to get through getting substring of image base 64 string
-
-    client.post(url + 'create/', reqObj, function (data, response) {
-      if (response.statusCode == 200 && data.params.errmsg == null) {
-
-        storeLog(JSON.stringify(data), 'assetIdCreate_Response.json');
-
-        var args = imageToFormData(imgObj.base64);
-
-        storeLog(JSON.stringify(data), 'imagePost_request_argument.json');
-
-        return;
-        client.post(url + 'update/' + assetId, args, function (data, response) {
-          if (response.statusCode == 200) {
-            // update the url
-            imgObj.url[env] = url;
-          }
-        });
-      } else if (response.statusCode == 400) {
-        // asset already exists.. post the image
-        var args = imageToFormData(imgObj.base64);
-        client.post(url + 'update/' + assetId, args, function (data, response) {
-          // check the response
-          if (response.statusCode != 200) {
-            // do a patch
-            client.patch(url + 'update/' + assetId, args, function (data, response) {
-              // check the response
-              if (response.statusCode == 200) {
+      else {
+        //UPLOAD IMAGE => The base 64 successfully stored as file
+        uploadImageToContent(data.env, data.assetId, data.imageMimeType, function (response) {
+          if (response && response.statusCode == 200) {
+            // read the image asset from content api, to get the s3Key
+            readImageAsset(data.assetId, data.env, function (readResp) {
+              if (readResp.statusCode == 200) {
+                var respBody = JSON.parse(readResp.body);
+                var imageAssetIdUpdatObject = getImageUpdateObject({
+                  imageType: data.imageType,
+                  index: data.imageIndex,
+                  assetId: data.assetId,
+                  env: data.env,
+                  url: respBody.result.content.s3Key
+                })
+                Question.collection.updateOne({ 'identifier': data.qId }, { $set: imageAssetIdUpdatObject }, function (err, response) {
+                  if (err) {
+                    logger.error('Failed when updating image for question ' + data.qId + ' - assetId' + data.assetId)
+                    logger.error(err);
+                    resolve({});
+                  }
+                  else {
+                    logger.info('Successfully updated image for question ' + data.qId + ' - assetId' + data.assetId);
+                    resolve({
+                      id: data.assetId,
+                      src: respBody.result.content.s3Key,
+                      type: 'image'
+                    })
+                  }
+                });
+              }
+              else {
+                logger.error('readAsset failed with responseCod ' + readResp.statusCode)
+                logger.error('readAsset response ', readResp)
               }
             });
           }
+        })
+      }
+    })
+  })
+}
+
+function uploadImage(imgObj, env, assetId, qId, imageType, imageIndex) {
+  return new Promise(function (resolve, reject) {
+    var imageMimeType = getImageMimeTypeFromBase64(imgObj.base64);
+    createImageContent(assetId, imageMimeType, env, function (response) {
+      if (response && response.statusCode == 200) {
+        // upload the image and then update the mongodb document
+        logger.info('Asset created successfully');
+        //GET THE IMAGE BASE64 AND STORE AS IMAGE AND GET THE IMAGE TYPE
+        var data = {
+          qId: qId,
+          assetId: assetId,
+          imageIndex: imageIndex,
+          imageType: imageType,
+          imageBuffer: decodeBase64Image(imgObj.base64),
+          imageMimeType: imageMimeType,
+          env: env
+        }
+        uploadImageAndUpdateQuestion(data).then(function (results) {
+          // image uploaded successfully, now let's update the question
+          logger.info('asset uploaded and database was updated successfully for ' + qId + ' - assetId ' + assetId);
+          resolve(results);
+        }).catch(function (err) {
+          logger.error('Failed asset upload and database updat for ' + qId + ' - assetId ' + assetId);
+          logger.error(err)
+          reject(results)
         });
-      } else {
-        console.log('the response Code is ' + response.statusCode);
-        storeLog(JSON.stringify(data), 'assetIdCreate_Response_403.json');
+      } else if (response.statusCode == 400) {
+        // AssetID not created
+        console.warn("Failed when creating the asset");
+        resolve({});
+      }
+    })
+  });
+}
+
+function uploadImages(question, env, callback) {
+  //env = 'prod';
+  var imgUploadPromises = [];
+  if (question.questionImage.length > 0 && !question.questionImage[0].assetId) {
+    var assetId = 'org.ekstep.funtoot.' + question.identifier + '.image' + Math.random().toString().replace('0', '')
+    imgUploadPromises.push(uploadImage(question.questionImage[0], env, assetId, question.identifier, 'questionImage', 0));
+  }
+
+  if (question.qtype == 'mcq') {
+    question.options.forEach(function (option, i) {
+      //check if the option is having image property with out null
+      if (option.image && (!option.image.assetId || option.image.assetId.length == 0)) {
+        var opAssetId = 'org.ekstep.funtoot.' + question.identifier + '.image' + Math.random().toString().replace('0', '');
+        imgUploadPromises.push(uploadImage(option.image, env, opAssetId, question.identifier, 'option', i));
       }
     });
   }
-}
-
-function uploadImages(question, env) {
-  //is assetId already exists, if not generating asset id
-  var assetId = (!question.questionImage[0].assetId)
-    ? 'org.ekstep.funtoot.' + question.identifier + '.image' + Math.random().toString().replace("0", "")
-    : question.questionImage[0].assetId;
-
-  uploadImage(question.questionImage[0], env, assetId);
-  return;
-  if (question.qtype == "mcq") {
-    question.options.forEach(function (option, i) {
-      //check if the option is having image property with out null
-      if (option.image != null) {
-        var opAssetId = (option.image.assetId.length == 0)
-          ? 'org.ekstep.funtoot.' + question.identifier + '.image' + Math.random().toString().replace("0", "")
-          : option.image.assetId;
-        uploadImage(option.image, env, opAssetId);
-      }
+  if (imgUploadPromises.length > 0) {
+    // wait for all the images to get uploaded
+    Promise.all(imgUploadPromises).then(function (results) {
+      logger.info(question.identifier, 'All images uploaded successfully ');
+      logger.info(results);
+      Question.findOne({ 'identifier': question.identifier }, function (err, updatedQuestion) {
+        callback(updatedQuestion);
+      });
+      // results is an array of all the parsed bodies in order
+    }).catch(function (err) {
+      logger.error(err);
+      callback(null);
+    });
+  }
+  else {
+    Question.findOne({ 'identifier': question.identifier }, function (err, updatedQuestion) {
+      callback(updatedQuestion);
     });
   }
 }
@@ -281,156 +418,168 @@ function publishQuestion(qIds, env, messages, res, code) {
     }
     else {
       //starting upload or update process of imges in ekstep db
-      if (question.questionImage.length > 0) {
-        //uploadImages(question, env);
-      }
-
-      // cloning and applying  common properties of questions into item template
-      var item = quesTemplate.getCommonTemplate();
-      item.question = question.questionText;
-      item.identifier = item.qid = item.code = item.name = question.identifier;
-      item.grade = question.grade;
-      item.gradeLevel = ["Grade " + question.grade];
-      item.level = question.level;
-      item.sublevel = question.sublevel;
-      item.bloomsTaxonomyLevel = question.btlo;
-      item.model.hintMsg = question.hintText;
-      item.concepts.identifier = question.conceptCode;
-      item.qtype = question.qtype;
-
-      _.each(question.workSheets, function (w, k) {
-        if (w.id)
-          item.keywords.push(w.id);
-      });
-      if (question.expressions && typeof (question.expressions) == "string") {
-        _.each(question.expressions.split(/\r?\n/), function (exp) {
-          var tokens = exp.split('=');
-          item.model.variables[tokens[0]] = tokens[1];
+      uploadImages(question, env, function (question) {
+        // cloning and applying  common properties of questions into item template
+        var item = quesTemplate.getCommonTemplate();
+        item.media = [];
+        item.question = question.questionText;
+        item.identifier = item.qid = item.code = item.name = question.identifier;
+        item.grade = question.grade;
+        item.gradeLevel = ["Grade " + question.grade];
+        item.level = question.level;
+        item.sublevel = question.sublevel;
+        item.bloomsTaxonomyLevel = question.btlo;
+        item.model.hintMsg = question.hintText;
+        item.concepts.identifier = question.conceptCode;
+        item.qtype = question.qtype;
+        if (question.questionImage && question.questionImage.length > 0) {
+          item.questionImage = question.questionImage[0].assetId;
+          item.media.push({
+            id: question.questionImage[0].assetId,
+            src: question.questionImage[0].urls[env],
+            type: 'image'
+          })
+        }
+        _.each(question.workSheets, function (w, k) {
+          if (w.id)
+            item.keywords.push(w.id);
         });
-      }
-
-      //applying question type specific properties into item template
-      switch (question.qtype) {
-        case "legacy-word-problem": {
-          item.type = 'ftb';
-          item.template_id = 'org.ekstep.plugins.funtoot.fibWordProblem';
-          item.template = 'org.ekstep.plugins.funtoot.fibWordProblem';
-          item.keywords = ['wordproblem'];
-          item.model.steps = [];
-          question.steps.forEach(function (s, i) {
-            item.model.steps.push(s);
+        if (question.expressions && typeof (question.expressions) == "string") {
+          _.each(question.expressions.split(/\r?\n/), function (exp) {
+            var tokens = exp.split('=');
+            item.model.variables[tokens[0]] = tokens[1];
           });
-          break;
         }
-        case "mcq": {
-          item.type = 'mcq';
-          item.template_id = 'org.ekstep.plugins.funtoot.genericmcq';
-          item.template = 'org.ekstep.plugins.funtoot.genericmcq';
-          item.keywords = ['mcq'];
-          var mcqTemplate = quesTemplate.getMCQTemplate();
-          item = _.assign({}, item, mcqTemplate);
-          _.forEach(question.options, function (option, i) {
-            item.options.push(quesTemplate.mcqOptionTemplate());
-            item.options[i].value.asset = option.text;
 
-            item.options[i].value.image = option.image;
-            item.options[i].value.count = null;
-            item.options[i].answer = option.answer;
-            item.options[i].mmc = option.mmc;
-            item.options[i].mh = option.mh;
-            if (option.text == "" || option.text == undefined) {
-              item.options[i].value.type = "image";
-              if (option.image.assetId) {
-                item.options[i].value.asset = optoin.image.assetId;
-              }
-            }
-          });
-          item.model.mcqType = question.mcqType;
-          item.i18n = question.i18n[0];
-          break;
-        }
-        case "freeResponse": {
-          item.i18n = question.i18n[0];
-          item.keywords = ['freeResponse'];
-          item.type = 'ftb';
-          item.template_id = 'org.ekstep.plugins.funtoot.genericfib';
-          item.template = 'org.ekstep.plugins.funtoot.genericfib';
-          item.model.fibs = [];
-          item.model.steps = [];
-          question.fibs.forEach(function (fib, i) {
-            item.model.fibs.push(fib);
-          });
-          break;
-        }
-      }
+        //applying question type specific properties into item template
+        switch (question.qtype) {
+          case "legacy-word-problem": {
+            item.type = 'ftb';
+            item.template_id = 'org.ekstep.plugins.funtoot.fibWordProblem';
+            item.template = 'org.ekstep.plugins.funtoot.fibWordProblem';
+            item.keywords = ['wordproblem'];
+            item.model.steps = [];
+            question.steps.forEach(function (s, i) {
+              item.model.steps.push(s);
+            });
+            break;
+          }
+          case "mcq": {
+            item.type = 'mcq';
+            item.template_id = 'org.ekstep.plugins.funtoot.genericmcq';
+            item.template = 'org.ekstep.plugins.funtoot.genericmcq';
+            item.keywords = ['mcq'];
+            var mcqTemplate = quesTemplate.getMCQTemplate();
+            item = _.assign({}, item, mcqTemplate);
+            _.forEach(question.options, function (option, i) {
+              item.options.push(quesTemplate.mcqOptionTemplate());
+              item.options[i].value.asset = option.text;
 
-      var ekstep_env = env; // 'qa' or 'dev' or 'prod'
-      var url = envData[ekstep_env].url; //"https://" + ekstep_env + ".ekstep.in/api/assessment/v3/items/create";
-
-      var reqBody = { "request": { "assessment_item": {} } };
-      reqBody.request.assessment_item.identifier = item.code;
-      reqBody.request.assessment_item.objectType = "AssessmentItem";
-      reqBody.request.assessment_item.metadata = item;
-
-      var authheader = 'Bearer ' + envData[ekstep_env].apiKey;
-      var args = {
-        //path: { id: item.code, tid: 'domain' },
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": authheader
-        },
-        data: reqBody,
-        requestConfig: {
-          timeout: 240000
-        },
-        responseConfig: {
-          timeout: 240000
-        }
-      };
-      var client = new restclient();
-
-      client.post(url + 'create/', args, function (data, response) {
-        if (response.statusCode == 200 || response.statusCode == 400) {
-          if (data.params && data.params.errmsg) {
-            if (data.params.errmsg.indexOf("Object already exists with identifier") !== -1) {
-              console.log(item.code + ' already exists. Updating..')
-              url = url + 'update/' + item.code;
-              //console.log(JSON.stringify(args));
-              client.patch(url, args, function (data, response) {
-                if (response.statusCode == 200) {
-                  messages[qid] = { message: 'Published', statusCode: response.statusCode };
-                  if (env == 'prod')
-                    updateItemStatus(question._id, 'Published');
-                  publishQuestion(qIds, env, messages, res, response.statusCode);
+              item.options[i].value.image = option.image.assetId;
+              item.options[i].value.count = null;
+              item.options[i].answer = option.answer;
+              item.options[i].mmc = option.mmc;
+              item.options[i].mh = option.mh;
+              item.options[i].value.type = 'text';
+              if (!option.text || option.text.length == 0) {
+                item.options[i].value.type = "image";
+                if (option.image.assetId) {
+                  item.options[i].value.asset = option.image.assetId;
+                  item.media.push({
+                    id: option.image.assetId,
+                    src: option.image.urls[env],
+                    type: 'image'
+                  })
                 }
-                else {
+              }
+            });
+            item.model.mcqType = question.mcqType;
+            item.i18n = question.i18n[0];
+            break;
+          }
+          case "freeResponse": {
+            item.i18n = question.i18n[0];
+            item.keywords = ['freeResponse'];
+            item.type = 'ftb';
+            item.template_id = 'org.ekstep.plugins.funtoot.genericfib';
+            item.template = 'org.ekstep.plugins.funtoot.genericfib';
+            item.model.fibs = [];
+            item.model.steps = [];
+            question.fibs.forEach(function (fib, i) {
+              item.model.fibs.push(fib);
+            });
+            break;
+          }
+        }
+        console.log('item', item);
+        var ekstep_env = env; // 'qa' or 'dev' or 'prod'
+        var url = envData[ekstep_env].url; //"https://" + ekstep_env + ".ekstep.in/api/assessment/v3/items/create";
+
+        var reqBody = { "request": { "assessment_item": {} } };
+        reqBody.request.assessment_item.identifier = item.code;
+        reqBody.request.assessment_item.objectType = "AssessmentItem";
+        reqBody.request.assessment_item.metadata = item;
+
+        var authheader = 'Bearer ' + envData[ekstep_env].apiKey;
+        var args = {
+          //path: { id: item.code, tid: 'domain' },
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": authheader
+          },
+          data: reqBody,
+          requestConfig: {
+            timeout: 240000
+          },
+          responseConfig: {
+            timeout: 240000
+          }
+        };
+        var client = new restclient();
+
+        client.post(url + 'create/', args, function (data, response) {
+          if (response.statusCode == 200 || response.statusCode == 400) {
+            if (data.params && data.params.errmsg) {
+              if (data.params.errmsg.indexOf("Object already exists with identifier") !== -1) {
+                console.log(item.code + ' already exists. Updating..')
+                url = url + 'update/' + item.code;
+                //console.log(JSON.stringify(args));
+                client.patch(url, args, function (data, response) {
+                  if (response.statusCode == 200) {
+                    messages[qid] = { message: 'Published', statusCode: response.statusCode };
+                    if (env == 'prod')
+                      updateItemStatus(question._id, 'Published');
+                    publishQuestion(qIds, env, messages, res, response.statusCode);
+                  }
+                  else {
+                    messages[qid] = { message: err, statusCode: response.statusCode };
+                    publishQuestion(qIds, env, messages, res, response.statusCode);
+                  }
+                }).on('error', function (err) {
                   messages[qid] = { message: err, statusCode: response.statusCode };
                   publishQuestion(qIds, env, messages, res, response.statusCode);
-                }
-              }).on('error', function (err) {
-                messages[qid] = { message: err, statusCode: response.statusCode };
+                });
+              }
+              else {
+                messages[qid] = { message: data.params, statusCode: response.statusCode };
                 publishQuestion(qIds, env, messages, res, response.statusCode);
-              });
+              }
             }
             else {
-              messages[qid] = { message: data.params, statusCode: response.statusCode };
+              messages[qid] = { message: 'Published', statusCode: response.statusCode };
+              if (env == 'prod')
+                updateItemStatus(question._id, 'Published');
               publishQuestion(qIds, env, messages, res, response.statusCode);
             }
           }
           else {
-            messages[qid] = { message: 'Published', statusCode: response.statusCode };
-            if (env == 'prod')
-              updateItemStatus(question._id, 'Published');
+            messages[qid] = { message: data, statusCode: response.statusCode };
             publishQuestion(qIds, env, messages, res, response.statusCode);
           }
-        }
-        else {
-          messages[qid] = { message: data, statusCode: response.statusCode };
-          publishQuestion(qIds, env, messages, res, response.statusCode);
-        }
-      }).on('error', function (err) {
-        messages[qid] = { message: err, statusCode: '' };
-        publishQuestion(qIds, env, messages, res, 501);
+        }).on('error', function (err) {
+          messages[qid] = { message: err, statusCode: '' };
+          publishQuestion(qIds, env, messages, res, 501);
+        });
       });
     }
   });

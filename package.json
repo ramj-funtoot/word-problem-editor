@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "main": "server/app.js",
   "dependencies": {
+    "@google-cloud/translate": "^1.0.0",
     "angular-base64-upload": "^0.1.22",
     "body-parser": "~1.5.0",
     "composable-middleware": "^0.3.0",
@@ -23,7 +24,8 @@
     "passport": "~0.2.0",
     "passport-google-oauth": "latest",
     "passport-local": "~0.1.6",
-    "serve-favicon": "~2.0.1"
+    "serve-favicon": "~2.0.1",
+    "winston": "^2.3.1"
   },
   "devDependencies": {
     "grunt": "~0.4.4",
