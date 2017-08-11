@@ -97,6 +97,16 @@ angular.module('wpappApp')
           });
         }
         else {
+          if (newItem.questionImage.length != 0) {
+            newItem.questionImage[0].assetId = ""
+          }
+          if (newItem.qtype == "mcq" && newItem.options.length != 0) {
+            newItem.options.forEach(function (opt) {
+              if (opt.image != null) {
+                opt.image.assetId = "";
+              }
+            });
+          }
           $http.patch('/api/questions/' + newItem._id, newItem).then(function (response) {
             console.log('item updated successfully');
             $scope.refresh($scope.showMyItems);
