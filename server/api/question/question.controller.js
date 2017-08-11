@@ -10,10 +10,10 @@ var Promise = require('bluebird');
 var winston = require('winston');
 const util = require('util')
 
-var logger = new(winston.Logger)({
+var logger = new (winston.Logger)({
   transports: [
-    new(winston.transports.Console)(),
-    new(winston.transports.File)({
+    new (winston.transports.Console)(),
+    new (winston.transports.File)({
       filename: 'zcat.server.log'
     })
   ]
@@ -207,8 +207,8 @@ exports.index = function (req, res) {
   } else if (req.query.type && req.query.type == 'detail') {
     if (req.query.id) {
       Question.findOne({
-          'identifier': req.query.id
-        })
+        'identifier': req.query.id
+      })
         .lean()
         .exec(function (err, question) {
           if (err) {
@@ -238,9 +238,9 @@ exports.index = function (req, res) {
 // get list of questions based on query parameters
 exports.query = function (req, res) {
   Question.find({
-      active: true,
-      owner: req.params.owner
-    })
+    active: true,
+    owner: req.params.owner
+  })
     .sort({
       "updated.when": -1
     })
@@ -357,21 +357,21 @@ function uploadImageAndUpdateQuestion(data) {
                 Question.collection.updateOne({
                   'identifier': data.qId
                 }, {
-                  $set: imageAssetIdUpdatObject
-                }, function (err, response) {
-                  if (err) {
-                    logger.error('Failed when updating image for question ' + data.qId + ' - assetId' + data.assetId)
-                    logger.error(err);
-                    resolve({});
-                  } else {
-                    logger.info('Successfully updated image for question ' + data.qId + ' - assetId' + data.assetId);
-                    resolve({
-                      id: data.assetId,
-                      src: respBody.result.content.s3Key,
-                      type: 'image'
-                    })
-                  }
-                });
+                    $set: imageAssetIdUpdatObject
+                  }, function (err, response) {
+                    if (err) {
+                      logger.error('Failed when updating image for question ' + data.qId + ' - assetId' + data.assetId)
+                      logger.error(err);
+                      resolve({});
+                    } else {
+                      logger.info('Successfully updated image for question ' + data.qId + ' - assetId' + data.assetId);
+                      resolve({
+                        id: data.assetId,
+                        src: respBody.result.content.s3Key,
+                        type: 'image'
+                      })
+                    }
+                  });
               } else {
                 logger.error('readAsset failed with responseCod ' + readResp.statusCode)
                 logger.error('readAsset response ', readResp)
@@ -521,67 +521,61 @@ function publishQuestion(qIds, env, messages, res, code) {
 
         //applying question type specific properties into item template
         switch (question.qtype) {
-          case "legacy-word-problem":
-            {
-              item.type = 'ftb';
-              item.template_id = 'org.ekstep.plugins.funtoot.fibWordProblem';
-              item.template = 'org.ekstep.plugins.funtoot.fibWordProblem';
-              item.keywords = ['wordproblem'];
-              item.model.steps = [];
-              item.i18n = question.i18n;
-              item.model.steps = question.steps[question.steps.length - 1];
-              question.steps.forEach(function (s, i) {
-                item.model.steps.push(s);
-              });
-              break;
-            }
-          case "mcq":
-            {
-              item.type = 'mcq';
-              item.template_id = 'org.ekstep.plugins.funtoot.genericmcq';
-              item.template = 'org.ekstep.plugins.funtoot.genericmcq';
-              item.keywords = ['mcq'];
-              var mcqTemplate = quesTemplate.getMCQTemplate();
-              item = _.assign({}, item, mcqTemplate);
-              _.forEach(question.options, function (option, i) {
-                item.options.push(quesTemplate.mcqOptionTemplate());
-                item.options[i].value.asset = option.text;
+          case "legacy-word-problem": {
+            item.type = 'ftb';
+            item.template_id = 'org.ekstep.plugins.funtoot.fibWordProblem';
+            item.template = 'org.ekstep.plugins.funtoot.fibWordProblem';
+            item.keywords = ['wordproblem'];
+            item.model.steps = [];
+            item.i18n = question.i18n;
+            item.model.steps = [question.steps[question.steps.length - 1]];
+            break;
+          }
+          case "mcq": {
+            item.type = 'mcq';
+            item.template_id = 'org.ekstep.plugins.funtoot.genericmcq';
+            item.template = 'org.ekstep.plugins.funtoot.genericmcq';
+            item.keywords = ['mcq'];
+            var mcqTemplate = quesTemplate.getMCQTemplate();
+            item = _.assign({}, item, mcqTemplate);
+            _.forEach(question.options, function (option, i) {
+              item.options.push(quesTemplate.mcqOptionTemplate());
+              item.options[i].value.asset = option.text;
 
-                item.options[i].value.image = option.image.assetId;
-                item.options[i].value.count = null;
-                item.options[i].answer = option.answer;
-                item.options[i].mmc = option.mmc;
-                item.options[i].mh = option.mh;
-                item.options[i].value.type = (option.image && option.image.assetId) ? 'image' : 'text';
-                if (!option.text || option.text.length == 0) {
-                  if (option.image.assetId) {
-                    item.options[i].value.asset = option.image.assetId;
-                    item.media.push({
-                      id: option.image.assetId,
-                      src: option.image.urls[env],
-                      type: 'image'
-                    })
-                  }
+              item.options[i].value.image = option.image.assetId;
+              item.options[i].value.count = null;
+              item.options[i].answer = option.answer;
+              item.options[i].mmc = option.mmc;
+              item.options[i].mh = option.mh;
+              item.options[i].value.type = (option.image && option.image.assetId) ? 'image' : 'text';
+              if (!option.text || option.text.length == 0) {
+                if (option.image.assetId) {
+                  item.options[i].value.asset = option.image.assetId;
+                  item.media.push({
+                    id: option.image.assetId,
+                    src: option.image.urls[env],
+                    type: 'image'
+                  })
                 }
-              });
-              item.model.mcqType = question.mcqType;
-              item.i18n = question.i18n;
-              break;
-            }
-          case "freeResponse":
-            {
-              item.i18n = question.i18n;
-              item.keywords = ['freeResponse'];
-              item.type = 'ftb';
-              item.template_id = 'org.ekstep.plugins.funtoot.genericfib';
-              item.template = 'org.ekstep.plugins.funtoot.genericfib';
-              item.model.fibs = [];
-              item.model.steps = [];
-              question.fibs.forEach(function (fib, i) {
-                item.model.fibs.push(fib);
-              });
-              break;
-            }
+              }
+            });
+            item.model.mcqType = question.mcqType;
+            item.i18n = question.i18n;
+            break;
+          }
+          case "freeResponse": {
+            item.i18n = question.i18n;
+            item.keywords = ['freeResponse'];
+            item.type = 'ftb';
+            item.template_id = 'org.ekstep.plugins.funtoot.genericfib';
+            item.template = 'org.ekstep.plugins.funtoot.genericfib';
+            item.model.fibs = [];
+            item.model.steps = [];
+            question.fibs.forEach(function (fib, i) {
+              item.model.fibs.push(fib);
+            });
+            break;
+          }
         }
         var ekstep_env = env; // 'qa' or 'dev' or 'prod'
         var url = envData[ekstep_env].url; //"https://" + ekstep_env + ".ekstep.in/api/assessment/v3/items/create";
