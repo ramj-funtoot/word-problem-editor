@@ -114,26 +114,7 @@
                     </md-autocomplete>
                 </div>
                 <hr />
-                <div layout="row" ng-if="item.qtype=='legacy-word-problem'">
-                    <div class="md-block question-image-container" flex="30">
-                        <input id="qimg" type="file" ng-model="images.qImage" name="questionImage" base-sixty-four-input required maxsize="500" accept="image/*"
-                            class="question-image-input">
-                        <label for="qimg">
-                            <!--<div ng-style="{'background-image': url({{item.questionImage || 'http://placehold.it/300x200'}})}"></div>-->
-                            <img ng-src="{{item.questionImage[0].base64 || 'http://placehold.it/300x200'}}" />
-                        </label>
-                    </div>
-                    <md-input-container class="md-block" flex="70">
-                        <label>Question Stem</label>
-                        <textarea required name="questionStem" rows="3" ng-model="item.questionText" md-select-on-focus></textarea>
-                        <div class="input-message hint" ng-if="!questionForm.questionStem.$dirty">Write the question stem</div>
-                        <div class="input-message error-msg" ng-messages="questionForm.questionStem.$error">
-                            <div ng-message="required">This is required.</div>
-                        </div>
-                    </md-input-container>
-                </div>
-
-                <div layout="row" ng-if="item.qtype=='mcq' || item.qtype=='freeResponse'">
+                <div layout="row">
                     <div class="md-block question-image-container" flex="30">
                         <input id="qimg" type="file" ng-model="images.qImage" name="questionImage" base-sixty-four-input required maxsize="500" accept="image/*"
                             class="question-image-input">
@@ -151,7 +132,6 @@
                         </div>
                     </md-input-container>
                 </div>
-
                 <br />
                 <md-divider></md-divider>
                 <!-- -->
@@ -165,17 +145,7 @@
                     <div ng-include src="'app/question/question.dialog/freeResponse.dialog.options.html'"></div>
                 </div>
                 <md-divider></md-divider>
-                <div layout="row" ng-if="item.qtype=='legacy-word-problem'">
-                    <md-input-container flex>
-                        <label>Hint </label>
-                        <textarea required name="hint" rows="1" ng-model="item.hintText" md-select-on-focus></textarea>
-                        <div class="input-message hint" ng-if="!questionForm.hint.$dirty">Write the hint</div>
-                        <div class="input-message error-msg" ng-messages="questionForm.hint.$error">
-                            <div ng-message="required">This is required.</div>
-                        </div>
-                    </md-input-container>
-                </div>
-                <div layout="row" ng-if="item.qtype=='mcq' || item.qtype=='freeResponse'">
+                <div layout="row">
                     <md-input-container flex>
                         <label>Hint </label>
                         <textarea required name="hint" rows="1" ng-model="item.i18n[langId][item.hintText]" md-select-on-focus></textarea>
@@ -188,7 +158,7 @@
                 <div layout="row">
                     <md-input-container flex>
                         <label>Expressions </label>
-                        <textarea name="expressions" rows="1" ng-model="item.expressions" md-select-on-focus></textarea>
+                        <textarea name="expressions" rows="1" ng-model="item.i18n[langId][item.expressions]" md-select-on-focus></textarea>
                         <div class="input-message hint" ng-if="!questionForm.expressions.$dirty">Write expressions one line per expression</div>
                     </md-input-container>
                 </div>

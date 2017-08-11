@@ -320,6 +320,7 @@ function publishQuestion(qIds, env, messages, res, code) {
           question.steps.forEach(function (s, i) {
             item.model.steps.push(s);
           });
+          item.i18n = question.i18n;
           break;
         }
         case "mcq": {
@@ -346,11 +347,11 @@ function publishQuestion(qIds, env, messages, res, code) {
             }
           });
           item.model.mcqType = question.mcqType;
-          item.i18n = question.i18n[0];
+          item.i18n = question.i18n;
           break;
         }
         case "freeResponse": {
-          item.i18n = question.i18n[0];
+          item.i18n = question.i18n;
           item.keywords = ['freeResponse'];
           item.type = 'ftb';
           item.template_id = 'org.ekstep.plugins.funtoot.genericfib';

@@ -1,20 +1,18 @@
 <form name="stepForm">
-    <div layout="row" ng-repeat="step in item.steps">
-        <div layout="column" flex layout-fill ng-cloak>
-            <h4 class="md-primary">Step #{{$index+1}}</h4>
-            <div layout="row">
-                <md-input-container flex="70">
-                    <label>Step text</label>
-                    <textarea required name="step" rows="1" ng-model="step.text" md-select-on-focus></textarea>
-                    <div class="input-message hint" ng-if="!stepForm.step.$dirty">Write the step</div>
-                    <div class="input-message error-msg" ng-messages="stepForm.step.$error">
-                        <div ng-message="required">This is required.</div>
-                    </div>
-                </md-input-container>
-                <md-input-container flex="30">
-                    <md-button class="md-primary md-hue-1" ng-click="configResponses($event, step)">Configure Responses</md-button>
-                </md-input-container>
-            </div>
+    <div layout="column" flex layout-fill ng-cloak>
+        <h4 class="md-primary">Step</h4>
+        <div layout="row">
+            <md-input-container flex="70">
+                <label>Step text</label>
+                <textarea required name="step" rows="1" ng-model="item.i18n[langId][item.steps[item.steps.length-1].text]" md-select-on-focus></textarea>
+                <div class="input-message hint" ng-if="!stepForm.step.$dirty">Write the step</div>
+                <div class="input-message error-msg" ng-messages="stepForm.step.$error">
+                    <div ng-message="required">This is required.</div>
+                </div>
+            </md-input-container>
+            <md-input-container flex="30">
+                <md-button class="md-primary md-hue-1" ng-click="configResponses($event, item.steps[item.steps.length-1])">Configure Responses</md-button>
+            </md-input-container>
         </div>
     </div>
 </form>
