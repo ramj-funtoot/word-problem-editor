@@ -13,29 +13,43 @@ var imageSchema = new Schema({
   assetId: String,
   urls: Object,
   isValid: Boolean,
-  _id: { id: false }
+  _id: {
+    id: false
+  }
 });
 
 var commentsSchema = new Schema({
-  created: { type: Date, default: Date.now },
+  created: {
+    type: Date,
+    default: Date.now
+  },
   commentedBy: String,
   comment: String,
-  _id: { id: false }
+  _id: {
+    id: false
+  }
 });
 var responsesSchema = new Schema({
   response: [String],
   mmc: [String],
   mh: String,
   default: Boolean,
-  _id: { id: false }
+  _id: {
+    id: false
+  }
 });
 var stepSchema = new Schema({
   text: String,
   answer: String,
   unit: String,
-  unitPlacement: { type: String, enum: validUnitPlacements },
+  unitPlacement: {
+    type: String,
+    enum: validUnitPlacements
+  },
   responses: [responsesSchema],
-  _id: { id: false }
+  _id: {
+    id: false
+  }
 });
 
 var optionSchema = new Schema({
@@ -45,15 +59,22 @@ var optionSchema = new Schema({
     assetId: String,
     urls: Object,
     isValid: Boolean,
-    _id: { id: false }
+    _id: {
+      id: false
+    }
   },
   answer: Boolean,
   mh: String,
   mmc: [String],
-  _id: { id: false }
+  _id: {
+    id: false
+  }
 });
 var fibSchema = new Schema({
-  identifier: { type: String, unique: true },
+  identifier: {
+    type: String,
+    unique: true
+  },
   answer: String,
   responses: [responsesSchema]
 });
@@ -62,22 +83,51 @@ var workSheetSchema = new Schema({
   name: String
 });
 var QuestionSchema = new Schema({
-  identifier: { type: String, unique: true },
-  grade: { type: Number, min: 1, max: 5 },
+  identifier: {
+    type: String,
+    unique: true
+  },
+  grade: {
+    type: Number,
+    min: 1,
+    max: 5
+  },
   level: Number,
   subLevel: Number,
-  btlo: { type: String, enum: validBtlos },
-  difficultyLevel: { type: Number, min: 1, max: 5 },
-  subject: { type: String, default: 'NUM' },
+  btlo: {
+    type: String,
+    enum: validBtlos
+  },
+  difficultyLevel: {
+    type: Number,
+    min: 1,
+    max: 5
+  },
+  subject: {
+    type: String,
+    default: 'NUM'
+  },
   conceptCode: String,
   es_difficultyLevel: String,
   qtype: String,
   active: Boolean,
-  updated: { when: { type: Date, default: Date.now }, by: String },
+  updated: {
+    when: {
+      type: Date,
+      default: Date.now
+    },
+    by: String
+  },
   owner: String,
-  state: { type: String, enum: validStates },
+  state: {
+    type: String,
+    enum: validStates
+  },
   workSheets: [workSheetSchema],
-  maxAttempts: { type: Number, max: 10 },
+  maxAttempts: {
+    type: Number,
+    max: 10
+  },
   questionText: String,
   questionImage: [imageSchema],
   steps: [stepSchema],
