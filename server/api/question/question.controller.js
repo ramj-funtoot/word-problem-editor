@@ -20,7 +20,7 @@ var logger = new(winston.Logger)({
 });
 
 function getImageMimeTypeFromBase64(base64Data) {
-  return base64Data.substring('data:image/'.length, base64Data.indexOf(';base64'))
+  return base64Data.substring("data:image/".length, base64Data.indexOf(";base64"))
 }
 
 function decodeBase64Image(dataString) {
@@ -44,7 +44,7 @@ var envData = {
     'contentApiUrl': 'https://dev.ekstep.in/content/v3/'
   },
   'qa': {
-    'apiKey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJjZmJiOWMzNjNkZTk0ZWNiOGJiMDhjYzA0NTlmZjI3YSJ9.pvSbcuIAiu5Cty9FyZSMp3R4O0dXZ3zx6-nz8Xkkf0I',
+    'apiKey': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiIwZjg4MWQzNmEzMWY0NDUwOGQxZmFkMWY1NjEzYjgwYSIsImlhdCI6bnVsbCwiZXhwIjpudWxsLCJhdWQiOiIiLCJzdWIiOiIifQ.JO7audICEz9KSGNQu7ALzxFJ2x35Qva3LCPKOpAqfbg',
     'url': 'https://qa.ekstep.in/api/assessment/v3/items/',
     'contentApiUrl': 'https://qa.ekstep.in/content/v3/'
   },
@@ -81,11 +81,11 @@ function getImageUpdateObject(opts) {
   var updateObj = {};
   updateObj[opts.imageType + opts.index + '.assetId']
   if (opts.imageType == 'questionImage') {
-    updateObj['questionImage.' + opts.index + '.assetId'] = opts.assetId;
-    updateObj['questionImage.' + opts.index + '.urls.' + opts.env] = opts.url
-  } else if (opts.imageType == 'option') {
-    updateObj['options.' + opts.index + '.image.assetId'] = opts.assetId
-    updateObj['options.' + opts.index + '.image.urls.' + opts.env] = opts.url
+    updateObj["questionImage." + opts.index + ".assetId"] = opts.assetId;
+    updateObj["questionImage." + opts.index + ".urls." + opts.env] = opts.url
+  } else if (opts.imageType == "option") {
+    updateObj["options." + opts.index + ".image.assetId"] = opts.assetId
+    updateObj["options." + opts.index + ".image.urls." + opts.env] = opts.url
   }
   return updateObj
 }
@@ -195,7 +195,7 @@ exports.index = function (req, res) {
     Question.find(getFilterClause(active, owner))
       .select(getSelectClause(req.query.type))
       .sort({
-        'updated.when': -1
+        "updated.when": -1
       })
       .lean()
       .exec(function (err, questions) {
@@ -222,7 +222,7 @@ exports.index = function (req, res) {
     } else {
       Question.find(getFilterClause(active, owner))
         .sort({
-          'updated.when': -1
+          "updated.when": -1
         })
         .lean()
         .exec(function (err, questions) {
@@ -242,7 +242,7 @@ exports.query = function (req, res) {
       owner: req.params.owner
     })
     .sort({
-      'updated.when': -1
+      "updated.when": -1
     })
     .lean()
     .exec(function (err, questions) {
@@ -412,7 +412,7 @@ function uploadImage(imgObj, env, assetId, qId, imageType, imageIndex) {
         });
       } else if (response.statusCode == 400) {
         // AssetID not created
-        console.warn('Failed when creating the asset');
+        console.warn("Failed when creating the asset");
         resolve({});
       }
     })
@@ -420,6 +420,7 @@ function uploadImage(imgObj, env, assetId, qId, imageType, imageIndex) {
 }
 
 function uploadImages(question, env, callback) {
+  //env = 'prod';
   var imgUploadPromises = [];
   if (question.questionImage.length > 0 && !question.questionImage[0].assetId) {
     var assetId = 'org.ekstep.funtoot.' + question.identifier + '.image' + Math.random().toString().replace('0', '')
@@ -428,7 +429,7 @@ function uploadImages(question, env, callback) {
 
   if (question.qtype == 'mcq') {
     question.options.forEach(function (option, i) {
-      //check if the option is having image property with out 'null', if image is not avail in db then 'null' returned as string instead null object
+      //check if the option is having image property with out null
       if (option.image != 'null' && (!option.image.assetId || option.image.assetId.length == 0)) {
         var opAssetId = 'org.ekstep.funtoot.' + question.identifier + '.image' + Math.random().toString().replace('0', '');
         imgUploadPromises.push(uploadImage(option.image, env, opAssetId, question.identifier, 'option', i));
@@ -445,9 +446,14 @@ function uploadImages(question, env, callback) {
       }, function (err, updatedQuestion) {
         callback(updatedQuestion);
       });
+      // results is an array of all the parsed bodies in order
     }).catch(function (err) {
       logger.error(err);
-      callback(null);
+      Question.findOne({
+        'identifier': question.identifier
+      }, function (err, updatedQuestion) {
+        callback(updatedQuestion);
+      });
     });
   } else {
     Question.findOne({
@@ -487,7 +493,7 @@ function publishQuestion(qIds, env, messages, res, code) {
         item.question = question.questionText;
         item.identifier = item.qid = item.code = item.name = question.identifier;
         item.grade = question.grade;
-        item.gradeLevel = ['Grade ' + question.grade];
+        item.gradeLevel = ["Grade " + question.grade];
         item.level = question.level;
         item.sublevel = question.sublevel;
         item.bloomsTaxonomyLevel = question.btlo;
@@ -506,7 +512,7 @@ function publishQuestion(qIds, env, messages, res, code) {
           if (w.id)
             item.keywords.push(w.id);
         });
-        if (question.expressions && typeof (question.expressions) == 'string') {
+        if (question.expressions && typeof (question.expressions) == "string") {
           _.each(question.expressions.split(/\r?\n/), function (exp) {
             var tokens = exp.split('=');
             item.model.variables[tokens[0]] = tokens[1];
@@ -515,7 +521,7 @@ function publishQuestion(qIds, env, messages, res, code) {
 
         //applying question type specific properties into item template
         switch (question.qtype) {
-          case 'legacy-word-problem':
+          case "legacy-word-problem":
             {
               item.type = 'ftb';
               item.template_id = 'org.ekstep.plugins.funtoot.fibWordProblem';
@@ -523,13 +529,13 @@ function publishQuestion(qIds, env, messages, res, code) {
               item.keywords = ['wordproblem'];
               item.model.steps = [];
               item.i18n = question.i18n;
+              item.model.steps = question.steps[question.steps.length - 1];
               question.steps.forEach(function (s, i) {
                 item.model.steps.push(s);
               });
-              item.model.steps = question.steps[question.steps.length - 1];
               break;
             }
-          case 'mcq':
+          case "mcq":
             {
               item.type = 'mcq';
               item.template_id = 'org.ekstep.plugins.funtoot.genericmcq';
@@ -546,9 +552,8 @@ function publishQuestion(qIds, env, messages, res, code) {
                 item.options[i].answer = option.answer;
                 item.options[i].mmc = option.mmc;
                 item.options[i].mh = option.mh;
-                item.options[i].value.type = 'text';
+                item.options[i].value.type = (option.image && option.image.assetId) ? 'image' : 'text';
                 if (!option.text || option.text.length == 0) {
-                  item.options[i].value.type = 'image';
                   if (option.image.assetId) {
                     item.options[i].value.asset = option.image.assetId;
                     item.media.push({
@@ -563,7 +568,7 @@ function publishQuestion(qIds, env, messages, res, code) {
               item.i18n = question.i18n;
               break;
             }
-          case 'freeResponse':
+          case "freeResponse":
             {
               item.i18n = question.i18n;
               item.keywords = ['freeResponse'];
@@ -582,20 +587,20 @@ function publishQuestion(qIds, env, messages, res, code) {
         var url = envData[ekstep_env].url; //"https://" + ekstep_env + ".ekstep.in/api/assessment/v3/items/create";
 
         var reqBody = {
-          'request': {
-            'assessment_item': {}
+          "request": {
+            "assessment_item": {}
           }
         };
         reqBody.request.assessment_item.identifier = item.code;
-        reqBody.request.assessment_item.objectType = 'AssessmentItem';
+        reqBody.request.assessment_item.objectType = "AssessmentItem";
         reqBody.request.assessment_item.metadata = item;
 
         var authheader = 'Bearer ' + envData[ekstep_env].apiKey;
         var args = {
           //path: { id: item.code, tid: 'domain' },
           headers: {
-            'Content-Type': 'application/json',
-            'Authorization': authheader
+            "Content-Type": "application/json",
+            "Authorization": authheader
           },
           data: reqBody,
           requestConfig: {
@@ -606,10 +611,11 @@ function publishQuestion(qIds, env, messages, res, code) {
           }
         };
         var client = new restclient();
+
         client.post(url + 'create/', args, function (data, response) {
           if (response.statusCode == 200 || response.statusCode == 400) {
             if (data.params && data.params.errmsg) {
-              if (data.params.errmsg.indexOf('Object already exists with identifier') !== -1) {
+              if (data.params.errmsg.indexOf("Object already exists with identifier") !== -1) {
                 console.log(item.code + ' already exists. Updating..')
                 url = url + 'update/' + item.code;
                 //console.log(JSON.stringify(args));
