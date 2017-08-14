@@ -22,7 +22,7 @@
                     </md-input-container>
                     <md-input-container flex="10">
                         <label>Units</label>
-                        <input name="units" rows="1" ng-model="step.unit">
+                        <input name="units" rows="1" ng-model="i18n[langId][step.unit]">
                         <div class="input-message hint" ng-if="!responseForm.units.$dirty">Units</div>
                     </md-input-container>
                     <md-input-container flex="20">
@@ -52,12 +52,12 @@
                                         <input name="response" rows="1" ng-model="res.response">
                                         <div class="input-message hint" ng-if="!responseForm.response.$dirty">Response</div>
                                     </md-input-container>
-                                    <md-input-container flex="75" ng-if="qtype=='legacy-word-problem'">
+                                    <!--  <md-input-container flex="75" ng-if="qtype=='legacy-word-problem'">
                                         <label>Micro Hint</label>
                                         <input name="mh" rows="1" ng-model="res.mh">
                                         <div class="input-message hint" ng-if="!responseForm.mh.$dirty">Write the Micro hint</div>
-                                    </md-input-container>
-                                    <md-input-container flex="75" ng-if="qtype=='freeResponse'">
+                                    </md-input-container> -->
+                                    <md-input-container flex="75">
                                         <label>Micro Hint</label>
                                         <input name="mh" rows="1" ng-model="i18n[langId][res.mh]">
                                         <div class="input-message hint" ng-if="!responseForm.mh.$dirty">Write the Micro hint</div>
