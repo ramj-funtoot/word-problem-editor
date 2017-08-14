@@ -41,12 +41,12 @@ var envData = {
   'dev': {
     'apiKey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiI0Y2Y3ZWM1OGU1Zjg0ZWNlODRmMWU0M2ViMTM5ZDllMCJ9.XlhqVzofiJCGPen42fno3hfJu8OVKUOyFIM1koxfy54',
     'url': 'https://dev.ekstep.in/api/assessment/v3/items/',
-    'contentApiUrl': 'https://dev.ekstep.in/content/v3/'
+    'contentApiUrl': 'https://dev.ekstep.in/api/content/v3/'
   },
   'qa': {
-    'apiKey': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiI5MGNhMmNiYmM3N2Y0MGE2YjFhNDc5NjNlYmZkMzcwYyIsImlhdCI6bnVsbCwiZXhwIjpudWxsLCJhdWQiOiIiLCJzdWIiOiIifQ.nSiNRJccW0p4SQdB1MHONVJHIbG483PPbbtsmSMC_ZU',
+    'apiKey': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiI2Zjc1MTA1MmMyMjA0YWI3OWI3ZWRiZmU1NTlmNTQyOCIsImlhdCI6bnVsbCwiZXhwIjpudWxsLCJhdWQiOiIiLCJzdWIiOiIifQ.EkiH5RkIr0FIeUu8aNGmQEmEWKtVwr5e2Fhm-cefMxQ',
     'url': 'https://qa.ekstep.in/api/assessment/v3/items/',
-    'contentApiUrl': 'https://qa.ekstep.in/content/v3/'
+    'contentApiUrl': 'https://qa.ekstep.in/api/content/v3/'
   },
   'prod': {
     'apiKey': 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiIzY2M5ODMxYjI0ZDc0ZDA5OGM5ZTk0ZTc4M2JlZTY4YiIsImlhdCI6bnVsbCwiZXhwIjpudWxsLCJhdWQiOiIiLCJzdWIiOiIifQ.skn0NOtGIARj7yxBb6g_I6-oQ8rs0Y2RTTI8hALfuYs',
@@ -352,7 +352,7 @@ function uploadImageAndUpdateQuestion(data) {
                   index: data.imageIndex,
                   assetId: data.assetId,
                   env: data.env,
-                  url: respBody.result.content.s3Key
+                  url: respBody.result.content.downloadUrl
                 })
                 Question.collection.updateOne({
                   'identifier': data.qId
@@ -367,7 +367,7 @@ function uploadImageAndUpdateQuestion(data) {
                       logger.info('Successfully updated image for question ' + data.qId + ' - assetId' + data.assetId);
                       resolve({
                         id: data.assetId,
-                        src: respBody.result.content.s3Key,
+                        src: respBody.result.content.downloadUrl,
                         type: 'image'
                       })
                     }
@@ -422,7 +422,7 @@ function uploadImage(imgObj, env, assetId, qId, imageType, imageIndex) {
 function uploadImages(question, env, callback) {
   //env = 'prod';
   var imgUploadPromises = [];
-  if (question.questionImage.length > 0 && !question.questionImage[0].assetId) {
+  if (question.questionImage.length > 0 && (!question.questionImage[0].assetId || (question.questionImage[0].assetId && !question.questionImage[0].urls[env]))) {
     var assetId = 'org.ekstep.funtoot.' + question.identifier + '.image' + Math.random().toString().replace('0', '')
     imgUploadPromises.push(uploadImage(question.questionImage[0], env, assetId, question.identifier, 'questionImage', 0));
   }
@@ -430,7 +430,7 @@ function uploadImages(question, env, callback) {
   if (question.qtype == 'mcq') {
     question.options.forEach(function (option, i) {
       //check if the option is having image property with out null
-      if (option.image != 'null' && (!option.image.assetId || option.image.assetId.length == 0)) {
+      if (option.image && (!option.image.assetId || option.image.assetId.length == 0 || (option.image.assetId && option.image.assetId.length > 0 && !option.image.urls[env]))) {
         var opAssetId = 'org.ekstep.funtoot.' + question.identifier + '.image' + Math.random().toString().replace('0', '');
         imgUploadPromises.push(uploadImage(option.image, env, opAssetId, question.identifier, 'option', i));
       }
@@ -475,9 +475,7 @@ function publishQuestion(qIds, env, messages, res, code) {
     return;
   }
   var qid = qs[0];
-  Question.findOne({
-    'identifier': qid
-  }, function (err, question) {
+  Question.findOne({ 'identifier': qid }).lean().exec(function (err, question) {
     if (err) {
       messages[qid] = err;
       publishQuestion(qIds, env, messages, res);
@@ -495,7 +493,7 @@ function publishQuestion(qIds, env, messages, res, code) {
         item.grade = question.grade;
         item.gradeLevel = ["Grade " + question.grade];
         item.level = question.level;
-        item.sublevel = question.sublevel;
+        item.sublevel = question.subLevel;
         item.bloomsTaxonomyLevel = question.btlo;
         item.model.hintMsg = question.hintText;
         item.concepts.identifier = question.conceptCode;
@@ -506,7 +504,7 @@ function publishQuestion(qIds, env, messages, res, code) {
             id: question.questionImage[0].assetId,
             src: question.questionImage[0].urls[env],
             type: 'image'
-          })
+          });
         }
         _.each(question.workSheets, function (w, k) {
           if (w.id)
@@ -526,7 +524,6 @@ function publishQuestion(qIds, env, messages, res, code) {
             item.template_id = 'org.ekstep.plugins.funtoot.fibWordProblem';
             item.template = 'org.ekstep.plugins.funtoot.fibWordProblem';
             item.keywords = ['wordproblem'];
-            item.model.steps = [];
             item.i18n = question.i18n;
             item.model.steps = [question.steps[question.steps.length - 1]];
             break;
@@ -555,7 +552,7 @@ function publishQuestion(qIds, env, messages, res, code) {
                     id: option.image.assetId,
                     src: option.image.urls[env],
                     type: 'image'
-                  })
+                  });
                 }
               }
             });

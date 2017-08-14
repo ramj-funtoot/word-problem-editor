@@ -1,11 +1,11 @@
 <form name="stepForm">
-    <div layout="row" ng-repeat="step in item.steps">
+    <div layout="row" ng-repeat="step in item.steps" ng-if="$last">
         <div layout="column" flex layout-fill ng-cloak>
-            <h4 class="md-primary">Step #{{$index+1}}</h4>
+            <h4 class="md-primary">Step #{{1}}</h4>
             <div layout="row">
                 <md-input-container flex="70">
                     <label>Step text</label>
-                    <textarea required name="step" rows="1" ng-model="step.text" md-select-on-focus></textarea>
+                    <textarea required name="step" rows="1" ng-model="item.i18n[langId][step.text]" md-select-on-focus></textarea>
                     <div class="input-message hint" ng-if="!stepForm.step.$dirty">Write the step</div>
                     <div class="input-message error-msg" ng-messages="stepForm.step.$error">
                         <div ng-message="required">This is required.</div>
