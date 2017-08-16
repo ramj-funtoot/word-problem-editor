@@ -186,7 +186,7 @@
                 <div layout="row">
                     <md-input-container flex>
                         <label>Expressions </label>
-                        <textarea name="expressions" rows="1" ng-model="item.expressions" md-select-on-focus></textarea>
+                        <textarea name="expressions" rows="1" ng-model="item.i18n[langId][item.expressions]" md-select-on-focus></textarea>
                         <div class="input-message hint" ng-if="!questionForm.expressions.$dirty">Write expressions one line per expression</div>
                     </md-input-container>
                 </div>
