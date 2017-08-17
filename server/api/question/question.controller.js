@@ -697,7 +697,6 @@ exports.translate = function (req, res) {
       } else {
         var requestedLang = req.params.target_language;
         var transTextKeyArray = [];
-        var allTransRequests = [];
         var transTextArray = [];
 
         for (var key in question.i18n.en) {
