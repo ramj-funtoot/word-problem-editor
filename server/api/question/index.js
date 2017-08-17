@@ -12,5 +12,6 @@ router.post('/', controller.create);
 router.put('/:id/:env', controller.publish);
 router.patch('/:id', controller.update);
 router.delete('/:id', controller.destroy);
+router.get('/translate/:id/:target_language', controller.translate);
 
 module.exports = router;

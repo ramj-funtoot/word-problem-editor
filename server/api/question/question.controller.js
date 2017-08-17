@@ -8,12 +8,13 @@ var quesTemplate = require('./question.item.template.js');
 var fs = require('fs')
 var Promise = require('bluebird');
 var winston = require('winston');
+var Translate = require('@google-cloud/translate')();
 const util = require('util')
 
-var logger = new (winston.Logger)({
+var logger = new(winston.Logger)({
   transports: [
-    new (winston.transports.Console)(),
-    new (winston.transports.File)({
+    new(winston.transports.Console)(),
+    new(winston.transports.File)({
       filename: 'zcat.server.log'
     })
   ]
@@ -207,8 +208,8 @@ exports.index = function (req, res) {
   } else if (req.query.type && req.query.type == 'detail') {
     if (req.query.id) {
       Question.findOne({
-        'identifier': req.query.id
-      })
+          'identifier': req.query.id
+        })
         .lean()
         .exec(function (err, question) {
           if (err) {
@@ -238,9 +239,9 @@ exports.index = function (req, res) {
 // get list of questions based on query parameters
 exports.query = function (req, res) {
   Question.find({
-    active: true,
-    owner: req.params.owner
-  })
+      active: true,
+      owner: req.params.owner
+    })
     .sort({
       "updated.when": -1
     })
@@ -357,21 +358,21 @@ function uploadImageAndUpdateQuestion(data) {
                 Question.collection.updateOne({
                   'identifier': data.qId
                 }, {
-                    $set: imageAssetIdUpdatObject
-                  }, function (err, response) {
-                    if (err) {
-                      logger.error('Failed when updating image for question ' + data.qId + ' - assetId' + data.assetId)
-                      logger.error(err);
-                      resolve({});
-                    } else {
-                      logger.info('Successfully updated image for question ' + data.qId + ' - assetId' + data.assetId);
-                      resolve({
-                        id: data.assetId,
-                        src: respBody.result.content.downloadUrl,
-                        type: 'image'
-                      })
-                    }
-                  });
+                  $set: imageAssetIdUpdatObject
+                }, function (err, response) {
+                  if (err) {
+                    logger.error('Failed when updating image for question ' + data.qId + ' - assetId' + data.assetId)
+                    logger.error(err);
+                    resolve({});
+                  } else {
+                    logger.info('Successfully updated image for question ' + data.qId + ' - assetId' + data.assetId);
+                    resolve({
+                      id: data.assetId,
+                      src: respBody.result.content.downloadUrl,
+                      type: 'image'
+                    })
+                  }
+                });
               } else {
                 logger.error('readAsset failed with responseCod ' + readResp.statusCode)
                 logger.error('readAsset response ', readResp)
@@ -475,7 +476,9 @@ function publishQuestion(qIds, env, messages, res, code) {
     return;
   }
   var qid = qs[0];
-  Question.findOne({ 'identifier': qid }).lean().exec(function (err, question) {
+  Question.findOne({
+    'identifier': qid
+  }).lean().exec(function (err, question) {
     if (err) {
       messages[qid] = err;
       publishQuestion(qIds, env, messages, res);
@@ -519,60 +522,63 @@ function publishQuestion(qIds, env, messages, res, code) {
 
         //applying question type specific properties into item template
         switch (question.qtype) {
-          case "legacy-word-problem": {
-            item.type = 'ftb';
-            item.template_id = 'org.ekstep.plugins.funtoot.fibWordProblem';
-            item.template = 'org.ekstep.plugins.funtoot.fibWordProblem';
-            item.keywords = ['wordproblem'];
-            item.i18n = question.i18n;
-            item.model.steps = [question.steps[question.steps.length - 1]];
-            break;
-          }
-          case "mcq": {
-            item.type = 'mcq';
-            item.template_id = 'org.ekstep.plugins.funtoot.genericmcq';
-            item.template = 'org.ekstep.plugins.funtoot.genericmcq';
-            item.keywords = ['mcq'];
-            var mcqTemplate = quesTemplate.getMCQTemplate();
-            item = _.assign({}, item, mcqTemplate);
-            _.forEach(question.options, function (option, i) {
-              item.options.push(quesTemplate.mcqOptionTemplate());
-              item.options[i].value.asset = option.text;
+          case "legacy-word-problem":
+            {
+              item.type = 'ftb';
+              item.template_id = 'org.ekstep.plugins.funtoot.fibWordProblem';
+              item.template = 'org.ekstep.plugins.funtoot.fibWordProblem';
+              item.keywords = ['wordproblem'];
+              item.i18n = question.i18n;
+              item.model.steps = [question.steps[question.steps.length - 1]];
+              break;
+            }
+          case "mcq":
+            {
+              item.type = 'mcq';
+              item.template_id = 'org.ekstep.plugins.funtoot.genericmcq';
+              item.template = 'org.ekstep.plugins.funtoot.genericmcq';
+              item.keywords = ['mcq'];
+              var mcqTemplate = quesTemplate.getMCQTemplate();
+              item = _.assign({}, item, mcqTemplate);
+              _.forEach(question.options, function (option, i) {
+                item.options.push(quesTemplate.mcqOptionTemplate());
+                item.options[i].value.asset = option.text;
 
-              item.options[i].value.image = option.image.assetId;
-              item.options[i].value.count = null;
-              item.options[i].answer = option.answer;
-              item.options[i].mmc = option.mmc;
-              item.options[i].mh = option.mh;
-              item.options[i].value.type = (option.image && option.image.assetId) ? 'image' : 'text';
-              if (!option.text || option.text.length == 0) {
-                if (option.image.assetId) {
-                  item.options[i].value.asset = option.image.assetId;
-                  item.media.push({
-                    id: option.image.assetId,
-                    src: option.image.urls[env],
-                    type: 'image'
-                  });
+                item.options[i].value.image = option.image.assetId;
+                item.options[i].value.count = null;
+                item.options[i].answer = option.answer;
+                item.options[i].mmc = option.mmc;
+                item.options[i].mh = option.mh;
+                item.options[i].value.type = (option.image && option.image.assetId) ? 'image' : 'text';
+                if (!option.text || option.text.length == 0) {
+                  if (option.image.assetId) {
+                    item.options[i].value.asset = option.image.assetId;
+                    item.media.push({
+                      id: option.image.assetId,
+                      src: option.image.urls[env],
+                      type: 'image'
+                    });
+                  }
                 }
-              }
-            });
-            item.model.mcqType = question.mcqType;
-            item.i18n = question.i18n;
-            break;
-          }
-          case "freeResponse": {
-            item.i18n = question.i18n;
-            item.keywords = ['freeResponse'];
-            item.type = 'ftb';
-            item.template_id = 'org.ekstep.plugins.funtoot.genericfib';
-            item.template = 'org.ekstep.plugins.funtoot.genericfib';
-            item.model.fibs = [];
-            item.model.steps = [];
-            question.fibs.forEach(function (fib, i) {
-              item.model.fibs.push(fib);
-            });
-            break;
-          }
+              });
+              item.model.mcqType = question.mcqType;
+              item.i18n = question.i18n;
+              break;
+            }
+          case "freeResponse":
+            {
+              item.i18n = question.i18n;
+              item.keywords = ['freeResponse'];
+              item.type = 'ftb';
+              item.template_id = 'org.ekstep.plugins.funtoot.genericfib';
+              item.template = 'org.ekstep.plugins.funtoot.genericfib';
+              item.model.fibs = [];
+              item.model.steps = [];
+              question.fibs.forEach(function (fib, i) {
+                item.model.fibs.push(fib);
+              });
+              break;
+            }
         }
         var ekstep_env = env; // 'qa' or 'dev' or 'prod'
         var url = envData[ekstep_env].url; //"https://" + ekstep_env + ".ekstep.in/api/assessment/v3/items/create";
@@ -676,4 +682,46 @@ exports.publish = function (req, res) {
   var messages = {};
   var env = req.params.env;
   publishQuestion(qIds, env, messages, res);
+}
+
+exports.translate = function (req, res) {
+  Question.findOne({
+      'identifier': req.params.id
+    })
+    .lean()
+    .exec(function (err, question) {
+      if (err) {
+        res.status(500).json(err);
+      } else if (!question) {
+        res.status(404).send('Not Found');
+      } else {
+        var requestedLang = req.params.target_language;
+        var transTextKeyArray = [];
+        var allTransRequests = [];
+        var transTextArray = [];
+
+        for (var key in question.i18n.en) {
+          if (question.i18n.en.hasOwnProperty(key)) {
+            transTextKeyArray.push(key);
+            if (question.i18n.en[key]) {
+              transTextArray.push(question.i18n.en[key]);
+            } else {
+              transTextArray.push('');
+            }
+          }
+        }
+
+        Translate.translate(transTextArray, requestedLang, function (err, results) {
+          if (err) {
+            res.status(err.code).json(transTextArray);
+          } else {
+            var resObj = {};
+            _.each(transTextKeyArray, function (key, i) {
+              resObj[key] = results[i];
+            })
+            res.status(200).json(resObj);
+          }
+        })
+      }
+    });
 }
