@@ -11,10 +11,10 @@ var winston = require('winston');
 var Translate = require('@google-cloud/translate')();
 const util = require('util')
 
-var logger = new(winston.Logger)({
+var logger = new (winston.Logger)({
   transports: [
-    new(winston.transports.Console)(),
-    new(winston.transports.File)({
+    new (winston.transports.Console)(),
+    new (winston.transports.File)({
       filename: 'zcat.server.log'
     })
   ]
@@ -178,7 +178,7 @@ function uploadImageToContent(env, assetId, imageMimeType, callback) {
     } else {
       callback(response);
     }
-    return; //currently no need to delete the images as they were useful for debugging
+    //return; //currently no need to delete the images as they were useful for debugging
     fs.unlink('./' + assetId + '.' + imageMimeType, function (err) {
       if (err) {
         return console.log(err);
@@ -208,8 +208,8 @@ exports.index = function (req, res) {
   } else if (req.query.type && req.query.type == 'detail') {
     if (req.query.id) {
       Question.findOne({
-          'identifier': req.query.id
-        })
+        'identifier': req.query.id
+      })
         .lean()
         .exec(function (err, question) {
           if (err) {
@@ -239,9 +239,9 @@ exports.index = function (req, res) {
 // get list of questions based on query parameters
 exports.query = function (req, res) {
   Question.find({
-      active: true,
-      owner: req.params.owner
-    })
+    active: true,
+    owner: req.params.owner
+  })
     .sort({
       "updated.when": -1
     })
@@ -358,21 +358,21 @@ function uploadImageAndUpdateQuestion(data) {
                 Question.collection.updateOne({
                   'identifier': data.qId
                 }, {
-                  $set: imageAssetIdUpdatObject
-                }, function (err, response) {
-                  if (err) {
-                    logger.error('Failed when updating image for question ' + data.qId + ' - assetId' + data.assetId)
-                    logger.error(err);
-                    resolve({});
-                  } else {
-                    logger.info('Successfully updated image for question ' + data.qId + ' - assetId' + data.assetId);
-                    resolve({
-                      id: data.assetId,
-                      src: respBody.result.content.downloadUrl,
-                      type: 'image'
-                    })
-                  }
-                });
+                    $set: imageAssetIdUpdatObject
+                  }, function (err, response) {
+                    if (err) {
+                      logger.error('Failed when updating image for question ' + data.qId + ' - assetId' + data.assetId)
+                      logger.error(err);
+                      resolve({});
+                    } else {
+                      logger.info('Successfully updated image for question ' + data.qId + ' - assetId' + data.assetId);
+                      resolve({
+                        id: data.assetId,
+                        src: respBody.result.content.downloadUrl,
+                        type: 'image'
+                      })
+                    }
+                  });
               } else {
                 logger.error('readAsset failed with responseCod ' + readResp.statusCode)
                 logger.error('readAsset response ', readResp)
@@ -686,8 +686,8 @@ exports.publish = function (req, res) {
 
 exports.translate = function (req, res) {
   Question.findOne({
-      'identifier': req.params.id
-    })
+    'identifier': req.params.id
+  })
     .lean()
     .exec(function (err, question) {
       if (err) {
