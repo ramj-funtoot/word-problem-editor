@@ -18,9 +18,21 @@ angular.module('wpappApp')
       levels: [1, 2, 3, 4, 5, 6],
       sub_levels: [1, 2, 3, 4, 5, 6],
       mcqType: [1, 2, 3, 4, 5, 6, 7, 8],
-      locales: [
-        { id: 'en', name: 'English' },
-        { id: 'mr', name: 'Marathi' }
+      locales: [{
+          id: 'en',
+          name: 'English'
+        }, {
+          id: 'ka',
+          name: 'Kannada'
+        },
+        {
+          id: 'hi',
+          name: 'Hindi'
+        },
+        {
+          id: 'ta',
+          name: 'Tamil'
+        }
       ],
       validate: function () {
         return true;
@@ -46,10 +58,26 @@ angular.module('wpappApp')
       }
     }
 
+    $scope.langChange = function ($event) {
+      console.log($scope.langId);
+      if ($scope.item.i18n.hasOwnProperty($scope.langId)) {
+        console.log('language exists i18n');
+      } else {
+        $http.get('/api/questions/translate/' + $scope.item.identifier + '/' + $scope.langId).then(function (response) {
+          console.log(response.data);
+          $scope.item.i18n[$scope.langId] = response.data;
+        }).catch(function (error) {
+          $scope.message = "No items to show!";
+          console.log(error);
+        });
+      }
+    }
+
     $scope.images = {
       qImage: null,
       optionImages: []
     }
+
 
     $scope.$watch(function () {
       return $scope.images.qImage;
@@ -158,7 +186,7 @@ angular.module('wpappApp')
           item.i18n["en"]["OPT_" + r] = str;
           delete item.i18n["en"]["OPT_" + i]
         }
-      }, function () { });
+      }, function () {});
     }
 
 
