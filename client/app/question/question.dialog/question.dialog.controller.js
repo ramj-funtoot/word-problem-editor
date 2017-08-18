@@ -21,17 +21,10 @@ angular.module('wpappApp')
       locales: [{
           id: 'en',
           name: 'English'
-        }, {
-          id: 'ka',
-          name: 'Kannada'
         },
         {
-          id: 'hi',
-          name: 'Hindi'
-        },
-        {
-          id: 'ta',
-          name: 'Tamil'
+          id: 'mr',
+          name: 'Marathi'
         }
       ],
       validate: function () {
