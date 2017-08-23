@@ -622,8 +622,8 @@ function publishQuestion(qIds, env, messages, res, code) {
                       message: 'Published',
                       statusCode: response.statusCode
                     };
-                    if (env == 'prod')
-                      updateItemStatus(question._id, 'Published');
+                    /* if (env == 'prod')
+                      updateItemStatus(question._id, 'Published'); */
                     publishQuestion(qIds, env, messages, res, response.statusCode);
                   } else {
                     messages[qid] = {
