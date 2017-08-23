@@ -12,20 +12,20 @@ angular.module('wpappApp')
       grades: [1, 2, 3, 4, 5],
       btlos: ['Remember', 'Understand', 'Apply', 'Analyze', 'Evaluate', 'Create'],
       diffLevels: [1, 2, 3, 4, 5],
-      states: ['Draft', 'In-Review', 'Reviewed', 'Ready For Publish', 'Published', 'Rejected'],
+      states: ['Draft', 'In-Review', 'Reviewed', 'Ready For Publish', 'Published', 'Rejected', 'Verified'],
       es_diffLevels: ['EASY', 'MEDIUM', 'HARD', 'RARE'],
       attempts: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
       levels: [1, 2, 3, 4, 5, 6],
       sub_levels: [1, 2, 3, 4, 5, 6],
       mcqType: [1, 2, 3, 4, 5, 6, 7, 8],
       locales: [{
-          id: 'en',
-          name: 'English'
-        },
-        {
-          id: 'mr',
-          name: 'Marathi'
-        }
+        id: 'en',
+        name: 'English'
+      },
+      {
+        id: 'mr',
+        name: 'Marathi'
+      }
       ],
       validate: function () {
         return true;
@@ -179,7 +179,7 @@ angular.module('wpappApp')
           item.i18n["en"]["OPT_" + r] = str;
           delete item.i18n["en"]["OPT_" + i]
         }
-      }, function () {});
+      }, function () { });
     }
 
 

@@ -11,10 +11,10 @@ var winston = require('winston');
 var Translate = require('@google-cloud/translate')();
 const util = require('util')
 
-var logger = new(winston.Logger)({
+var logger = new (winston.Logger)({
   transports: [
-    new(winston.transports.Console)(),
-    new(winston.transports.File)({
+    new (winston.transports.Console)(),
+    new (winston.transports.File)({
       filename: 'zcat.server.log'
     })
   ]
@@ -208,8 +208,8 @@ exports.index = function (req, res) {
   } else if (req.query.type && req.query.type == 'detail') {
     if (req.query.id) {
       Question.findOne({
-          'identifier': req.query.id
-        })
+        'identifier': req.query.id
+      })
         .lean()
         .exec(function (err, question) {
           if (err) {
@@ -239,9 +239,9 @@ exports.index = function (req, res) {
 // get list of questions based on query parameters
 exports.query = function (req, res) {
   Question.find({
-      active: true,
-      owner: req.params.owner
-    })
+    active: true,
+    owner: req.params.owner
+  })
     .sort({
       "updated.when": -1
     })
@@ -358,21 +358,21 @@ function uploadImageAndUpdateQuestion(data) {
                 Question.collection.updateOne({
                   'identifier': data.qId
                 }, {
-                  $set: imageAssetIdUpdatObject
-                }, function (err, response) {
-                  if (err) {
-                    logger.error('Failed when updating image for question ' + data.qId + ' - assetId' + data.assetId)
-                    logger.error(err);
-                    resolve({});
-                  } else {
-                    logger.info('Successfully updated image for question ' + data.qId + ' - assetId' + data.assetId);
-                    resolve({
-                      id: data.assetId,
-                      src: respBody.result.content.downloadUrl,
-                      type: 'image'
-                    })
-                  }
-                });
+                    $set: imageAssetIdUpdatObject
+                  }, function (err, response) {
+                    if (err) {
+                      logger.error('Failed when updating image for question ' + data.qId + ' - assetId' + data.assetId)
+                      logger.error(err);
+                      resolve({});
+                    } else {
+                      logger.info('Successfully updated image for question ' + data.qId + ' - assetId' + data.assetId);
+                      resolve({
+                        id: data.assetId,
+                        src: respBody.result.content.downloadUrl,
+                        type: 'image'
+                      })
+                    }
+                  });
               } else {
                 logger.error('readAsset failed with responseCod ' + readResp.statusCode)
                 logger.error('readAsset response ', readResp)
@@ -466,12 +466,9 @@ function uploadImages(question, env, callback) {
 }
 
 function publishQuestion(qIds, env, messages, res, code) {
-  if (code && code != 200) {
-    res.status(code).json(messages);
-    return;
-  }
   var qs = qIds.splice(0, 1);
   if (qs.length == 0) {
+    if (!code) code = 404;
     res.status(code).json(messages);
     return;
   }
@@ -480,9 +477,11 @@ function publishQuestion(qIds, env, messages, res, code) {
     'identifier': qid
   }).lean().exec(function (err, question) {
     if (err) {
+      console.log(err);
       messages[qid] = err;
       publishQuestion(qIds, env, messages, res);
     } else if (!question) {
+      console.log(qid + ' not found');
       messages[qid] = 'Not Found';
       publishQuestion(qIds, env, messages, res);
     } else {
@@ -498,6 +497,7 @@ function publishQuestion(qIds, env, messages, res, code) {
         item.level = question.level;
         item.sublevel = question.subLevel;
         item.bloomsTaxonomyLevel = question.btlo;
+        item.state = question.state;
         item.model.hintMsg = question.hintText;
         item.concepts.identifier = question.conceptCode;
         item.qtype = question.qtype;
@@ -681,13 +681,13 @@ exports.publish = function (req, res) {
   var qIds = req.body;
   var messages = {};
   var env = req.params.env;
-  publishQuestion(qIds, env, messages, res);
+  publishQuestion(qIds, env, messages, res, 200);
 }
 
 exports.translate = function (req, res) {
   Question.findOne({
-      'identifier': req.params.id
-    })
+    'identifier': req.params.id
+  })
     .lean()
     .exec(function (err, question) {
       if (err) {
