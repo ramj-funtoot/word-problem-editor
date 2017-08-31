@@ -13,6 +13,11 @@ angular.module('wpappApp')
     });
 
 
+    _.each($scope.item.options, function (o) {
+      if (o.mmc === null && o.answer == false)
+        o.mmc = [];
+    });
+
     $scope.meta = {
       grades: [1, 2, 3, 4, 5],
       btlos: ['Remember', 'Understand', 'Apply', 'Analyze', 'Evaluate', 'Create'],
@@ -24,13 +29,13 @@ angular.module('wpappApp')
       sub_levels: [1, 2, 3, 4, 5, 6],
       mcqType: [1, 2, 3, 4, 5, 6, 7, 8],
       locales: [{
-        id: 'en',
-        name: 'English'
-      },
-      {
-        id: 'mr',
-        name: 'Marathi'
-      }
+          id: 'en',
+          name: 'English'
+        },
+        {
+          id: 'mr',
+          name: 'Marathi'
+        }
       ],
       validate: function () {
         return true;
@@ -156,7 +161,7 @@ angular.module('wpappApp')
         .multiple(true);
       $mdDialog.show(confirm).then(function () {
         //Remove particular option
-        console.log("following was option removed :", $scope.item.options[index])
+        console.log("following option was removed :", $scope.item.options[index])
         $scope.item.options.splice(index, 1);
         //Update remaining options
         $scope.item.options.forEach(function (o) {
@@ -184,7 +189,7 @@ angular.module('wpappApp')
           item.i18n["en"]["OPT_" + r] = str;
           delete item.i18n["en"]["OPT_" + i]
         }
-      }, function () { });
+      }, function () {});
     }
 
 
