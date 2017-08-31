@@ -81,6 +81,9 @@ angular.module('wpappApp')
       optionImages: []
     }
 
+    $scope.deleteQimage = function () {
+      $scope.item.questionImage = [];
+    }
 
     $scope.$watch(function () {
       return $scope.images.qImage;

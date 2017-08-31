@@ -140,7 +140,12 @@
                             <img ng-src="{{item.questionImage[0].base64 || 'http://placehold.it/300x200'}}" />
                         </label>
           </div>
-          <md-input-container class="md-block" flex="70">
+          <md-input-container class="md-block" flex="10">
+            <md-button ng-click="deleteQimage()">
+              <md-icon md-svg-src="action:delete" aria-label="Delete Option"></md-icon>
+            </md-button>
+          </md-input-container>
+          <md-input-container class="md-block" flex="60">
             <label>Question Stem</label>
             <textarea required name="questionStem" rows="3" ng-model="item.i18n[langId][item.questionText]" md-select-on-focus></textarea>
             <div class="input-message hint" ng-if="!questionForm.questionStem.$dirty">Write the question stem</div>
