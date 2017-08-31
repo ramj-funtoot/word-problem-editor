@@ -498,6 +498,7 @@ function publishQuestion(qIds, env, messages, res, code) {
         item.sublevel = question.subLevel;
         item.bloomsTaxonomyLevel = question.btlo;
         item.state = question.state;
+        item.status = question.state == 'Verified' ? 'Live' : 'Draft';
         item.model.hintMsg = question.hintText;
         item.concepts.identifier = question.conceptCode;
         item.qtype = question.qtype;

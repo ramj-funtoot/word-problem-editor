@@ -7,6 +7,11 @@ angular.module('wpappApp')
     $scope.langId = 'en';
     var langId = $scope.langId;
     $scope.users = users;
+    _.each($scope.item.options, function (o) {
+      if (o.mmc === null && o.answer == false)
+        o.mmc = [];
+    });
+
 
     $scope.meta = {
       grades: [1, 2, 3, 4, 5],
