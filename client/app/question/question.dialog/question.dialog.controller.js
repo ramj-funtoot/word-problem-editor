@@ -81,10 +81,6 @@ angular.module('wpappApp')
       optionImages: []
     }
 
-    $scope.deleteQimage = function () {
-      $scope.item.questionImage = [];
-    }
-
     $scope.$watch(function () {
       return $scope.images.qImage;
     }, function (n, o) {
@@ -153,18 +149,45 @@ angular.module('wpappApp')
       });
     }
 
+    $scope.deleteQimage = function ($event) {
+      var confirm = $mdDialog.confirm()
+        .title('Sure?')
+        .textContent('Are you sure you want to delete the question image?')
+        .ariaLabel('Delete Image')
+        .targetEvent($event)
+        .ok('No')
+        .cancel('Yes')
+        .multiple(true);
+      $mdDialog.show(confirm).then(function () {}, function () {
+        $scope.item.questionImage[0].isValid = false;
+      });
+    };
+
+    $scope.deleteOptionImage = function ($event, index) {
+      var confirm = $mdDialog.confirm()
+        .title('Sure?')
+        .textContent('Are you sure you want to delete this option image?')
+        .ariaLabel('Delete Image')
+        .targetEvent($event)
+        .ok('No')
+        .cancel('Yes')
+        .multiple(true);
+      $mdDialog.show(confirm).then(function () {}, function () {
+        $scope.item.options[index].image.isValid = false;
+      });
+    };
+
     $scope.deleteOption = function ($event, index) {
       var confirm = $mdDialog.confirm()
         .title('Confirm Delete Option')
         .textContent('Are you sure you want to delete this option?')
-        .ariaLabel('Delete option')
+        .ariaLabel('Delete Option')
         .targetEvent($event)
         .ok('Yes')
         .cancel('No')
         .multiple(true);
       $mdDialog.show(confirm).then(function () {
         //Remove particular option
-        console.log("following option was removed :", $scope.item.options[index])
         $scope.item.options.splice(index, 1);
         //Update remaining options
         $scope.item.options.forEach(function (o) {

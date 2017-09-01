@@ -1,61 +1,64 @@
 <div ng-controller="MCQOptionsCtrl">
-    <form name="optionForm">
-        <div layout="row" ng-repeat="option in item.options">
-            <div layout="column" flex layout-fill ng-cloak>
-                <h4 class="md-primary">Option #{{$index+1}}</h4>
-                <div layout="row">
-                    <div class="md-block option-image-container" flex="30">
-                        <input id="optimg{{$index+1}}" type="file" ng-model="images.optionImages[$index]" name="optionImage" base-sixty-four-input
-                            required onload="onLoad" maxsize="500" accept="image/*" class="option-image-input">
-                        <label for="optimg{{$index+1}}">
-                        <img ng-src="{{option.image.base64|| 'http://placehold.it/300x200'}}" />
-                    </label>
-                    </div>
-                    <md-input-container class="md-block" flex="70">
-                        <div layout="row">
-                            <md-input-container class="md-block" flex="70">
-                                <label>Option text</label>
-                                <textarea required name="option" ng-model="item.i18n[langId][option.text]" md-select-on-focus></textarea>
-                                <div class="input-message hint" ng-if="!optionForm.option.$dirty">Write the option</div>
-                            </md-input-container>
-                            <md-input-container class="md-block" flex="30">
-                                <md-checkbox name="answer" class="" ng-model="option.answer">Answer</md-checkbox>
-                            </md-input-container>
-                            <md-input-container class="md-block" flex="10">
-                                <md-button ng-click="deleteOption($event, $index)">
-                                    <md-icon md-svg-src="action:delete" aria-label="Delete Option"></md-icon>
-                                </md-button>
-                            </md-input-container>
-                        </div>
-                        <div layout="row">
-                            <md-input-container class="md-block" flex="50">
-                                <label>Micro Hint</label>
-                                <input name="optmh" ng-disabled="option.answer" ng-model="item.i18n[langId][option.mh]" style="color:inherit;">
-                                <div class="input-message hint" ng-if="!optionForm.optmh.$dirty">Write the Micro hint</div>
-                            </md-input-container>
-                            <md-input-container class="md-block" flex="50">
-                                <label>MMC</label>
-                                <md-chips name="optmmc" ng-model="option.mmc" readonly="option.answer" md-separator-keys="keys" placeholder="Enter a MMC"></md-chips>
-                            </md-input-container>
-                        </div>
-                    </md-input-container>
-                </div>
-            </div>
-        </div>
+  <form name="optionForm">
+    <div layout="row" ng-repeat="option in item.options">
+      <div layout="column" flex layout-fill ng-cloak>
+        <h4 class="md-primary">Option #{{$index+1}}</h4>
         <div layout="row">
-            <md-input-container flex="30">
-                <label>Select MCQ Type</label>
-                <md-select name="mcq_t" ng-model="item.mcqType" required>
-                    <md-option ng-value="mcq_t" ng-repeat="mcq_t in meta.mcqType">{{mcq_t}}</md-option>
-                </md-select>
-                <div class="input-message hint" ng-if="!optionForm.mcq_t.$dirty">Mcq Type</div>
-                <div class="input-message error-msg" ng-messages="optionForm.mcq_t.$error">
-                    <div ng-message="required">This is required.</div>
-                </div>
-            </md-input-container>
-            <md-input-container flex="30">
-                <md-button ng-click="addNewOption($event, $index)">Add Option</md-button>
-            </md-input-container>
+          <div class="md-block option-image-container wrap" flex="30">
+            <input id="optimg{{$index+1}}" type="file" ng-model="images.optionImages[$index]" name="optionImage" base-sixty-four-input
+              required onload="onLoad" maxsize="500" accept="image/*" class="option-image-input">
+            <label for="optimg{{$index+1}}">
+              <img ng-src="{{option.image.isValid ? option.image.base64 : 'http://placehold.it/300x200'}}" />
+            </label>
+            <span class="qbutton" flex="10" ng-show="option.image.isValid" ng-click="deleteOptionImage($event, $index)">
+                <md-icon md-svg-src="action:delete " aria-label="Delete Option Image"></md-icon>
+            </span>
+          </div>
+          <md-input-container class="md-block" flex="60">
+            <div layout="row">
+              <md-input-container class="md-block" flex="60">
+                <label>Option text</label>
+                <textarea required name="option" ng-model="item.i18n[langId][option.text]" md-select-on-focus></textarea>
+                <div class="input-message hint" ng-if="!optionForm.option.$dirty">Write the option</div>
+              </md-input-container>
+              <md-input-container class="md-block" flex="30">
+                <md-checkbox name="answer" class="" ng-model="option.answer">Answer</md-checkbox>
+              </md-input-container>
+              <md-input-container class="md-block" flex="10">
+                <md-button ng-click="deleteOption($event, $index)">
+                  <md-icon md-svg-src="action:delete" aria-label="Delete Option"></md-icon>
+                </md-button>
+              </md-input-container>
+            </div>
+            <div layout="row">
+              <md-input-container class="md-block" flex="50">
+                <label>Micro Hint</label>
+                <input name="optmh" ng-disabled="option.answer" ng-model="item.i18n[langId][option.mh]" style="color:inherit;">
+                <div class="input-message hint" ng-if="!optionForm.optmh.$dirty">Write the Micro hint</div>
+              </md-input-container>
+              <md-input-container class="md-block" flex="50">
+                <label>MMC</label>
+                <md-chips name="optmmc" ng-model="option.mmc" readonly="option.answer" md-separator-keys="keys" placeholder="Enter a MMC"></md-chips>
+              </md-input-container>
+            </div>
+          </md-input-container>
         </div>
-    </form>
+      </div>
+    </div>
+    <div layout="row">
+      <md-input-container flex="30">
+        <label>Select MCQ Type</label>
+        <md-select name="mcq_t" ng-model="item.mcqType" required>
+          <md-option ng-value="mcq_t" ng-repeat="mcq_t in meta.mcqType">{{mcq_t}}</md-option>
+        </md-select>
+        <div class="input-message hint" ng-if="!optionForm.mcq_t.$dirty">Mcq Type</div>
+        <div class="input-message error-msg" ng-messages="optionForm.mcq_t.$error">
+          <div ng-message="required">This is required.</div>
+        </div>
+      </md-input-container>
+      <md-input-container flex="30">
+        <md-button ng-click="addNewOption($event, $index)">Add Option</md-button>
+      </md-input-container>
+    </div>
+  </form>
 </div>

@@ -133,24 +133,23 @@
                 </div> -->
 
         <div layout="row">
-          <div class="md-block question-image-container" flex="30">
+          <div class="md-block question-image-container wrap" flex="30">
             <input id="qimg" type="file" ng-model="images.qImage" name="questionImage" base-sixty-four-input required maxsize="500" accept="image/*"
               class="question-image-input">
             <label for="qimg">
-                            <img ng-src="{{item.questionImage[0].base64 || 'http://placehold.it/300x200'}}" />
-                        </label>
+              <img ng-src=" {{item.questionImage[0].isValid ? item.questionImage[0].base64 : 'http://placehold.it/300x200'}} " />
+            </label>
+            <span class="qbutton" flex="10" ng-show="item.questionImage[0].isValid" ng-click="deleteQimage($event) ">
+                <md-icon md-svg-src="action:delete " aria-label="Delete Option Image"></md-icon>
+            </span>
           </div>
-          <md-input-container class="md-block" flex="10">
-            <md-button ng-click="deleteQimage()">
-              <md-icon md-svg-src="action:delete" aria-label="Delete Option"></md-icon>
-            </md-button>
-          </md-input-container>
-          <md-input-container class="md-block" flex="60">
+          <span flex="5"></span>
+          <md-input-container class="md-block " flex="60 ">
             <label>Question Stem</label>
-            <textarea required name="questionStem" rows="3" ng-model="item.i18n[langId][item.questionText]" md-select-on-focus></textarea>
-            <div class="input-message hint" ng-if="!questionForm.questionStem.$dirty">Write the question stem</div>
-            <div class="input-message error-msg" ng-messages="questionForm.questionStem.$error">
-              <div ng-message="required">This is required.</div>
+            <textarea required name="questionStem " rows="3 " ng-model="item.i18n[langId][item.questionText] " md-select-on-focus></textarea>
+            <div class="input-message hint " ng-if="!questionForm.questionStem.$dirty ">Write the question stem</div>
+            <div class="input-message error-msg " ng-messages="questionForm.questionStem.$error ">
+              <div ng-message="required ">This is required.</div>
             </div>
           </md-input-container>
         </div>
@@ -158,61 +157,61 @@
         <br />
         <md-divider></md-divider>
         <!-- -->
-        <div id="steps" ng-if="item.qtype=='legacy-word-problem'">
-          <div ng-include src="'app/question/question.dialog/wp.dialog.steps.html'"></div>
+        <div id="steps " ng-if="item.qtype=='legacy-word-problem' ">
+          <div ng-include src=" 'app/question/question.dialog/wp.dialog.steps.html' "></div>
         </div>
-        <div id="steps" ng-if="item.qtype=='mcq'">
-          <div ng-include src="'app/question/question.dialog/mcq.dialog.options.html'"></div>
+        <div id="steps " ng-if="item.qtype=='mcq' ">
+          <div ng-include src=" 'app/question/question.dialog/mcq.dialog.options.html' "></div>
         </div>
-        <div id="steps" ng-if="item.qtype=='freeResponse'">
-          <div ng-include src="'app/question/question.dialog/freeResponse.dialog.options.html'"></div>
+        <div id="steps " ng-if="item.qtype=='freeResponse' ">
+          <div ng-include src=" 'app/question/question.dialog/freeResponse.dialog.options.html' "></div>
         </div>
         <md-divider></md-divider>
-        <!-- <div layout="row" ng-if="item.qtype=='legacy-word-problem'">
+        <!-- <div layout="row " ng-if="item.qtype=='legacy-word-problem' ">
                     <md-input-container flex>
                         <label>Hint </label>
-                        <textarea required name="hint" rows="1" ng-model="item.hintText" md-select-on-focus></textarea>
-                        <div class="input-message hint" ng-if="!questionForm.hint.$dirty">Write the hint</div>
-                        <div class="input-message error-msg" ng-messages="questionForm.hint.$error">
-                            <div ng-message="required">This is required.</div>
+                        <textarea required name="hint " rows="1 " ng-model="item.hintText " md-select-on-focus></textarea>
+                        <div class="input-message hint " ng-if="!questionForm.hint.$dirty ">Write the hint</div>
+                        <div class="input-message error-msg " ng-messages="questionForm.hint.$error ">
+                            <div ng-message="required ">This is required.</div>
                         </div>
                     </md-input-container>
                 </div> -->
-        <div layout="row">
+        <div layout="row ">
           <md-input-container flex>
             <label>Hint </label>
-            <textarea required name="hint" rows="1" ng-model="item.i18n[langId][item.hintText]" md-select-on-focus></textarea>
-            <div class="input-message hint" ng-if="!questionForm.hint.$dirty">Write the hint</div>
-            <div class="input-message error-msg" ng-messages="questionForm.hint.$error">
-              <div ng-message="required">This is required.</div>
+            <textarea required name="hint " rows="1 " ng-model="item.i18n[langId][item.hintText] " md-select-on-focus></textarea>
+            <div class="input-message hint " ng-if="!questionForm.hint.$dirty ">Write the hint</div>
+            <div class="input-message error-msg " ng-messages="questionForm.hint.$error ">
+              <div ng-message="required ">This is required.</div>
             </div>
           </md-input-container>
         </div>
-        <div layout="row">
+        <div layout="row ">
           <md-input-container flex>
             <label>Expressions </label>
-            <textarea name="expressions" rows="1" ng-model="item.i18n[langId][item.expressions]" md-select-on-focus></textarea>
-            <div class="input-message hint" ng-if="!questionForm.expressions.$dirty">Write expressions one line per expression</div>
+            <textarea name="expressions " rows="1 " ng-model="item.i18n[langId][item.expressions] " md-select-on-focus></textarea>
+            <div class="input-message hint " ng-if="!questionForm.expressions.$dirty ">Write expressions one line per expression</div>
           </md-input-container>
         </div>
         <hr />
         <h2>Comments</h2>
-        <div layout="row">
+        <div layout="row ">
           <md-input-container flex>
             <label>Add your comments </label>
-            <textarea name="comment" rows="1" ng-model="userComment" md-select-on-focus></textarea>
-            <md-button ng-click="addComment()" class="md-primary">Add Comment</md-button>
+            <textarea name="comment " rows="1 " ng-model="userComment " md-select-on-focus></textarea>
+            <md-button ng-click="addComment() " class="md-primary ">Add Comment</md-button>
           </md-input-container>
         </div>
-        <div layout="column" class="comment-block" ng-repeat="comment in item.comments" flex>
-          <div class="md-block comment-user-info">{{comment.commentedBy}} commented {{getDisplayableTime(comment.created)}}</div>
-          <div class="md-block comment-text">{{comment.comment}}</div>
+        <div layout="column " class="comment-block " ng-repeat="comment in item.comments " flex>
+          <div class="md-block comment-user-info ">{{comment.commentedBy}} commented {{getDisplayableTime(comment.created)}}</div>
+          <div class="md-block comment-text ">{{comment.comment}}</div>
         </div>
       </form>
     </div>
   </md-dialog-content>
   <md-dialog-actions>
-    <md-button ng-click="closeDialog()" class="md-primary">Cancel</md-button>
-    <md-button ng-click="saveQuestion($event)" class="md-primary">Save</md-button>
+    <md-button ng-click="closeDialog() " class="md-primary ">Cancel</md-button>
+    <md-button ng-click="saveQuestion($event) " class="md-primary ">Save</md-button>
   </md-dialog-actions>
 </md-dialog>
