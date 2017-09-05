@@ -11,10 +11,10 @@ var winston = require('winston');
 var Translate = require('@google-cloud/translate')();
 const util = require('util')
 
-var logger = new (winston.Logger)({
+var logger = new(winston.Logger)({
   transports: [
-    new (winston.transports.Console)(),
-    new (winston.transports.File)({
+    new(winston.transports.Console)(),
+    new(winston.transports.File)({
       filename: 'zcat.server.log'
     })
   ]
@@ -208,8 +208,8 @@ exports.index = function (req, res) {
   } else if (req.query.type && req.query.type == 'detail') {
     if (req.query.id) {
       Question.findOne({
-        'identifier': req.query.id
-      })
+          'identifier': req.query.id
+        })
         .lean()
         .exec(function (err, question) {
           if (err) {
@@ -239,9 +239,9 @@ exports.index = function (req, res) {
 // get list of questions based on query parameters
 exports.query = function (req, res) {
   Question.find({
-    active: true,
-    owner: req.params.owner
-  })
+      active: true,
+      owner: req.params.owner
+    })
     .sort({
       "updated.when": -1
     })
@@ -358,21 +358,21 @@ function uploadImageAndUpdateQuestion(data) {
                 Question.collection.updateOne({
                   'identifier': data.qId
                 }, {
-                    $set: imageAssetIdUpdatObject
-                  }, function (err, response) {
-                    if (err) {
-                      logger.error('Failed when updating image for question ' + data.qId + ' - assetId' + data.assetId)
-                      logger.error(err);
-                      resolve({});
-                    } else {
-                      logger.info('Successfully updated image for question ' + data.qId + ' - assetId' + data.assetId);
-                      resolve({
-                        id: data.assetId,
-                        src: respBody.result.content.downloadUrl,
-                        type: 'image'
-                      })
-                    }
-                  });
+                  $set: imageAssetIdUpdatObject
+                }, function (err, response) {
+                  if (err) {
+                    logger.error('Failed when updating image for question ' + data.qId + ' - assetId' + data.assetId)
+                    logger.error(err);
+                    resolve({});
+                  } else {
+                    logger.info('Successfully updated image for question ' + data.qId + ' - assetId' + data.assetId);
+                    resolve({
+                      id: data.assetId,
+                      src: respBody.result.content.downloadUrl,
+                      type: 'image'
+                    })
+                  }
+                });
               } else {
                 logger.error('readAsset failed with responseCod ' + readResp.statusCode)
                 logger.error('readAsset response ', readResp)
@@ -421,7 +421,6 @@ function uploadImage(imgObj, env, assetId, qId, imageType, imageIndex) {
 }
 
 function uploadImages(question, env, callback) {
-  //env = 'prod';
   var imgUploadPromises = [];
   if (question.questionImage.length > 0 && (!question.questionImage[0].assetId || (question.questionImage[0].assetId && !question.questionImage[0].urls[env]))) {
     var assetId = 'org.ekstep.funtoot.' + question.identifier + '.image' + Math.random().toString().replace('0', '')
@@ -438,7 +437,6 @@ function uploadImages(question, env, callback) {
     });
   }
   if (imgUploadPromises.length > 0) {
-    // wait for all the images to get uploaded
     Promise.all(imgUploadPromises).then(function (results) {
       logger.info(question.identifier, 'All images uploaded successfully ');
       logger.info(results);
@@ -492,8 +490,14 @@ function publishQuestion(qIds, env, messages, res, code) {
         item.media = [];
         item.question = question.questionText;
         item.identifier = item.qid = item.code = item.name = question.identifier;
-        item.grade = question.grade;
-        item.gradeLevel = ["Grade " + question.grade];
+
+        _.forEach(question.grade, function (grade, index) {
+          //ekstep accepting grade value [ "1", "4"], if it is number array like [1,4] 400 type error returns
+          item.grade.push(grade.toString());
+          //adding each grade to gradeLevel
+          item.gradeLevel.push("Grade " + grade);
+        })
+
         item.level = question.level;
         item.sublevel = question.subLevel;
         item.bloomsTaxonomyLevel = question.btlo;
@@ -609,7 +613,6 @@ function publishQuestion(qIds, env, messages, res, code) {
           }
         };
         var client = new restclient();
-
         client.post(url + 'create/', args, function (data, response) {
           if (response.statusCode == 200 || response.statusCode == 400) {
             if (data.params && data.params.errmsg) {
@@ -687,8 +690,8 @@ exports.publish = function (req, res) {
 
 exports.translate = function (req, res) {
   Question.findOne({
-    'identifier': req.params.id
-  })
+      'identifier': req.params.id
+    })
     .lean()
     .exec(function (err, question) {
       if (err) {

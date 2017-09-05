@@ -82,16 +82,17 @@ var workSheetSchema = new Schema({
   _id: String,
   name: String
 });
+
 var QuestionSchema = new Schema({
   identifier: {
     type: String,
     unique: true
   },
-  grade: {
+  grade: [{
     type: Number,
     min: 1,
     max: 5
-  },
+  }],
   level: Number,
   subLevel: Number,
   btlo: {
