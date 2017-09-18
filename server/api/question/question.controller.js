@@ -422,7 +422,7 @@ function uploadImage(imgObj, env, assetId, qId, imageType, imageIndex) {
 
 function uploadImages(question, env, callback) {
   var imgUploadPromises = [];
-  if (question.questionImage.length > 0 && (!question.questionImage[0].assetId || (question.questionImage[0].assetId && !question.questionImage[0].urls[env]))) {
+  if (question.questionImage.length > 0 && question.questionImage[0].isValid && (!question.questionImage[0].assetId || (question.questionImage[0].assetId && !question.questionImage[0].urls[env]))) {
     var assetId = 'org.ekstep.funtoot.' + question.identifier + '.image' + Math.random().toString().replace('0', '')
     imgUploadPromises.push(uploadImage(question.questionImage[0], env, assetId, question.identifier, 'questionImage', 0));
   }
@@ -430,7 +430,7 @@ function uploadImages(question, env, callback) {
   if (question.qtype == 'mcq') {
     question.options.forEach(function (option, i) {
       //check if the option is having image property with out null
-      if (option.image && (!option.image.assetId || option.image.assetId.length == 0 || (option.image.assetId && option.image.assetId.length > 0 && !option.image.urls[env]))) {
+      if (option.image && option.image.isValid && (!option.image.assetId || option.image.assetId.length == 0 || (option.image.assetId && option.image.assetId.length > 0 && !option.image.urls[env]))) {
         var opAssetId = 'org.ekstep.funtoot.' + question.identifier + '.image' + Math.random().toString().replace('0', '');
         imgUploadPromises.push(uploadImage(option.image, env, opAssetId, question.identifier, 'option', i));
       }

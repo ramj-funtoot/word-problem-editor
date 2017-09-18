@@ -160,6 +160,8 @@ angular.module('wpappApp')
         .multiple(true);
       $mdDialog.show(confirm).then(function () {}, function () {
         $scope.item.questionImage[0].isValid = false;
+        $scope.item.questionImage[0].assetId = "";
+        $scope.item.questionImage[0].URL = {};
       });
     };
 
