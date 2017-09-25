@@ -1,92 +1,92 @@
 <md-dialog aria-label="Configure Response Dialog" class="response-config-dialog" flex="80">
-    <md-toolbar>
-        <div class="md-toolbar-tools">
-            <h2>Configure Responses</h2>
-            <span flex></span>
-            <md-button class="md-icon-button" ng-click="closeDialog()">
-                <md-icon md-svg-src="navigation:close" aria-label="Close dialog"></md-icon>
-            </md-button>
+  <md-toolbar>
+    <div class="md-toolbar-tools">
+      <h2>Configure Responses</h2>
+      <span flex></span>
+      <md-button class="md-icon-button" ng-click="closeDialog()">
+        <md-icon md-svg-src="navigation:close" aria-label="Close dialog"></md-icon>
+      </md-button>
+    </div>
+  </md-toolbar>
+  <md-dialog-content>
+    <div class="md-dialog-content">
+      <form name="responseForm">
+        <div layout="row" ng-if="qtype=='legacy-word-problem'">
+          <md-input-container flex="30">
+            <label>Correct Answer</label>
+            <input required name="correctAnswer" rows="1" ng-model="step.answer">
+            <div class="input-message hint" ng-if="!responseForm.correctAnswer.$dirty">Correct Answer</div>
+            <div class="input-message error-msg" ng-messages="responseForm.correctAnswer.$error">
+              <div ng-message="required">This is required.</div>
+            </div>
+          </md-input-container>
+          <md-input-container flex="10">
+            <label>Units</label>
+            <input name="units" rows="1" ng-model="i18n[langId][step.unit]">
+            <div class="input-message hint" ng-if="!responseForm.units.$dirty">Units</div>
+          </md-input-container>
+          <md-input-container flex="20">
+            <label>Unit Placement</label>
+            <md-select name="unitPlacement" ng-model="step.unitPlacement" required>
+              <md-option ng-value="up" ng-repeat="up in meta.unitPlacements">{{up}}</md-option>
+            </md-select>
+            <div class="input-message hint" ng-if="!responseForm.units.$dirty">Unit Placement</div>
+          </md-input-container>
         </div>
-    </md-toolbar>
-    <md-dialog-content>
-        <div class="md-dialog-content">
-            <form name="responseForm">
-                <div layout="row" ng-if="qtype=='legacy-word-problem'">
-                    <md-input-container flex="30">
-                        <label>Correct Answer</label>
-                        <input required name="correctAnswer" rows="1" ng-model="step.answer">
-                        <div class="input-message hint" ng-if="!responseForm.correctAnswer.$dirty">Correct Answer</div>
-                        <div class="input-message error-msg" ng-messages="responseForm.correctAnswer.$error">
-                            <div ng-message="required">This is required.</div>
-                        </div>
-                    </md-input-container>
-                    <md-input-container flex="10">
-                        <label>Units</label>
-                        <input name="units" rows="1" ng-model="i18n[langId][step.unit]">
-                        <div class="input-message hint" ng-if="!responseForm.units.$dirty">Units</div>
-                    </md-input-container>
-                    <md-input-container flex="20">
-                        <label>Unit Placement</label>
-                        <md-select name="unitPlacement" ng-model="step.unitPlacement" required>
-                            <md-option ng-value="up" ng-repeat="up in meta.unitPlacements">{{up}}</md-option>
-                        </md-select>
-                        <div class="input-message hint" ng-if="!responseForm.units.$dirty">Unit Placement</div>
-                    </md-input-container>
-                </div>
+        <div layout="row">
+          <div layout="column" flex layout-fill ng-cloak>
+            <h5>Responses</h5>
+            <div layout="row" ng-repeat="res in step.responses">
+              <div layout="column" flex="95" layout-fill>
                 <div layout="row">
-                    <div layout="column" flex layout-fill ng-cloak>
-                        <h5>Responses</h5>
-                        <div layout="row" ng-repeat="res in step.responses">
-                            <div layout="column" flex="95" layout-fill>
-                                <div layout="row">
-                                    <md-input-container flex="5">
-                                        <label>#{{$index+1}}</label>
-                                    </md-input-container>
-                                    <md-input-container ng-if="res.default" flex="20">
-                                        <label>Default response</label>
-                                        <!--<input name="response" rows="1" ng-model="res.response">
+                  <md-input-container flex="5">
+                    <label>#{{$index+1}}</label>
+                  </md-input-container>
+                  <md-input-container ng-if="res.default" flex="20">
+                    <label>Default response</label>
+                    <!--<input name="response" rows="1" ng-model="res.response">
                                         <div class="input-message hint" ng-if="!responseForm.response.$dirty">Response</div>-->
-                                    </md-input-container>
-                                    <md-input-container ng-if="!res.default" flex="20">
-                                        <label>Response</label>
-                                        <input name="response" rows="1" ng-model="res.response">
-                                        <div class="input-message hint" ng-if="!responseForm.response.$dirty">Response</div>
-                                    </md-input-container>
-                                    <!-- <md-input-container flex="75" ng-if="qtype=='legacy-word-problem'">
+                  </md-input-container>
+                  <md-input-container ng-if="!res.default" flex="20">
+                    <label>Response</label>
+                    <input name="response" rows="1" ng-model="res.response">
+                    <div class="input-message hint" ng-if="!responseForm.response.$dirty">Response</div>
+                  </md-input-container>
+                  <!-- <md-input-container flex="75" ng-if="qtype=='legacy-word-problem'">
                                         <label>Micro Hint</label>
                                         <input name="mh" rows="1" ng-model="res.mh">
                                         <div class="input-message hint" ng-if="!responseForm.mh.$dirty">Write the Micro hint</div>
                                     </md-input-container> -->
-                                    <md-input-container flex="75">
-                                        <label>Micro Hint</label>
-                                        <input name="mh" rows="1" ng-model="i18n[langId][res.mh]">
-                                        <div class="input-message hint" ng-if="!responseForm.mh.$dirty">Write the Micro hint</div>
-                                    </md-input-container>
-                                </div>
-                                <div layout="row">
-                                    <md-input-container flex>
-                                        <label>MMC</label>
-                                        <md-chips ng-model="res.mmc" md-separator-keys="keys" placeholder="Enter a MMC"></md-chips>
-                                        <!--<div class="input-message hint" ng-if="!responseForm.response.$dirty">MMC Codes</div>-->
-                                    </md-input-container>
-                                </div>
-                            </div>
-                            <div layout="column" flex layout-fill>
-                                <md-button ng-click="deleteResponse($event, $index)">
-                                    <md-icon md-svg-src="action:delete" aria-label="Delete Response"></md-icon>
-                                </md-button>
-                            </div>
-                        </div>
-                        <div layout="row">
-                            <md-button ng-click="addNewResponse($event, $index)">Add Response</md-button>
-                        </div>
-                    </div>
+                  <md-input-container flex="75">
+                    <label>Micro Hint</label>
+                    <input name="mh" rows="1" ng-model="i18n[langId][res.mh]">
+                    <div class="input-message hint" ng-if="!responseForm.mh.$dirty">Write the Micro hint</div>
+                  </md-input-container>
                 </div>
-            </form>
+                <div layout="row">
+                  <md-input-container flex>
+                    <label>MMC</label>
+                    <md-chips ng-model="res.mmc" md-separator-keys="keys" placeholder="Enter a MMC"></md-chips>
+                    <!--<div class="input-message hint" ng-if="!responseForm.response.$dirty">MMC Codes</div>-->
+                  </md-input-container>
+                </div>
+              </div>
+              <div layout="column" flex layout-fill>
+                <md-button ng-if="!res.default" ng-click="deleteResponse($event, $index)">
+                  <md-icon md-svg-src="action:delete" aria-label="Delete Response"></md-icon>
+                </md-button>
+              </div>
+            </div>
+            <div layout="row">
+              <md-button ng-click="addNewResponse($event, $index)">Add Response</md-button>
+            </div>
+          </div>
         </div>
-    </md-dialog-content>
-    <md-dialog-actions>
-        <md-button ng-click="closeDialog()" class="md-primary">Cancel</md-button>
-        <md-button ng-click="save($event)" class="md-primary">Save</md-button>
-    </md-dialog-actions>
+      </form>
+    </div>
+  </md-dialog-content>
+  <md-dialog-actions>
+    <md-button ng-click="closeDialog()" class="md-primary">Cancel</md-button>
+    <md-button ng-click="save($event)" class="md-primary">Save</md-button>
+  </md-dialog-actions>
 </md-dialog>

@@ -7,11 +7,6 @@ angular.module('wpappApp')
     $scope.langId = 'en';
     var langId = $scope.langId;
     $scope.users = users;
-    _.each($scope.item.options, function (o) {
-      if (o.mmc === null && o.answer == false)
-        o.mmc = [];
-    });
-
 
     _.each($scope.item.options, function (o) {
       if (o.mmc === null && o.answer == false)
@@ -27,7 +22,7 @@ angular.module('wpappApp')
       attempts: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
       levels: [1, 2, 3, 4, 5, 6],
       sub_levels: [1, 2, 3, 4, 5, 6],
-      mcqType: [1, 2, 3, 4, 5, 6, 7, 8],
+      mcqType: [1, 2, 3, 4, 5, 6, 7, 8, 9],
       locales: [{
           id: 'en',
           name: 'English'
