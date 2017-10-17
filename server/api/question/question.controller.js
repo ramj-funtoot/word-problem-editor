@@ -11,6 +11,7 @@ var winston = require('winston');
 var Translate = require('@google-cloud/translate')();
 const util = require('util')
 
+
 var logger = new(winston.Logger)({
   transports: [
     new(winston.transports.Console)(),
@@ -570,6 +571,19 @@ function publishQuestion(qIds, env, messages, res, code) {
               item.i18n = question.i18n;
               break;
             }
+          case "mfr": {
+              item.i18n = question.i18n;
+              item.keywords = ['mfr'];
+              item.type = 'ftb';
+              item.template_id = 'org.ekstep.plugins.funtoot.genericmfr';
+              item.template = 'org.ekstep.plugins.funtoot.genericmfr';
+              item.model.fibs = [];
+              item.model.steps = [];
+              question.fibs.forEach(function (fib, i) {
+                item.model.fibs.push(fib);
+              });
+              break;
+          }
           case "freeResponse":
             {
               item.i18n = question.i18n;
@@ -584,6 +598,7 @@ function publishQuestion(qIds, env, messages, res, code) {
               });
               break;
             }
+
         }
         var ekstep_env = env; // 'qa' or 'dev' or 'prod'
         var url = envData[ekstep_env].url; //"https://" + ekstep_env + ".ekstep.in/api/assessment/v3/items/create";
