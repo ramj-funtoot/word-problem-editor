@@ -163,8 +163,11 @@
         <div id="steps " ng-if="item.qtype=='mcq' ">
           <div ng-include src=" 'app/question/question.dialog/mcq.dialog.options.html' "></div>
         </div>
-        <div id="steps " ng-if="item.qtype=='freeResponse' ">
+        <div id="steps " ng-if="item.qtype=='freeResponse'">
           <div ng-include src=" 'app/question/question.dialog/freeResponse.dialog.options.html' "></div>
+        </div>
+        <div id="steps " ng-if="item.qtype=='mfr'">
+          <div ng-include src=" 'app/question/question.dialog/mfr.dialog.options.html' "></div>
         </div>
         <md-divider></md-divider>
         <!-- <div layout="row " ng-if="item.qtype=='legacy-word-problem' ">
