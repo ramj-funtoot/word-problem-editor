@@ -1,0 +1,62 @@
+<md-dialog aria-label="Configure Option Dialog" class="response-config-dialog" flex="80">
+    <md-toolbar>
+      <div class="md-toolbar-tools">
+        <h2>Configure Options fro Drop down {{dD.identifier}}</h2>
+        <span flex></span>
+        <md-button class="md-icon-button" ng-click="closeDialog()">
+          <md-icon md-svg-src="navigation:close" aria-label="Close dialog"></md-icon>
+        </md-button>
+      </div>
+    </md-toolbar>
+    <md-dialog-content>
+        <div class="md-dialog-content">
+        <form name="optionForm">
+            <div layout="row" >
+                <div layout="column" flex layout-fill ng-cloak>
+                    <div layout="row" ng-repeat="option in dD.options">
+                        <div layout="column" flex="95" layout-fill>
+                            <h4 class="md-primary">Option #{{$index+1}}</h4>
+                          <div layout="row">
+                              <md-input-container class="md-block" flex="70">
+                                  <label>Option text</label>
+                                  <textarea required name="option" ng-model="i18n[langId][option.text]" md-select-on-focus></textarea>
+                                  <div class="input-message hint" ng-if="!optionForm.option.$dirty">Write the option</div>
+                              </md-input-container>
+                              <md-input-container class="md-block" flex="20">
+                                <md-checkbox name="answer" class="" ng-model="option.answer">Answer</md-checkbox>
+                              </md-input-container>
+                              <md-input-container class="md-block" flex="10">
+                                <md-button ng-click="deleteOptionFromDropDown($event, dD.identifier, $index)">
+                                  <md-icon md-svg-src="action:delete" aria-label="Delete Option"></md-icon>
+                                </md-button>
+                              </md-input-container>
+                          </div>  
+                          <div layout="row"> 
+                              <md-input-container class="md-block" flex="50">
+                                  <label>Micro Hint</label>
+                                  <input name="mh" rows="1" ng-disabled="option.answer" ng-model="i18n[langId][option.mh]">
+                                  <div class="input-message hint" ng-if="!optionForm.option.$dirty">Write the Micro hint</div>
+                              </md-input-container>
+                              <md-input-container class="md-block" flex="50">
+                                  <label>MMC</label>
+                                  <md-chips readonly="option.answer" ng-model="option.mmc" md-separator-keys="keys" placeholder="Enter a MMC"></md-chips>
+                                  <!--<div class="input-message hint" ng-if="!responseForm.response.$dirty">MMC Codes</div>-->
+                                </md-input-container>
+                          </div>
+                        </div>
+                        
+                      </div>
+                      <md-input-container flex="30">
+                          <md-button ng-click="addNewOptionForDropDown($event, dD.identifier)">Add Option</md-button>
+                      </md-input-container>
+                  </div>
+            </div>
+      </form>
+      </div>
+    </md-dialog-content>
+    <md-dialog-actions>
+      <md-button ng-click="closeDialog()" class="md-primary">Cancel</md-button>
+      <md-button ng-click="save($event)" class="md-primary">Save</md-button>
+    </md-dialog-actions>
+  </md-dialog>
+  

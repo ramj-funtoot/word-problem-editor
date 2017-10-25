@@ -56,6 +56,25 @@ angular.module('wpappApp')
       }
     }
 
+    $scope.showOptions = function($event, dD){
+      var parentEl = angular.element(document.body);
+      $mdDialog.show({
+        parent: parentEl,
+        targetEvent: $event,
+        templateUrl: 'app/question/question.dialog/options.config.dialog.html',
+        locals: {
+          dD: angular.copy(dD),
+          i18n: item.i18n || {},
+          qtype: item.qtype
+        },
+        multiple: true,
+        controller: 'OptionsConfigDialogCtrl'
+      }).then(function (updatedDD) {
+        console.log('dD', updatedDD);
+        angular.extend(dD, updatedDD);
+      });
+    }
+
     $scope.langChange = function ($event) {
       console.log($scope.langId);
       if ($scope.item.i18n.hasOwnProperty($scope.langId)) {
@@ -113,6 +132,7 @@ angular.module('wpappApp')
         angular.extend(step, updatedStep);
       });
     }
+
 
     $scope.addComment = function () {
       var user = Auth.getCurrentUser();
@@ -240,6 +260,7 @@ angular.module('wpappApp')
         option.answer ? (option.answer = false, $scope.isMCQAnswerSet = false) : (option.answer = true, $scope.isMCQAnswerSet = true);
       }*/
     }
+
 
     $scope.meta.validate = function () {
       if (!_.some($scope.item.options, 'answer')) {

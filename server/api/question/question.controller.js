@@ -584,6 +584,15 @@ function publishQuestion(qIds, env, messages, res, code) {
               });
               break;
           }
+          case "mdd": {
+            item.i18n = question.i18n;
+            item.keywords = ['mdd'];
+            item.type = 'ftb';
+            item.template_id = 'org.ekstep.plugins.funtoot.genericmdd';
+            item.template = 'org.ekstep.plugins.funtoot.genericmdd';
+            item.model.dropDowns = question.dropDowns;
+            break;
+        }
           case "freeResponse":
             {
               item.i18n = question.i18n;

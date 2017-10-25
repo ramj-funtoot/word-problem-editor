@@ -169,6 +169,9 @@
         <div id="steps " ng-if="item.qtype=='mfr'">
           <div ng-include src=" 'app/question/question.dialog/mfr.dialog.options.html' "></div>
         </div>
+        <div id="steps " ng-if="item.qtype=='mdd'">
+          <div ng-include src=" 'app/question/question.dialog/mdd.dialog.options.html' "></div>
+        </div>
         <md-divider></md-divider>
         <!-- <div layout="row " ng-if="item.qtype=='legacy-word-problem' ">
                     <md-input-container flex>

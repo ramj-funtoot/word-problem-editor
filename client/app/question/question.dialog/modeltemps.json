@@ -139,5 +139,40 @@
                 "comment": ""
             }
         ]
+    },
+    "mdd": {
+        "identifier": "",
+        "grade": "2",
+        "level": 0,
+        "subLevel": 1,
+        "btlo": "Remember",
+        "difficultyLevel": "1",
+        "subject": "NUM",
+        "conceptCode": "C12",
+        "active": true,
+        "owner": "",
+        "state": "Draft",
+        "maxAttempts": 1,
+        "questionText": "",
+        "dropDowns": [
+            {
+                "identifier": "",
+                "options": [{
+                        "text" : "",
+                        "answer" : true,
+                        "mh" : "",
+                        "mmc" : []
+                }]
+            }
+        ],
+        "hintText": "",
+        "solutionText": "",
+        "expressions": "",
+        "comments": [
+            {
+                "commentedBy": "",
+                "comment": ""
+            }
+        ]
     }
 }

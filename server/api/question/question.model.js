@@ -29,6 +29,8 @@ var commentsSchema = new Schema({
     id: false
   }
 });
+
+
 var responsesSchema = new Schema({
   response: [String],
   mmc: [String],
@@ -70,6 +72,15 @@ var optionSchema = new Schema({
     id: false
   }
 });
+
+var dropDownSchema = new Schema({
+  identifier: Number,
+  options: [optionSchema],
+  _id: {
+    id: false
+  }
+})
+
 var fibSchema = new Schema({
   identifier: {
     type: String,
@@ -133,6 +144,7 @@ var QuestionSchema = new Schema({
   questionImage: [imageSchema],
   steps: [stepSchema],
   options: [optionSchema],
+  dropDowns : [dropDownSchema],
   fibs: [fibSchema],
   mcqType: Number,
   hintText: String,
