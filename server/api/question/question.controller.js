@@ -680,7 +680,8 @@ function publishQuestion(qIds, env, messages, res, code) {
                 statusCode: response.statusCode
               };
               if (env == 'prod')
-                updateItemStatus(question._id, 'Published');
+                //Updating Item status action should be changed only by Curators in ZCAT
+                //updateItemStatus(question._id, 'Published');
               publishQuestion(qIds, env, messages, res, response.statusCode);
             }
           } else {
