@@ -507,7 +507,7 @@ function publishQuestion(qIds, env, messages, res, code) {
         item.model.hintMsg = question.hintText;
         item.concepts.identifier = question.conceptCode;
         item.qtype = question.qtype;
-        if (question.questionImage && question.questionImage.length > 0) {
+        if (question.questionImage && question.questionImage.length > 0 && question.questionImage[0].isValid) {
           item.questionImage = question.questionImage[0].assetId;
           item.media.push({
             id: question.questionImage[0].assetId,
@@ -557,7 +557,7 @@ function publishQuestion(qIds, env, messages, res, code) {
                 item.options[i].mh = option.mh;
                 item.options[i].value.type = (option.image && option.image.assetId) ? 'image' : 'text';
                 if (!option.text || option.text.length == 0) {
-                  if (option.image.assetId) {
+                  if (option.image.assetId && option.image.isValid) {
                     item.options[i].value.asset = option.image.assetId;
                     item.media.push({
                       id: option.image.assetId,
