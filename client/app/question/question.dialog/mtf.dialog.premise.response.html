@@ -1,0 +1,104 @@
+<div ng-controller="MTFPremRespCtrl">
+    <div style="width:50%;float:left">
+        <div layout="row" ng-repeat="premise in item.premises" class="mtf-container" >
+          <div layout="column" flex layout-fill ng-cloak   >
+            <h4 class="md-primary">Premise Id #{{$index}}</h4>
+            <div layout="row">
+              <div class="md-block option-image-container wrap" flex="70">
+                <input id="prmsimg{{$index}}" type="file" ng-model="images.premiseImages[$index]" name="premiseImage" base-sixty-four-input
+                  required onload="onLoad" maxsize="500" accept="image/*" class="option-image-input">
+                <label for="prmsimg{{$index}}">
+                  <img style='height:100px' ng-src="{{premise.image.isValid ? premise.image.base64 : 'http://placehold.it/300x200'}}" />
+                </label>
+                <span class="qbutton" flex="10" ng-show="premise.image.isValid" ng-click="deletePremiseImage($event, $index)">
+                    <md-icon md-svg-src="action:delete " aria-label="Delete Option Image"></md-icon>
+                </span>
+              </div>
+              
+              </div>
+              <div layout="row">
+                <md-input-container class="md-block" flex="100">
+                  <label>Premise text</label>
+                  <textarea required name="premise" ng-model="item.i18n[langId][premise.text]" md-select-on-focus></textarea>
+                  <div class="input-message hint">Write the Premise Text</div>
+                </md-input-container>
+              </div>
+              <div layout="row" flex="100">
+                <md-input-container class="md-block" flex="100">
+                  <label>Micro Hint</label>
+                  <input name="prmsmh"  ng-model="item.i18n[langId][premise.mh]" style="color:inherit;">
+                  <div class="input-message hint" >Write the Micro hint</div>
+                </md-input-container>
+              </div>
+              <div layout="row" flex="80">
+                <md-input-container class="md-block" >
+                  <label>MMC</label>
+                  <md-chips name="optmmc" ng-model="premise.mmc" md-separator-keys="keys" placeholder="Enter a MMC"></md-chips>
+                </md-input-container>
+                
+                <md-input-container class="md-block" flex="20">
+                  <md-button ng-click="deletePremiseAndResponse($event, $index)">
+                    <md-icon md-svg-src="action:delete" aria-label="Delete Premise"></md-icon>
+                  </md-button>
+                </md-input-container>
+              </div>   
+          </div>
+        </div>
+        
+      </div>
+      
+  <div style="width:50%;float:left">
+    
+        <div layout="row" ng-repeat="response in item.responses"  class='mtf-container' >
+          <div layout="column" flex layout-fill ng-cloak  >
+            <h4 class="md-primary">Response Id #{{$index}}</h4>
+            <div layout="row">
+              <div class="md-block option-image-container wrap" flex="70">
+                <input id="respimg{{$index}}" type="file" ng-model="images.responseImages[$index]" name="responseImage" base-sixty-four-input
+                  required onload="onLoad" maxsize="500" accept="image/*" class="option-image-input">
+                <label for="respimg{{$index}}">
+                  <img style='height:100px' ng-src="{{response.image.isValid ? response.image.base64 : 'http://placehold.it/300x200'}}" />
+                </label>
+                <span class="qbutton" flex="10" ng-show="response.image.isValid" ng-click="deleteResponseImage($event, $index)">
+                    <md-icon md-svg-src="action:delete " aria-label="Delete Option Image"></md-icon>
+                </span>
+              </div>
+              
+              </div>
+                <div layout="row">
+                  <md-input-container class="md-block" flex="100">
+                    <label>Response text</label>
+                    <textarea required name="response" ng-model="item.i18n[langId][response.text]" md-select-on-focus></textarea>
+                    <div class="input-message hint" ng-if="!Form.response.$dirty">Write the Response Text</div>
+                  </md-input-container>
+                </div>
+                <div layout="row" flex="100">
+                  <md-input-container class="md-block" flex="100" ng-style="{'visibility': 'hidden'}">
+                    <label>Micro Hint</label>
+                    <input name="respmh"  ng-model="item.i18n[langId][response.mh]" style="color:inherit;">
+                    <div class="input-message hint" >Write the Micro hint</div>
+                  </md-input-container>
+                </div>
+                <div layout="row" flex="80" ng-style="{'visibility': 'hidden'}">
+                  <md-input-container class="md-block" >
+                    <label>MMC</label>
+                    <md-chips name="optmmc"   ng-model="response.mmc" md-separator-keys="keys" placeholder="Enter a MMC"></md-chips>
+                  </md-input-container>
+                  
+                  <md-input-container class="md-block" flex="20" ng-style="{'visibility': 'hidden'}">
+                    <md-button  ng-click="deleteOption($event, $index)">
+                      <md-icon md-svg-src="action:delete" aria-label="Delete Option"></md-icon>
+                    </md-button>
+                  </md-input-container>
+                </div>
+                
+          </div>
+        </div>
+      </div>
+      <md-input-container flex="30">
+        <md-button ng-click="addPremiseAndResponse($event)">Add New Match</md-button>
+      </md-input-container>
+    
+
+  </div>
+  

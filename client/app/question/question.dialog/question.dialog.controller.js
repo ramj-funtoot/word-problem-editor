@@ -180,6 +180,120 @@ angular.module('wpappApp')
       });
     };
 
+    $scope.deletePremiseAndResponse = function($event, index){
+      var confirm = $mdDialog.confirm()
+      .title('Sure?')
+      .textContent('Are you sure you want to delete Premise & Response of Id #'+ index + '?')
+      .ariaLabel('Delete Premise & Response')
+      .targetEvent($event)
+      .ok('No')
+      .cancel('Yes')
+      .multiple(true);
+    $mdDialog.show(confirm).then(function () {}, function () {
+      //renaming premise and response text for i18n and micro hint upon deletion
+      $scope.item.premises.splice(index, 1);
+      $scope.item.responses.splice(index, 1);
+
+      _.each($scope.item.premises, function(premise){
+        if(premise.identifier > index){
+          var newId = premise.identifier - 1;
+          premise.identifier = newId;
+          if(premise.text != null && premise.text != undefined && premise.text.length != 0){
+            premise.text = 'premise_' + ( +newId + 1 );
+            $scope.item.i18n.en[premise.text] = $scope.item.i18n.en['premise_' + ( +newId + 2 )];
+            delete $scope.item.i18n.en['premise_' + ( +newId + 2 )];
+          }
+          if(premise.mh != null && premise.mh != undefined && premise.mh.length != 0){
+            premise.mh = 'mh_' + ( +newId + 1 );
+            $scope.item.i18n.en[premise.mh] = $scope.item.i18n.en['mh_' + ( +newId + 2 )];
+            delete  $scope.item.i18n.en['mh_' +( +newId + 2 )];
+          }
+        }
+      })
+
+      _.each($scope.item.responses, function(response){
+        if(response.identifier > index){
+          var newId = response.identifier - 1;
+          response.identifier = newId;
+          if(response.text != null && response.text != undefined && response.text.length != 0){
+            response.text = 'response_' + ( +newId + 1 ) + '_1';
+            $scope.item.i18n.en[response.text] = $scope.item.i18n.en['response_' + ( +newId + 2 ) + '_1'];
+            delete $scope.item.i18n.en['response_' + ( +newId + 2 ) + '_1'];
+          }
+          if(response.mh != null && response.mh != undefined && response.mh.length != 0){
+            response.mh = 'mh_' + ( +newId + 1 ) + '_1';
+            $scope.item.i18n.en[response.mh] = $scope.item.i18n.en['mh_' + ( +newId + 2 ) + '_1'];
+            delete  $scope.item.i18n.en['mh_' +( +newId + 2 ) + '_1'];
+          }
+        }
+      })
+
+       //change mappings upon deleting
+       $scope.item.map.splice(index, 1);
+       _.each($scope.item.map, function(m, i){
+          if(m.premise[0] > index){
+            m.premise[0] = m.premise[0] - 1;
+            m.response[0] = "" +  (+m.response[0] - 1);
+          }
+       })
+
+    });
+      
+       
+    }
+
+    $scope.addPremiseAndResponse = function($event){
+      var newId = "" + $scope.item.premises.length;
+      $scope.item.premises.push({
+        identifier : newId,
+        text : "premise_" + ( +newId + 1 ),
+        image : null,
+        mh : "mh_" + ( +newId + 1 ),
+        mmc : []
+      })
+      $scope.item.responses.push({
+        identifier : newId,
+        text : "response_" + ( +newId + 1 ) + '_1',
+        image : null,
+        mh : "mh_" + ( +newId + 1 ) + '_1',
+        mmc : []
+      })
+
+      $scope.item.map.push({
+        'premise' : [newId],
+        'response': [newId]
+      })
+    }
+
+    $scope.deletePremiseImage = function ($event, index) {
+      var confirm = $mdDialog.confirm()
+        .title('Sure?')
+        .textContent('Are you sure you want to delete this Premise image?')
+        .ariaLabel('Delete Image')
+        .targetEvent($event)
+        .ok('No')
+        .cancel('Yes')
+        .multiple(true);
+      $mdDialog.show(confirm).then(function () {}, function () {
+        $scope.item.premises[index].image.isValid = false;
+      });
+    };
+  
+    $scope.deleteResponseImage = function ($event, index) {
+      var confirm = $mdDialog.confirm()
+        .title('Sure?')
+        .textContent('Are you sure you want to delete this Premise image?')
+        .ariaLabel('Delete Image')
+        .targetEvent($event)
+        .ok('No')
+        .cancel('Yes')
+        .multiple(true);
+      $mdDialog.show(confirm).then(function () {}, function () {
+        $scope.item.responses[index].image.isValid = false;
+      });
+    };
+    
+
     $scope.deleteOptionImage = function ($event, index) {
       var confirm = $mdDialog.confirm()
         .title('Sure?')
@@ -240,6 +354,88 @@ angular.module('wpappApp')
       return moment(time).fromNow();
     }
   });
+
+
+angular.module('wpappApp').controller('MTFPremRespCtrl', function($scope){
+  $scope.images = {
+    premiseImages: [],
+    responseImages: []
+  };
+
+  $scope.premRespMapObj = {};
+  $scope.responseArray = [];
+
+  var init = function () {
+    
+    _.each($scope.item.premises, function (o, i) {
+      $scope.images.premiseImages.push({});
+    });
+    
+    _.each($scope.item.responses, function (r, i) {
+      $scope.images.responseImages.push({});
+      $scope.responseArray.push(r.identifier);
+    });
+
+    //as currently each premise have a single response, Current MTF Does not allow 
+      //a single premise to have multiple responses as answer
+    _.each($scope.item.map, function(m){
+      $scope.premRespMapObj[m.premise[0]] = m.response[0]
+    })
+
+  
+
+  }();
+
+  
+
+  $scope.$watch(function () {
+    return $scope.images.premiseImages;
+  }, function (n, o) {
+    _.each($scope.images.premiseImages, function (img, i) {
+      if (img.base64) {
+        if (!$scope.item.premises[i].image)
+          $scope.item.premises[i].image = {
+            base64: null,
+            assetId: '',
+            isValid: true
+          };
+        $scope.item.premises[i].image.base64 = 'data:' + img.filetype + ';base64,' + img.base64;
+        $scope.item.premises[i].image.isValid = true;
+      }
+    });
+  }, true);
+
+  $scope.$watch(function () {
+    return $scope.images.responseImages;
+  }, function (n, o) {
+    _.each($scope.images.responseImages, function (img, i) {
+      if (img.base64) {
+        if (!$scope.item.responses[i].image)
+          $scope.item.responses[i].image = {
+            base64: null,
+            assetId: '',
+            isValid: true
+          };
+        $scope.item.responses[i].image.base64 = 'data:' + img.filetype + ';base64,' + img.base64;
+        $scope.item.responses[i].image.isValid = true;
+      }
+    });
+  }, true);
+
+
+  $scope.updateMapping = function(event, index){
+    _.each($scope.item.map, function(m){
+      if(m.premise[0] == $scope.item.premises[index].identifier){
+        m.response[0] = $scope.premRespMapObj[m.premise[0]];
+      }
+    })
+    
+  }
+
+
+
+
+})
 
 angular.module('wpappApp')
   .controller('MCQOptionsCtrl', function ($scope) {

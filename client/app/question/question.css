@@ -85,3 +85,10 @@
 .questions-list .question-id {
   margin-right: 30px;
 }
+
+.mtf-container{
+  border: 1px solid silver;
+  padding:15px;
+  border-top:0px;
+  
+}

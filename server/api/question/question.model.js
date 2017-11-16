@@ -54,6 +54,33 @@ var stepSchema = new Schema({
   }
 });
 
+var PremiseResponseSchema = new Schema({
+  identifier: String,
+  text:String,
+  image: {
+    base64: String,
+    assetId: String,
+    urls: Object,
+    isValid: Boolean,
+    _id: {
+      id: false
+    }
+  },
+  mh:String,
+  mmc: [String],
+  _id: {
+    id: false
+  }
+})
+
+var mapSchema = new Schema({
+  _id: {
+    id: false
+  },
+  premise:[],
+  response:[]
+})
+
 var optionSchema = new Schema({
   text: String,
   image: {
@@ -144,6 +171,9 @@ var QuestionSchema = new Schema({
   questionImage: [imageSchema],
   steps: [stepSchema],
   options: [optionSchema],
+  premises:[PremiseResponseSchema],
+  responses:[PremiseResponseSchema],
+  map:[mapSchema],
   dropDowns : [dropDownSchema],
   fibs: [fibSchema],
   mcqType: Number,

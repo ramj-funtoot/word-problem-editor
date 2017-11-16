@@ -88,6 +88,12 @@ function getImageUpdateObject(opts) {
   } else if (opts.imageType == "option") {
     updateObj["options." + opts.index + ".image.assetId"] = opts.assetId
     updateObj["options." + opts.index + ".image.urls." + opts.env] = opts.url
+  } else if(opts.imageType == "premise"){
+    updateObj["premises." + opts.index + ".image.assetId"] = opts.assetId
+    updateObj["premises." + opts.index + ".image.urls." + opts.env] = opts.url
+  } else if(opts.imageType == "response"){
+    updateObj["responses." + opts.index + ".image.assetId"] = opts.assetId
+    updateObj["responses." + opts.index + ".image.urls." + opts.env] = opts.url
   }
   return updateObj
 }
@@ -389,6 +395,7 @@ function uploadImageAndUpdateQuestion(data) {
 function uploadImage(imgObj, env, assetId, qId, imageType, imageIndex) {
   return new Promise(function (resolve, reject) {
     var imageMimeType = getImageMimeTypeFromBase64(imgObj.base64);
+    //just creates new assetId (with out image) to store the image
     createImageContent(assetId, imageMimeType, env, function (response) {
       if (response && response.statusCode == 200) {
         // upload the image and then update the mongodb document
@@ -437,6 +444,23 @@ function uploadImages(question, env, callback) {
       }
     });
   }
+  else if (question.qtype == 'mtf'){
+    question.premises.forEach(function(premise, i){
+      if (premise.image && premise.image.isValid && (!premise.image.assetId || premise.image.assetId.length == 0 || (premise.image.assetId && premise.image.assetId.length > 0 && !premise.image.urls[env]))) {
+        var opAssetId = 'org.ekstep.funtoot.' + question.identifier + '.image' + Math.random().toString().replace('0', '');
+        imgUploadPromises.push(uploadImage(premise.image, env, opAssetId, question.identifier, 'premise', i));
+      }
+    })
+
+    question.responses.forEach(function(response, i){
+      if (response.image && response.image.isValid && (!response.image.assetId || response.image.assetId.length == 0 || (response.image.assetId && response.image.assetId.length > 0 && !response.image.urls[env]))) {
+        var opAssetId = 'org.ekstep.funtoot.' + question.identifier + '.image' + Math.random().toString().replace('0', '');
+        imgUploadPromises.push(uploadImage(response.image, env, opAssetId, question.identifier, 'response', i));
+      }
+    })
+
+  }
+
   if (imgUploadPromises.length > 0) {
     Promise.all(imgUploadPromises).then(function (results) {
       logger.info(question.identifier, 'All images uploaded successfully ');
@@ -507,6 +531,7 @@ function publishQuestion(qIds, env, messages, res, code) {
         item.model.hintMsg = question.hintText;
         item.concepts.identifier = question.conceptCode;
         item.qtype = question.qtype;
+        item.i18n = question.i18n;
         if (question.questionImage && question.questionImage.length > 0 && question.questionImage[0].isValid) {
           item.questionImage = question.questionImage[0].assetId;
           item.media.push({
@@ -534,7 +559,6 @@ function publishQuestion(qIds, env, messages, res, code) {
               item.template_id = 'org.ekstep.plugins.funtoot.fibWordProblem';
               item.template = 'org.ekstep.plugins.funtoot.fibWordProblem';
               item.keywords = ['wordproblem'];
-              item.i18n = question.i18n;
               item.model.steps = [question.steps[question.steps.length - 1]];
               break;
             }
@@ -568,11 +592,9 @@ function publishQuestion(qIds, env, messages, res, code) {
                 }
               });
               item.model.mcqType = question.mcqType;
-              item.i18n = question.i18n;
               break;
             }
           case "mfr": {
-              item.i18n = question.i18n;
               item.keywords = ['mfr'];
               item.type = 'ftb';
               item.template_id = 'org.ekstep.plugins.funtoot.genericmfr';
@@ -585,7 +607,6 @@ function publishQuestion(qIds, env, messages, res, code) {
               break;
           }
           case "mdd": {
-            item.i18n = question.i18n;
             item.keywords = ['mdd'];
             item.type = 'ftb';
             item.template_id = 'org.ekstep.plugins.funtoot.genericmdd';
@@ -593,9 +614,15 @@ function publishQuestion(qIds, env, messages, res, code) {
             item.model.dropDowns = question.dropDowns;
             break;
         }
+          case "mtf":{
+            item.model.map = question.map;
+            item.model.responses = question.responses;
+            item.model.premises = question.premises;
+            item.template_id = 'org.ekstep.plugins.funtoot.genericmtf';
+            item.template = 'org.ekstep.plugins.funtoot.genericmtf';
+          }
           case "freeResponse":
             {
-              item.i18n = question.i18n;
               item.keywords = ['freeResponse'];
               item.type = 'ftb';
               item.template_id = 'org.ekstep.plugins.funtoot.genericfib';
