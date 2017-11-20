@@ -92,3 +92,9 @@
   border-top:0px;
   
 }
+
+.mcqtype-preview{
+  width:350px;
+  height:200px;
+  border:1px solid silver;
+}

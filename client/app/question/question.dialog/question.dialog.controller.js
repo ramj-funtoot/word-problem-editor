@@ -22,7 +22,18 @@ angular.module('wpappApp')
       attempts: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
       levels: [1, 2, 3, 4, 5, 6],
       sub_levels: [1, 2, 3, 4, 5, 6],
-      mcqType: [1, 2, 3, 4, 5, 6, 7, 8, 9],
+      mcqType: [1, 2, 3, 5, 6, 7, 8, 9],
+      mcqTypeTemplateImages: [
+        'assets/images/mcq-type-1.png',
+        'assets/images/mcq-type-2.png',
+        'assets/images/mcq-type-3.png',
+        'assets/images/mcq-type-4.png',
+        'assets/images/mcq-type-5.png',
+        'assets/images/mcq-type-6.png',
+        'assets/images/mcq-type-7.png',
+        'assets/images/mcq-type-8.png',
+        'assets/images/mcq-type-9.png'
+      ],
       locales: [{
           id: 'en',
           name: 'English'

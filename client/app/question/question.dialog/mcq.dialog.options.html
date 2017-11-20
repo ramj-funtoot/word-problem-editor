@@ -45,6 +45,11 @@
         </div>
       </div>
     </div>
+    <div layout='row'>
+      <md-input-container flex="30">
+        <md-button ng-click="addNewOption($event, $index)">Add Option</md-button>
+      </md-input-container>
+    </div>
     <div layout="row">
       <md-input-container flex="30">
         <label>Select MCQ Type</label>
@@ -56,9 +61,16 @@
           <div ng-message="required">This is required.</div>
         </div>
       </md-input-container>
-      <md-input-container flex="30">
-        <md-button ng-click="addNewOption($event, $index)">Add Option</md-button>
-      </md-input-container>
+    </div>
+    <div layout="row">
+        <div class="md-block option-image-container wrap" flex="100">
+            <label >
+              <img class='mcqtype-preview' ng-src='{{meta.mcqTypeTemplateImages[item.mcqType - 1]}}'/>
+            </label>
+            <span class="qbutton" flex="10" ng-show="option.image.isValid" ng-click="deleteOptionImage($event, $index)">
+                <md-icon md-svg-src="action:delete " aria-label="Delete Option Image"></md-icon>
+            </span>
+          </div>
     </div>
   </form>
 </div>
