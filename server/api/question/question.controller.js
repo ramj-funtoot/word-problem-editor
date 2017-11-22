@@ -580,15 +580,17 @@ function publishQuestion(qIds, env, messages, res, code) {
                 item.options[i].mmc = option.mmc;
                 item.options[i].mh = option.mh;
                 item.options[i].value.type = (option.image && option.image.assetId) ? 'image' : 'text';
-                
-                if (option.image.assetId && option.image.isValid) {
-                  item.options[i].value.asset = option.image.assetId;
-                  item.media.push({
-                    id: option.image.assetId,
-                    src: option.image.urls[env],
-                    type: 'image'
-                  });
+                if(option.image != undefined){
+                  if (option.image.assetId && option.image.isValid) {
+                    item.options[i].value.asset = option.image.assetId;
+                    item.media.push({
+                      id: option.image.assetId,
+                      src: option.image.urls[env],
+                      type: 'image'
+                    });
+                  }
                 }
+                
                 
               });
               item.model.mcqType = question.mcqType;
