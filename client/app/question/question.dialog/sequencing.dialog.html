@@ -1,0 +1,54 @@
+<div ng-controller="SequencingCtrl">
+    <form name="sequencingForm">
+      <div layout="row" ng-repeat="sequence in item.seqSteps">
+        <div layout="column" flex layout-fill ng-cloak>
+          <h4 class="md-primary">Sequence Id #{{$index+1}}</h4>
+          <div layout="row">
+            <div class="md-block option-image-container wrap" flex="30">
+              <input id="sequencingimg{{$index+1}}" type="file" ng-model="images.sequenceImages[$index]" name="sequenceImage" base-sixty-four-input
+                required onload="onLoad" accept="image/*" class="option-image-input">
+              <label for="sequencingimg{{$index+1}}">
+                <img class='sequence-image' ng-src="{{sequence.image.isValid ? sequence.image.base64 : 'http://placehold.it/300x200'}}" />
+              </label>
+              <span class="qbutton" flex="10" ng-show="sequence.image.isValid" ng-click="deleteSequenceImage($event, $index)">
+                  <md-icon md-svg-src="action:delete " aria-label="Delete Sequence Image"></md-icon>
+              </span>
+            </div>
+            <md-input-container class="md-block" flex="70">
+              <div layout="row">
+                <md-input-container class="md-block" flex="50">
+                  <label>Sequence text</label>
+                  <textarea required name="sequence" ng-model="item.i18n[langId][sequence.text]" md-select-on-focus></textarea>
+                  <div class="input-message hint" ng-if="!sequencingForm.option.$dirty">Write the Sequence Text</div>
+                </md-input-container>
+                <md-input-container class="md-block" flex="50">
+                  <md-button ng-click="deleteSequence($event, $index)">
+                    <md-icon md-svg-src="action:delete" aria-label="Delete Sequence"></md-icon>
+                  </md-button>
+                </md-input-container>
+                
+                
+              </div>
+              <div layout="row">
+                <md-input-container class="md-block" flex="50">
+                  <label>Micro Hint</label>
+                  <input name="optmh" ng-model="item.i18n[langId][sequence.mh]" style="color:inherit;">
+                  <div class="input-message hint" ng-if="!sequencingForm.optmh.$dirty">Write the Micro hint</div>
+                </md-input-container>
+                <md-input-container class="md-block" flex="50">
+                  <label>MMC</label>
+                  <md-chips name="optmmc" ng-model="sequence.mmc" md-separator-keys="keys" placeholder="Enter a MMC"></md-chips>
+                </md-input-container>
+              </div>
+            </md-input-container>
+          </div>
+        </div>
+      </div>
+      <div layout='row'>
+        <md-input-container flex="30">
+          <md-button ng-click="addNewSequence($event, $index)">Add Sequence</md-button>
+        </md-input-container>
+      </div>
+    </form>
+  </div>
+  

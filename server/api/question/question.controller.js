@@ -94,6 +94,9 @@ function getImageUpdateObject(opts) {
   } else if(opts.imageType == "response"){
     updateObj["responses." + opts.index + ".image.assetId"] = opts.assetId
     updateObj["responses." + opts.index + ".image.urls." + opts.env] = opts.url
+  } else if(opts.imageType == "sequence"){
+    updateObj["seqSteps." + opts.index + ".image.assetId"] = opts.assetId
+    updateObj["seqSteps." + opts.index + ".image.urls." + opts.env] = opts.url
   }
   return updateObj
 }
@@ -461,6 +464,15 @@ function uploadImages(question, env, callback) {
 
   }
 
+  else if(question.qtype == 'Sequencing'){
+    question.seqSteps.forEach(function(sequence, i){
+      if (sequence.image && sequence.image.isValid && (!sequence.image.assetId || sequence.image.assetId.length == 0 || (sequence.image.assetId && sequence.image.assetId.length > 0 && !sequence.image.urls[env]))) {
+        var opAssetId = 'org.ekstep.funtoot.' + question.identifier + '.image' + Math.random().toString().replace('0', '');
+        imgUploadPromises.push(uploadImage(sequence.image, env, opAssetId, question.identifier, 'sequence', i));
+      }
+    })
+  }
+
   if (imgUploadPromises.length > 0) {
     Promise.all(imgUploadPromises).then(function (results) {
       logger.info(question.identifier, 'All images uploaded successfully ');
@@ -613,15 +625,112 @@ function publishQuestion(qIds, env, messages, res, code) {
             item.type = 'ftb';
             item.template_id = 'org.ekstep.plugins.funtoot.genericmdd';
             item.template = 'org.ekstep.plugins.funtoot.genericmdd';
-            item.model.dropDowns = question.dropDowns;
+            item.model.dropDowns = [];
+            _.each(question.dropDowns, function(dropDown, i){
+              item.model.dropDowns.push({
+                'identifier': dropDown.identifier,
+                'options' : []
+              })
+
+              _.each(dropDown.options, function(option, opt_i){
+                var image = null;
+                if(option.image && option.image.assetId && option.image.isValid){
+                  image = option.image.assetId;
+                  item.media.push({
+                    id: image,
+                    src: option.image.urls[env],
+                    type: 'image'
+                  });
+                }
+                item.model.dropDowns[i].options.push({ 'text' : option.text,
+                'mh': option.mh,
+                'mmc':option.mmc,
+                'answer':option.answer,
+                'image' : image
+                });
+              });
+            });
             break;
-        }
+          }
           case "mtf":{
-            item.model.map = question.map;
-            item.model.responses = question.responses;
-            item.model.premises = question.premises;
+            item.keywords = ['mtf'];
+            item.type = 'mtf';
             item.template_id = 'org.ekstep.plugins.funtoot.genericmtf';
             item.template = 'org.ekstep.plugins.funtoot.genericmtf';
+            item.model.map = question.map;
+            item.model.premises = [];
+            item.lhs_options = [];
+            item.rhs_options = [];
+            item.model.responses = [];
+            item.media = [];
+            _.each(question.premises, function(premise, i){
+              item.lhs_options.push(quesTemplate.lhsOptionTemplate());
+              var image = null;
+              if(premise.image && premise.image.assetId && premise.image.isValid){
+                image = premise.image.assetId;
+                item.media.push({
+                  id: premise.image.assetId,
+                  src: premise.image.urls[env],
+                  type: 'image'
+                });
+              }
+              item.model.premises.push({
+                'text' : premise.text, 'image': image, 'mh' : premise.mh, 'mmc' : premise.mmc, 'identifier' : premise.identifier
+              });
+              item.lhs_options[i].value.type = image ? 'image' : 'text';
+              item.lhs_options[i].value.asset = image ? image : premise.text;
+              item.lhs_options[i].index = Number(premise.identifier);
+              item.lhs_options[i].mh = premise.mh;
+              item.lhs_options[i].mmc = premise.mmc;
+
+            })
+
+            _.each(question.responses, function(response, i){
+              item.rhs_options.push(quesTemplate.rhsOptionTemplate());
+              var image = null;
+              if(response.image && response.image.assetId && response.image.isValid){
+                image = response.image.assetId;
+                item.media.push({
+                  id: response.image.assetId,
+                  src: response.image.urls[env],
+                  type: 'image'
+                });
+              }
+              item.model.responses.push({
+                'text' : response.text, 'image': image, 'mh' : response.mh, 'mmc' : response.mmc, 'identifier' : response.identifier
+              });
+              item.rhs_options[i].value.type = response.text ? 'text' : 'image';
+              item.rhs_options[i].value.asset = response.text ? response.text : image;
+              item.rhs_options[i].answer = Number(response.identifier);
+            })
+            break;
+          }
+          case "Sequencing":{
+            console.log('-----------------------------Im here----------------------------------')
+            item.keywords = ['Sequencing'];
+            item.type = 'ftb';
+            item.template_id = 'org.ekstep.plugins.funtoot.genericsequencing';
+            item.template = 'org.ekstep.plugins.funtoot.genericsequencing';
+            item.model.seqSteps = [];
+            _.each(question.seqSteps, function(seqStep, i){
+              var image = null;
+              if(seqStep.image && seqStep.image.assetId && seqStep.image.isValid){
+                image = seqStep.image.assetId;
+                item.media.push({
+                  id: seqStep.image.assetId,
+                  src: seqStep.image.urls[env],
+                  type: 'image'
+                });
+              }
+              item.model.seqSteps.push({
+                'identifier': seqStep.identifier,
+                'text': seqStep.text,
+                'image':image,
+                'mh': seqStep.mh,
+                'mmc': seqStep.mmc
+              })
+            })
+            break;
           }
           case "freeResponse":
             {
@@ -636,7 +745,6 @@ function publishQuestion(qIds, env, messages, res, code) {
               });
               break;
             }
-
         }
         var ekstep_env = env; // 'qa' or 'dev' or 'prod'
         var url = envData[ekstep_env].url; //"https://" + ekstep_env + ".ekstep.in/api/assessment/v3/items/create";
@@ -650,6 +758,17 @@ function publishQuestion(qIds, env, messages, res, code) {
         reqBody.request.assessment_item.objectType = "AssessmentItem";
         reqBody.request.assessment_item.metadata = item;
 
+        function storeLog(dataToStore, fileName){
+          fs.writeFile(__dirname+'/'+fileName, dataToStore, function(err){
+          if(err){
+          console.log('!!!!!!!!!!!!--writing log file of '+ fileName + ' fails--!!!!!!!!!!!!');
+          console.log(err)
+          return;
+          }
+          console.log('------------writing log file of '+ fileName + 'success--------------');
+          })
+          }
+          storeLog(JSON.stringify(reqBody), 'reqBody.json');
         var authheader = 'Bearer ' + envData[ekstep_env].apiKey;
         var args = {
           //path: { id: item.code, tid: 'domain' },

@@ -74,6 +74,25 @@ var mcq_option = {
   mmc: []
 }
 
+var mtfLHSTemplate = {
+  value: {
+    type : "",
+    asset: "",
+  },
+  index: 0,
+  mh: '',
+  mmc:[]
+
+}
+
+var mtfRHSTemplate = {
+  value: {
+    type : "",
+    asset: "",
+  },
+  answer: 0
+}
+
 var imageAsset = {
   request: {
     content: {
@@ -106,3 +125,13 @@ exports.mcqOptionTemplate = function () {
 exports.imageAssetTemplate = function () {
   return _.cloneDeep(imageAsset);
 }
+
+exports.lhsOptionTemplate = function(){
+  return _.cloneDeep(mtfLHSTemplate);
+}
+
+exports.rhsOptionTemplate = function(){
+  return _.cloneDeep(mtfRHSTemplate);
+}
+
+

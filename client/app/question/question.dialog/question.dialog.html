@@ -175,6 +175,9 @@
         <div id="steps " ng-if="item.qtype=='mtf'">
           <div ng-include src=" 'app/question/question.dialog/mtf.dialog.premise.response.html' "></div>
         </div>
+        <div id="steps " ng-if="item.qtype=='Sequencing'">
+          <div ng-include src=" 'app/question/question.dialog/sequencing.dialog.html' "></div>
+        </div>
         <md-divider></md-divider>
         <!-- <div layout="row " ng-if="item.qtype=='legacy-word-problem' ">
                     <md-input-container flex>

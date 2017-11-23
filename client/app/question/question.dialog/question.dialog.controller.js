@@ -191,6 +191,68 @@ angular.module('wpappApp')
       });
     };
 
+    $scope.deleteSequenceImage = function($event, index){
+      var confirm = $mdDialog.confirm()
+      .title('Sure?')
+      .textContent('Are you sure you want to delete this sequence Image of Id #?' + index+1)
+      .ariaLabel('Delete Image')
+      .targetEvent($event)
+      .ok('No')
+      .cancel('Yes')
+      .multiple(true);
+    $mdDialog.show(confirm).then(function () {}, function () {
+      $scope.item.seqSteps[index].image.isValid = false;
+    });
+    }
+
+
+    $scope.deleteSequence = function($event, index){
+      var confirm = $mdDialog.confirm()
+      .title('Sure?')
+      .textContent('Are you sure you want to delete Sequnce Id #' + index+1)
+      .ariaLabel('Delete Sequence')
+      .targetEvent($event)
+      .ok('No')
+      .cancel('Yes')
+      .multiple(true);
+    $mdDialog.show(confirm).then(function () {}, function () {
+      //renaming premise and response text for i18n and micro hint upon deletion
+      $scope.item.seqSteps.splice(index, 1);
+      
+      _.each($scope.item.seqSteps, function(sequence){
+        if(sequence.identifier > index){
+          var newId = sequence.identifier - 1;
+          sequence.identifier = "" + newId;
+          if(sequence.text != null && sequence.text != undefined && sequence.text.length != 0){
+            sequence.text = 'step_' + ( +newId + 1 );
+            $scope.item.i18n.en[sequence.text] = $scope.item.i18n.en['step_' + ( +newId + 2 )];
+            delete $scope.item.i18n.en['step_' + ( +newId + 2 )];
+          }
+          if(sequence.mh != null && sequence.mh != undefined && sequence.mh.length != 0){
+            sequence.mh = 'mh_' + ( +newId + 1 );
+            $scope.item.i18n.en[sequence.mh] = $scope.item.i18n.en['mh_' + ( +newId + 2 )];
+            delete  $scope.item.i18n.en['mh_' +( +newId + 2 )];
+          }
+        }
+      })
+
+      delete $scope.item.i18n.en['mh_' +( index + 1 )]
+      delete $scope.item.i18n.en['step_' +( index + 1 )]
+
+    });
+    }
+
+    $scope.addNewSequence = function($event, $index){
+      var newId = "" + $scope.item.seqSteps.length;
+      $scope.item.seqSteps.push({
+        identifier : newId,
+        text : "step_" + ( +newId + 1 ),
+        image : null,
+        mh : "mh_" + ( +newId + 1 ),
+        mmc : []
+      })
+    }
+
     $scope.deletePremiseAndResponse = function($event, index){
       var confirm = $mdDialog.confirm()
       .title('Sure?')
@@ -204,11 +266,11 @@ angular.module('wpappApp')
       //renaming premise and response text for i18n and micro hint upon deletion
       $scope.item.premises.splice(index, 1);
       $scope.item.responses.splice(index, 1);
-
+      //need to remove this in every language, need fix
       _.each($scope.item.premises, function(premise){
         if(premise.identifier > index){
           var newId = premise.identifier - 1;
-          premise.identifier = newId;
+          premise.identifier = "" + newId;
           if(premise.text != null && premise.text != undefined && premise.text.length != 0){
             premise.text = 'premise_' + ( +newId + 1 );
             $scope.item.i18n.en[premise.text] = $scope.item.i18n.en['premise_' + ( +newId + 2 )];
@@ -225,7 +287,7 @@ angular.module('wpappApp')
       _.each($scope.item.responses, function(response){
         if(response.identifier > index){
           var newId = response.identifier - 1;
-          response.identifier = newId;
+          response.identifier = "" + newId;
           if(response.text != null && response.text != undefined && response.text.length != 0){
             response.text = 'response_' + ( +newId + 1 ) + '_1';
             $scope.item.i18n.en[response.text] = $scope.item.i18n.en['response_' + ( +newId + 2 ) + '_1'];
@@ -238,13 +300,17 @@ angular.module('wpappApp')
           }
         }
       })
+      delete $scope.item.i18n.en['mh_' +( index + 1 )]
+      delete $scope.item.i18n.en['premise_' +( index + 1 )]
+      delete $scope.item.i18n.en['response_' +( index + 1 )+'_1']
+
 
        //change mappings upon deleting
        $scope.item.map.splice(index, 1);
        _.each($scope.item.map, function(m, i){
           if(m.premise[0] > index){
-            m.premise[0] = m.premise[0] - 1;
-            m.response[0] = "" +  (+m.response[0] - 1);
+            m.premise[0] = "" + (m.premise[0] - 1);
+            m.response[0] = "" + (+m.response[0] - 1);
           }
        })
 
@@ -432,20 +498,6 @@ angular.module('wpappApp').controller('MTFPremRespCtrl', function($scope){
       }
     });
   }, true);
-
-
-  $scope.updateMapping = function(event, index){
-    _.each($scope.item.map, function(m){
-      if(m.premise[0] == $scope.item.premises[index].identifier){
-        m.response[0] = $scope.premRespMapObj[m.premise[0]];
-      }
-    })
-    
-  }
-
-
-
-
 })
 
 angular.module('wpappApp')
@@ -494,6 +546,38 @@ angular.module('wpappApp')
       });
     }, true);
   });
+
+  angular.module('wpappApp')
+  .controller('SequencingCtrl', function ($scope) {
+    $scope.images = {
+      sequenceImages: []
+    };
+    var init = function () {
+      _.each($scope.item.seqSteps, function (o, i) {
+        $scope.images.sequenceImages.push({});
+      });
+    }();
+   
+
+
+    $scope.$watch(function () {
+      return $scope.images.sequenceImages;
+    }, function (n, o) {
+      _.each($scope.images.sequenceImages, function (img, i) {
+        if (img.base64) {
+          if (!$scope.item.seqSteps[i].image)
+            $scope.item.seqSteps[i].image = {
+              base64: null,
+              assetId: '',
+              isValid: true
+            };
+          $scope.item.seqSteps[i].image.base64 = 'data:' + img.filetype + ';base64,' + img.base64;
+          $scope.item.seqSteps[i].image.isValid = true;
+        }
+      });
+    }, true);
+  });
+
 
 angular.module('wpappApp')
   .controller('WordProblemCtrl', function ($scope) {

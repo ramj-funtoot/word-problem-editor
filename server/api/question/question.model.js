@@ -175,6 +175,7 @@ var QuestionSchema = new Schema({
   responses:[PremiseResponseSchema],
   map:[mapSchema],
   dropDowns : [dropDownSchema],
+  seqSteps: [PremiseResponseSchema], //currently sequencing and premise responses uses same schema
   fibs: [fibSchema],
   mcqType: Number,
   hintText: String,

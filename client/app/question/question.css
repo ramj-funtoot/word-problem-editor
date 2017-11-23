@@ -98,3 +98,7 @@
   height:200px;
   border:1px solid silver;
 }
+
+.sequence-image{
+  max-width:300px;
+}
