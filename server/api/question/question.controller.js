@@ -758,17 +758,7 @@ function publishQuestion(qIds, env, messages, res, code) {
         reqBody.request.assessment_item.objectType = "AssessmentItem";
         reqBody.request.assessment_item.metadata = item;
 
-        function storeLog(dataToStore, fileName){
-          fs.writeFile(__dirname+'/'+fileName, dataToStore, function(err){
-          if(err){
-          console.log('!!!!!!!!!!!!--writing log file of '+ fileName + ' fails--!!!!!!!!!!!!');
-          console.log(err)
-          return;
-          }
-          console.log('------------writing log file of '+ fileName + 'success--------------');
-          })
-          }
-          storeLog(JSON.stringify(reqBody), 'reqBody.json');
+        
         var authheader = 'Bearer ' + envData[ekstep_env].apiKey;
         var args = {
           //path: { id: item.code, tid: 'domain' },
