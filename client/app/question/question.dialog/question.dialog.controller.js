@@ -209,7 +209,7 @@ angular.module('wpappApp')
     $scope.deleteSequence = function($event, index){
       var confirm = $mdDialog.confirm()
       .title('Sure?')
-      .textContent('Are you sure you want to delete Sequnce Id #' + index+1)
+      .textContent('Are you sure you want to delete Sequnce Id #' + (+index+1))
       .ariaLabel('Delete Sequence')
       .targetEvent($event)
       .ok('No')

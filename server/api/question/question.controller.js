@@ -662,7 +662,6 @@ function publishQuestion(qIds, env, messages, res, code) {
             item.lhs_options = [];
             item.rhs_options = [];
             item.model.responses = [];
-            item.media = [];
             _.each(question.premises, function(premise, i){
               item.lhs_options.push(quesTemplate.lhsOptionTemplate());
               var image = null;
