@@ -112,6 +112,10 @@
               <div ng-message="md-require-match">Please select an existing user.</div>
             </div>
           </md-autocomplete>
+          <md-input-container class="md-block" flex="30">
+            <label>Question Type</label>
+            <input required name="qtype" ng-model="item.qtype" ng-disabled="{{true}}">
+          </md-input-container>
         </div>
         <hr />
         <!-- <div layout="row" ng-if="item.qtype=='legacy-word-problem'">

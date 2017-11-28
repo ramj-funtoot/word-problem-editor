@@ -49,7 +49,8 @@
                         <h4>
                             <span>Created: {{item.owner}} </span> |
                             <span>Updated: {{getDisplayableTime(item.updated.when)}} by {{item.updated.by}}</span> |
-                            <span><b>{{item.state}}</b></span>
+                            <span><b>{{item.state}}</b></span> |
+                            <span>{{item.qtype}}</span>
                         </h4>
                         <!-- <p ng-if="item.qtype=='legacy-word-problem'">
                             {{ item.questionText | limitTo:100 }} <span ng-if="item.questionText.length > 100">...</span>
