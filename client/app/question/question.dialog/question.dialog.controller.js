@@ -200,9 +200,11 @@ angular.module('wpappApp')
       .ok('No')
       .cancel('Yes')
       .multiple(true);
-    $mdDialog.show(confirm).then(function () {}, function () {
-      $scope.item.seqSteps[index].image.isValid = false;
-    });
+      $mdDialog.show(confirm).then(function () {}, function () {
+        $scope.item.seqSteps[index].image.isValid = false;
+        $scope.item.seqSteps[index].image.assetId = "";
+        $scope.item.seqSteps[index].image.URL = {};
+      });
     }
 
 
@@ -353,6 +355,8 @@ angular.module('wpappApp')
         .multiple(true);
       $mdDialog.show(confirm).then(function () {}, function () {
         $scope.item.premises[index].image.isValid = false;
+        $scope.item.premises[index].image.assetId = "";
+        $scope.item.premises[index].image.URL = {};
       });
     };
   
@@ -367,6 +371,8 @@ angular.module('wpappApp')
         .multiple(true);
       $mdDialog.show(confirm).then(function () {}, function () {
         $scope.item.responses[index].image.isValid = false;
+        $scope.item.responses[index].image.assetId = "";
+        $scope.item.responses[index].image.URL = {};
       });
     };
     
@@ -382,6 +388,8 @@ angular.module('wpappApp')
         .multiple(true);
       $mdDialog.show(confirm).then(function () {}, function () {
         $scope.item.options[index].image.isValid = false;
+        $scope.item.options[index].image.assetId = "";
+        $scope.item.options[index].image.URL = {};
       });
     };
 
