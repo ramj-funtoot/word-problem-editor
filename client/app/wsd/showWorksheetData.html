@@ -1,0 +1,92 @@
+<md-content>
+  <div ng-controller="details">
+    <div layout="row" layout-align="stretch center">
+      <md-toolbar style="position:fixed;">
+        <div layout="row">
+          <div class="md-toolbar-tools">
+            <md-button align="center" class="md-icon-button" aria-label="back" ui-sref="question">
+              <md-icon md-svg-icon="navigation:arrow_back"></md-icon>
+            </md-button>
+            <div>
+              |
+              <strong> Total: </strong>{{allContent.length}} |
+              <strong> Live: </strong>{{getCount('Live')}} |
+              <strong> Draft: </strong>{{getCount('Draft')}} |
+              <strong> Retired: </strong>{{getCount('Retired')}} |
+              <strong> Current List: </strong>{{getCount('Current')}} |
+            </div>
+            <span flex></span>
+            <input type="text" ng-model="searchWS" ng-change="filterList()" placeholder="Search For Worksheet">
+            <span flex="5"></span>
+            <input type="text" ng-model="searchP" ng-change="filterList()" placeholder="Search For Plugin">
+            <span flex="5"></span>
+            <md-input-container flex="10">
+              <span>Status</span>
+              <md-select name="sStatus" ng-model="selectedStatus" ng-change="filterList()">
+                <md-option ng-value="s" ng-repeat="s in status">{{s}}</md-option>
+              </md-select>
+            </md-input-container>
+          </div>
+        </div>
+      </md-toolbar>
+    </div>
+
+    <md-list md-virtual-repeat-container class="questions-list" style="height:90vh; margin-top: 10vh;" ng-cloak>
+      <div layout="row" style="padding:0.5%;">
+        <span flex="5"></span>
+        <span flex="5" align="center">
+          <strong>Sr. No.</strong>
+        </span>
+        <span flex="35" align="center">
+          <strong>Worksheet Name</strong>
+        </span>
+        <span flex="5" align="center"></span>
+        <span flex>
+          <strong>Worksheet Details</strong>
+        </span>
+      </div>
+      <md-divider></md-divider>
+      <div style="padding:1%;margin-top: 40vh;" ng-if="content.length==0" flex align="center">{{loading?"loading...":"No Results"}}</div>
+      <md-list-item style="padding:1%;" class="md-2-line" md-virtual-repeat="ws in vm.items" md-on-demand>
+        <div class="md-list-item-text" layout="row" layout-align="center center">
+          <span flex="5"></span>
+          <span flex="5">
+            <b class="numbox">{{$index+1}}</b>
+          </span>
+          <span flex="35" align="center">
+            <a href="https://community.ekstep.in/preview/content/{{ ws.identifier }}" target="_blank">
+              <span>{{ws.name}}</span>
+            </a>
+            <p align="center">
+              <strong>Description: </strong>{{ws.description}}</p>
+          </span>
+          <span flex="5"></span>
+          <div layout="column" flex>
+            <div>
+              <span>
+                <strong>Created: </strong>{{getDisplayableDate(ws.createdOn)}} |
+                <strong>Updated: </strong>{{getDisplayableDate(ws.lastUpdatedOn)}}
+              </span>
+            </div>
+            <div>
+              <span>
+                <strong>Status: </strong>{{ws.status}} |
+                <strong>No. Of Plugins: </strong>{{ws.body.theme['plugin-manifest'].plugin.length?ws.body.theme['plugin-manifest'].plugin.length:0}}
+              </span>
+              <p layout="column">
+                <span ng-repeat="i in ws.body.theme['plugin-manifest'].plugin">{{i.id}} </span>
+              </p>
+            </div>
+          </div>
+        </div>
+        <!--<md-icon class="md-secondary" ng-click="copyItem($event, item)" aria-label="Copy" md-svg-icon="content:content_copy"></md-icon>
+            <md-icon class="md-secondary" ng-click="openItem($event, item)" aria-label="Edit" md-svg-icon="editor:mode_edit"></md-icon>
+            <md-icon class="md-secondary" ng-click="archiveItem($event, item)" aria-label="Archive" md-svg-icon="action:delete"></md-icon>
+            <md-icon class="md-secondary" ng-click="publishItem($event, item)" aria-label="Publish" md-svg-icon="editor:publish"></md-icon>-->
+        <md-divider></md-divider>
+      </md-list-item>
+    </md-list>
+  </div>
+
+  <script src="controller.js"></script>
+</md-content>
