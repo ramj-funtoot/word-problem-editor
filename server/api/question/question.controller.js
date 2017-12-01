@@ -972,7 +972,7 @@ schedule.scheduleJob('0 * * * *', function () {
             if (res.result && res.result.content) {
               worksheetDetails.content.push(res.result.content);
               if (worksheetDetails.content.length > len - 1) {
-                addToFile(res.result.content);
+                addToFile(worksheetDetails);
               }
             }
             console.log("total worksheets -> ", len);
@@ -1000,14 +1000,15 @@ schedule.scheduleJob('0 * * * *', function () {
       });
     })*/
 
-    fs.writeFile('client/app/wsd/worksheetDetails.json', JSON.stringify(worksheetDetails), function (err) {
+    fs.writeFile('client/app/wsd/worksheetDetails.json', JSON.stringify(ws), function (err) {
       if (err) {
         console.log('saving json failed');
         console.log(err)
-        return;
-      } else
+        return
+      } else {
         console.log('json file saved');
-      process.exit();
+        return
+      }
     });
   }
 
