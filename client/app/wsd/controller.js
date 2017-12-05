@@ -1,6 +1,5 @@
 var app = angular.module('wpappApp');
 app.controller('details', function ($scope, $http, $filter) {
-  $scope.reverse = false;
   $scope.content = [];
   $scope.column = "createdBy";
   $scope.status = ['Any', 'Live', "Draft", "Retired"];
@@ -9,7 +8,7 @@ app.controller('details', function ($scope, $http, $filter) {
   $http.get("app/wsd/worksheetDetails.json").then(function (res) {
     $scope.allContent = res.data.content;
     $scope.content = res.data.content;
-
+    $scope.version = res.data.version_date;
     if ($scope.content)
       $scope.content.forEach(element => {
         //console.log("estate", JSON.parse(element.editorState))
@@ -31,19 +30,11 @@ app.controller('details', function ($scope, $http, $filter) {
     $scope.loading = false;
     $scope.filterList()
   });
-  $scope.getList = function (parray) {
-    if (parray) {
-      var arr = [];
-      console.log("parray", parray)
-      parray.forEach(function (a) {
-        //if (a.plugin.includes("funtoot"))
-        arr.push(a.id)
-      })
-      return arr;
-    }
-  }
-  $scope.getDisplayableDate = function (d) {
-    return moment(d).format("LL");
+  $scope.getDisplayableDate = function (d, bool) {
+    if (!bool)
+      return moment(d).format("LL");
+    else
+      return moment(d).format('MMMM Do YYYY, h:mm:ss a');
   }
   $scope.filterList = function (filter) {
     $scope.content = $filter('filter')($scope.allContent, {
@@ -51,7 +42,6 @@ app.controller('details', function ($scope, $http, $filter) {
       pluginsUsed: $scope.searchP,
       status: $scope.selectedStatus == "Any" ? undefined : $scope.selectedStatus
     });
-    console.log("dd", $scope.content.length)
   }
   $scope.getCount = function (status) {
     if (status == "Current") {
