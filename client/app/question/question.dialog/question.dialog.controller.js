@@ -116,11 +116,14 @@ angular.module('wpappApp')
           $scope.item.questionImage.push({
             base64: 'data:' + n.filetype + ';base64,' + n.base64,
             assetId: '',
+            urls:{},
             isValid: true
           });
         } else {
           $scope.item.questionImage[0].base64 = 'data:' + n.filetype + ';base64,' + n.base64;
           $scope.item.questionImage[0].isValid = true;
+          $scope.item.questionImage[0].urls = {};
+          $scope.item.questionImage[0].assetId = '';
         }
       }
     }, true);
@@ -486,6 +489,8 @@ angular.module('wpappApp').controller('MTFPremRespCtrl', function($scope){
           };
         $scope.item.premises[i].image.base64 = 'data:' + img.filetype + ';base64,' + img.base64;
         $scope.item.premises[i].image.isValid = true;
+        $scope.item.premises[i].image.assetId = '';
+        $scope.item.premises[i].image.urls = {};
       }
     });
   }, true);
@@ -503,6 +508,8 @@ angular.module('wpappApp').controller('MTFPremRespCtrl', function($scope){
           };
         $scope.item.responses[i].image.base64 = 'data:' + img.filetype + ';base64,' + img.base64;
         $scope.item.responses[i].image.isValid = true;
+        $scope.item.responses[i].image.assetId = '';
+        $scope.item.responses[i].image.urls = {};
       }
     });
   }, true);
@@ -550,6 +557,8 @@ angular.module('wpappApp')
             };
           $scope.item.options[i].image.base64 = 'data:' + img.filetype + ';base64,' + img.base64;
           $scope.item.options[i].image.isValid = true;
+          $scope.item.options[i].image.assetId = '';
+          $scope.item.options[i].image.urls = {};
         }
       });
     }, true);
@@ -581,6 +590,8 @@ angular.module('wpappApp')
             };
           $scope.item.seqSteps[i].image.base64 = 'data:' + img.filetype + ';base64,' + img.base64;
           $scope.item.seqSteps[i].image.isValid = true;
+          $scope.item.seqSteps[i].image.assetId = '';
+          $scope.item.seqSteps[i].image.urls = {};
         }
       });
     }, true);
