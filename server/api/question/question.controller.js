@@ -5,12 +5,13 @@ var Question = require('./question.model');
 var restclient = require('node-rest-client').Client;
 var request = require('request');
 var quesTemplate = require('./question.item.template.js');
-var fs = require('fs')
+var fs = require('fs');
 var Promise = require('bluebird');
 var winston = require('winston');
 var Translate = require('@google-cloud/translate')();
-const util = require('util')
+const util = require('util');
 
+var schedule_wsd = require("./wsd.schedule");
 
 var logger = new(winston.Logger)({
   transports: [
@@ -88,13 +89,13 @@ function getImageUpdateObject(opts) {
   } else if (opts.imageType == "option") {
     updateObj["options." + opts.index + ".image.assetId"] = opts.assetId
     updateObj["options." + opts.index + ".image.urls." + opts.env] = opts.url
-  } else if(opts.imageType == "premise"){
+  } else if (opts.imageType == "premise") {
     updateObj["premises." + opts.index + ".image.assetId"] = opts.assetId
     updateObj["premises." + opts.index + ".image.urls." + opts.env] = opts.url
-  } else if(opts.imageType == "response"){
+  } else if (opts.imageType == "response") {
     updateObj["responses." + opts.index + ".image.assetId"] = opts.assetId
     updateObj["responses." + opts.index + ".image.urls." + opts.env] = opts.url
-  } else if(opts.imageType == "sequence"){
+  } else if (opts.imageType == "sequence") {
     updateObj["seqSteps." + opts.index + ".image.assetId"] = opts.assetId
     updateObj["seqSteps." + opts.index + ".image.urls." + opts.env] = opts.url
   }
@@ -446,26 +447,23 @@ function uploadImages(question, env, callback) {
         imgUploadPromises.push(uploadImage(option.image, env, opAssetId, question.identifier, 'option', i));
       }
     });
-  }
-  else if (question.qtype == 'mtf'){
-    question.premises.forEach(function(premise, i){
+  } else if (question.qtype == 'mtf') {
+    question.premises.forEach(function (premise, i) {
       if (premise.image && premise.image.isValid && (!premise.image.assetId || premise.image.assetId.length == 0 || (premise.image.assetId && premise.image.assetId.length > 0 && !premise.image.urls[env]))) {
         var opAssetId = 'org.ekstep.funtoot.' + question.identifier + '.image' + Math.random().toString().replace('0', '');
         imgUploadPromises.push(uploadImage(premise.image, env, opAssetId, question.identifier, 'premise', i));
       }
     })
 
-    question.responses.forEach(function(response, i){
+    question.responses.forEach(function (response, i) {
       if (response.image && response.image.isValid && (!response.image.assetId || response.image.assetId.length == 0 || (response.image.assetId && response.image.assetId.length > 0 && !response.image.urls[env]))) {
         var opAssetId = 'org.ekstep.funtoot.' + question.identifier + '.image' + Math.random().toString().replace('0', '');
         imgUploadPromises.push(uploadImage(response.image, env, opAssetId, question.identifier, 'response', i));
       }
     })
 
-  }
-
-  else if(question.qtype == 'Sequencing'){
-    question.seqSteps.forEach(function(sequence, i){
+  } else if (question.qtype == 'Sequencing') {
+    question.seqSteps.forEach(function (sequence, i) {
       if (sequence.image && sequence.image.isValid && (!sequence.image.assetId || sequence.image.assetId.length == 0 || (sequence.image.assetId && sequence.image.assetId.length > 0 && !sequence.image.urls[env]))) {
         var opAssetId = 'org.ekstep.funtoot.' + question.identifier + '.image' + Math.random().toString().replace('0', '');
         imgUploadPromises.push(uploadImage(sequence.image, env, opAssetId, question.identifier, 'sequence', i));
@@ -592,7 +590,7 @@ function publishQuestion(qIds, env, messages, res, code) {
                 item.options[i].mmc = option.mmc;
                 item.options[i].mh = option.mh;
                 item.options[i].value.type = (option.image && option.image.assetId) ? 'image' : 'text';
-                if(option.image != undefined){
+                if (option.image != undefined) {
                   if (option.image.assetId && option.image.isValid) {
                     item.options[i].value.asset = option.image.assetId;
                     item.media.push({
@@ -602,13 +600,14 @@ function publishQuestion(qIds, env, messages, res, code) {
                     });
                   }
                 }
-                
-                
+
+
               });
               item.model.mcqType = question.mcqType;
               break;
             }
-          case "mfr": {
+          case "mfr":
+            {
               item.keywords = ['mfr'];
               item.type = 'ftb';
               item.template_id = 'org.ekstep.plugins.funtoot.genericmfr';
@@ -619,118 +618,130 @@ function publishQuestion(qIds, env, messages, res, code) {
                 item.model.fibs.push(fib);
               });
               break;
-          }
-          case "mdd": {
-            item.keywords = ['mdd'];
-            item.type = 'ftb';
-            item.template_id = 'org.ekstep.plugins.funtoot.genericmdd';
-            item.template = 'org.ekstep.plugins.funtoot.genericmdd';
-            item.model.dropDowns = [];
-            _.each(question.dropDowns, function(dropDown, i){
-              item.model.dropDowns.push({
-                'identifier': dropDown.identifier,
-                'options' : []
-              })
+            }
+          case "mdd":
+            {
+              item.keywords = ['mdd'];
+              item.type = 'ftb';
+              item.template_id = 'org.ekstep.plugins.funtoot.genericmdd';
+              item.template = 'org.ekstep.plugins.funtoot.genericmdd';
+              item.model.dropDowns = [];
+              _.each(question.dropDowns, function (dropDown, i) {
+                item.model.dropDowns.push({
+                  'identifier': dropDown.identifier,
+                  'options': []
+                })
 
-              _.each(dropDown.options, function(option, opt_i){
+                _.each(dropDown.options, function (option, opt_i) {
+                  var image = null;
+                  if (option.image && option.image.assetId && option.image.isValid) {
+                    image = option.image.assetId;
+                    item.media.push({
+                      id: image,
+                      src: option.image.urls[env],
+                      type: 'image'
+                    });
+                  }
+                  item.model.dropDowns[i].options.push({
+                    'text': option.text,
+                    'mh': option.mh,
+                    'mmc': option.mmc,
+                    'answer': option.answer,
+                    'image': image
+                  });
+                });
+              });
+              break;
+            }
+          case "mtf":
+            {
+              item.keywords = ['mtf'];
+              item.type = 'mtf';
+              item.template_id = 'org.ekstep.plugins.funtoot.genericmtf';
+              item.template = 'org.ekstep.plugins.funtoot.genericmtf';
+              item.model.map = question.map;
+              item.model.premises = [];
+              item.lhs_options = [];
+              item.rhs_options = [];
+              item.model.responses = [];
+              _.each(question.premises, function (premise, i) {
+                item.lhs_options.push(quesTemplate.lhsOptionTemplate());
                 var image = null;
-                if(option.image && option.image.assetId && option.image.isValid){
-                  image = option.image.assetId;
+                if (premise.image && premise.image.assetId && premise.image.isValid) {
+                  image = premise.image.assetId;
                   item.media.push({
-                    id: image,
-                    src: option.image.urls[env],
+                    id: premise.image.assetId,
+                    src: premise.image.urls[env],
                     type: 'image'
                   });
                 }
-                item.model.dropDowns[i].options.push({ 'text' : option.text,
-                'mh': option.mh,
-                'mmc':option.mmc,
-                'answer':option.answer,
-                'image' : image
+                item.model.premises.push({
+                  'text': premise.text,
+                  'image': image,
+                  'mh': premise.mh,
+                  'mmc': premise.mmc,
+                  'identifier': premise.identifier
                 });
-              });
-            });
-            break;
-          }
-          case "mtf":{
-            item.keywords = ['mtf'];
-            item.type = 'mtf';
-            item.template_id = 'org.ekstep.plugins.funtoot.genericmtf';
-            item.template = 'org.ekstep.plugins.funtoot.genericmtf';
-            item.model.map = question.map;
-            item.model.premises = [];
-            item.lhs_options = [];
-            item.rhs_options = [];
-            item.model.responses = [];
-            _.each(question.premises, function(premise, i){
-              item.lhs_options.push(quesTemplate.lhsOptionTemplate());
-              var image = null;
-              if(premise.image && premise.image.assetId && premise.image.isValid){
-                image = premise.image.assetId;
-                item.media.push({
-                  id: premise.image.assetId,
-                  src: premise.image.urls[env],
-                  type: 'image'
-                });
-              }
-              item.model.premises.push({
-                'text' : premise.text, 'image': image, 'mh' : premise.mh, 'mmc' : premise.mmc, 'identifier' : premise.identifier
-              });
-              item.lhs_options[i].value.type = image ? 'image' : 'text';
-              item.lhs_options[i].value.asset = image ? image : premise.text;
-              item.lhs_options[i].index = Number(premise.identifier);
-              item.lhs_options[i].mh = premise.mh;
-              item.lhs_options[i].mmc = premise.mmc;
+                item.lhs_options[i].value.type = image ? 'image' : 'text';
+                item.lhs_options[i].value.asset = image ? image : premise.text;
+                item.lhs_options[i].index = Number(premise.identifier);
+                item.lhs_options[i].mh = premise.mh;
+                item.lhs_options[i].mmc = premise.mmc;
 
-            })
-
-            _.each(question.responses, function(response, i){
-              item.rhs_options.push(quesTemplate.rhsOptionTemplate());
-              var image = null;
-              if(response.image && response.image.assetId && response.image.isValid){
-                image = response.image.assetId;
-                item.media.push({
-                  id: response.image.assetId,
-                  src: response.image.urls[env],
-                  type: 'image'
-                });
-              }
-              item.model.responses.push({
-                'text' : response.text, 'image': image, 'mh' : response.mh, 'mmc' : response.mmc, 'identifier' : response.identifier
-              });
-              item.rhs_options[i].value.type = response.text ? 'text' : 'image';
-              item.rhs_options[i].value.asset = response.text ? response.text : image;
-              item.rhs_options[i].answer = Number(response.identifier);
-            })
-            break;
-          }
-          case "Sequencing":{
-            console.log('-----------------------------Im here----------------------------------')
-            item.keywords = ['Sequencing'];
-            item.type = 'ftb';
-            item.template_id = 'org.ekstep.plugins.funtoot.genericsequencing';
-            item.template = 'org.ekstep.plugins.funtoot.genericsequencing';
-            item.model.seqSteps = [];
-            _.each(question.seqSteps, function(seqStep, i){
-              var image = null;
-              if(seqStep.image && seqStep.image.assetId && seqStep.image.isValid){
-                image = seqStep.image.assetId;
-                item.media.push({
-                  id: seqStep.image.assetId,
-                  src: seqStep.image.urls[env],
-                  type: 'image'
-                });
-              }
-              item.model.seqSteps.push({
-                'identifier': seqStep.identifier,
-                'text': seqStep.text,
-                'image':image,
-                'mh': seqStep.mh,
-                'mmc': seqStep.mmc
               })
-            })
-            break;
-          }
+
+              _.each(question.responses, function (response, i) {
+                item.rhs_options.push(quesTemplate.rhsOptionTemplate());
+                var image = null;
+                if (response.image && response.image.assetId && response.image.isValid) {
+                  image = response.image.assetId;
+                  item.media.push({
+                    id: response.image.assetId,
+                    src: response.image.urls[env],
+                    type: 'image'
+                  });
+                }
+                item.model.responses.push({
+                  'text': response.text,
+                  'image': image,
+                  'mh': response.mh,
+                  'mmc': response.mmc,
+                  'identifier': response.identifier
+                });
+                item.rhs_options[i].value.type = response.text ? 'text' : 'image';
+                item.rhs_options[i].value.asset = response.text ? response.text : image;
+                item.rhs_options[i].answer = Number(response.identifier);
+              })
+              break;
+            }
+          case "Sequencing":
+            {
+              console.log('-----------------------------Im here----------------------------------')
+              item.keywords = ['Sequencing'];
+              item.type = 'ftb';
+              item.template_id = 'org.ekstep.plugins.funtoot.genericsequencing';
+              item.template = 'org.ekstep.plugins.funtoot.genericsequencing';
+              item.model.seqSteps = [];
+              _.each(question.seqSteps, function (seqStep, i) {
+                var image = null;
+                if (seqStep.image && seqStep.image.assetId && seqStep.image.isValid) {
+                  image = seqStep.image.assetId;
+                  item.media.push({
+                    id: seqStep.image.assetId,
+                    src: seqStep.image.urls[env],
+                    type: 'image'
+                  });
+                }
+                item.model.seqSteps.push({
+                  'identifier': seqStep.identifier,
+                  'text': seqStep.text,
+                  'image': image,
+                  'mh': seqStep.mh,
+                  'mmc': seqStep.mmc
+                })
+              })
+              break;
+            }
           case "freeResponse":
             {
               item.keywords = ['freeResponse'];
@@ -757,7 +768,7 @@ function publishQuestion(qIds, env, messages, res, code) {
         reqBody.request.assessment_item.objectType = "AssessmentItem";
         reqBody.request.assessment_item.metadata = item;
 
-        
+
         var authheader = 'Bearer ' + envData[ekstep_env].apiKey;
         var args = {
           //path: { id: item.code, tid: 'domain' },

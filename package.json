@@ -21,9 +21,11 @@
     "mongoose": "~4.0.3",
     "morgan": "~1.0.0",
     "node-rest-client": "^3.1.0",
+    "node-schedule": "^1.2.5",
     "passport": "~0.2.0",
     "passport-google-oauth": "latest",
     "passport-local": "~0.1.6",
+    "request-promise": "^4.2.2",
     "serve-favicon": "~2.0.1",
     "winston": "^2.3.1"
   },

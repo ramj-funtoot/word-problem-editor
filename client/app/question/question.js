@@ -8,5 +8,11 @@ angular.module('wpappApp')
         templateUrl: 'app/question/question.html',
         controller: 'QuestionCtrl',
         authenticate: true
-      });
+      })
+      .state('wsdetails', {
+        url: '/wsd',
+        templateUrl: 'app/wsd/showWorksheetData.html',
+        controller: 'details',
+        authenticate: true
+      })
   });
