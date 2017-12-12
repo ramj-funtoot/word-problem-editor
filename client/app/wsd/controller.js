@@ -10,7 +10,7 @@ app.controller('details', function ($scope, $http, $filter) {
     $scope.content = res.data.content;
     $scope.version = res.data.version_date;
     if ($scope.content)
-      $scope.content.forEach(element => {
+      $scope.content.forEach(function (element) {
         //console.log("estate", JSON.parse(element.editorState))
         if (element.body && element.body.theme['plugin-manifest'].plugin && element.body.theme[
             'plugin-manifest'].plugin.length > 0) {
@@ -29,6 +29,9 @@ app.controller('details', function ($scope, $http, $filter) {
     };
     $scope.loading = false;
     $scope.filterList()
+  }).catch(function (err) {
+    $scope.loading = false;
+    console.log("error getting file - ", err)
   });
   $scope.getDisplayableDate = function (d, bool) {
     if (!bool)

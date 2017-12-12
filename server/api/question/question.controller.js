@@ -11,7 +11,11 @@ var winston = require('winston');
 var Translate = require('@google-cloud/translate')();
 const util = require('util');
 
-//var schedule_wsd = require("./wsd.schedule");
+/*
+worksheet detail module.
+runs every day at 1 AM as well as when the server is initialised. 
+*/
+var schedule_wsd = require("./wsd.schedule")();
 
 var logger = new(winston.Logger)({
   transports: [
