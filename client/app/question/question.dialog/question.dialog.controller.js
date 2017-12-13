@@ -34,14 +34,25 @@ angular.module('wpappApp')
         'assets/images/mcq-type-8.png',
         'assets/images/mcq-type-9.png'
       ],
+      mcqTypeTemplateDesc: [
+        'Question and options are texts. Options range is 2 to 4.',
+        'Question is text and options are images. Options range is 2 to 4.',
+        'Question is an image and options are texts. Options range is 2 to 4.',
+        'Question is text and options are images. 4 Options allowed.',
+        'Question mandatorily has image and text and options are texts. Options range is 2 to 6.',
+        'Question mandatorily has image and text and options are images. 4 options allowed.',
+        'Question is text and options are texts. 2 options are allowed.',
+        'Question is text and options are texts. Strictly 2 or 4 options allowed.',
+        'Question mandatorily has image and text and options are images. Strictly 2 or 4 options allowed.'
+      ],
       locales: [{
-          id: 'en',
-          name: 'English'
-        },
-        {
-          id: 'mr',
-          name: 'Marathi'
-        }
+        id: 'en',
+        name: 'English'
+      },
+      {
+        id: 'mr',
+        name: 'Marathi'
+      }
       ],
       validate: function () {
         return true;
@@ -67,7 +78,7 @@ angular.module('wpappApp')
       }
     }
 
-    $scope.showOptions = function($event, dD){
+    $scope.showOptions = function ($event, dD) {
       var parentEl = angular.element(document.body);
       $mdDialog.show({
         parent: parentEl,
@@ -116,7 +127,7 @@ angular.module('wpappApp')
           $scope.item.questionImage.push({
             base64: 'data:' + n.filetype + ';base64,' + n.base64,
             assetId: '',
-            urls:{},
+            urls: {},
             isValid: true
           });
         } else {
@@ -187,23 +198,23 @@ angular.module('wpappApp')
         .ok('No')
         .cancel('Yes')
         .multiple(true);
-      $mdDialog.show(confirm).then(function () {}, function () {
+      $mdDialog.show(confirm).then(function () { }, function () {
         $scope.item.questionImage[0].isValid = false;
         $scope.item.questionImage[0].assetId = "";
         $scope.item.questionImage[0].URL = {};
       });
     };
 
-    $scope.deleteSequenceImage = function($event, index){
+    $scope.deleteSequenceImage = function ($event, index) {
       var confirm = $mdDialog.confirm()
-      .title('Sure?')
-      .textContent('Are you sure you want to delete this sequence Image of Id #?' + index+1)
-      .ariaLabel('Delete Image')
-      .targetEvent($event)
-      .ok('No')
-      .cancel('Yes')
-      .multiple(true);
-      $mdDialog.show(confirm).then(function () {}, function () {
+        .title('Sure?')
+        .textContent('Are you sure you want to delete this sequence Image of Id #?' + index + 1)
+        .ariaLabel('Delete Image')
+        .targetEvent($event)
+        .ok('No')
+        .cancel('Yes')
+        .multiple(true);
+      $mdDialog.show(confirm).then(function () { }, function () {
         $scope.item.seqSteps[index].image.isValid = false;
         $scope.item.seqSteps[index].image.assetId = "";
         $scope.item.seqSteps[index].image.URL = {};
@@ -211,138 +222,138 @@ angular.module('wpappApp')
     }
 
 
-    $scope.deleteSequence = function($event, index){
+    $scope.deleteSequence = function ($event, index) {
       var confirm = $mdDialog.confirm()
-      .title('Sure?')
-      .textContent('Are you sure you want to delete Sequnce Id #' + (+index+1))
-      .ariaLabel('Delete Sequence')
-      .targetEvent($event)
-      .ok('No')
-      .cancel('Yes')
-      .multiple(true);
-    $mdDialog.show(confirm).then(function () {}, function () {
-      //renaming premise and response text for i18n and micro hint upon deletion
-      $scope.item.seqSteps.splice(index, 1);
-      
-      _.each($scope.item.seqSteps, function(sequence){
-        if(sequence.identifier > index){
-          var newId = sequence.identifier - 1;
-          sequence.identifier = "" + newId;
-          if(sequence.text != null && sequence.text != undefined && sequence.text.length != 0){
-            sequence.text = 'step_' + ( +newId + 1 );
-            $scope.item.i18n.en[sequence.text] = $scope.item.i18n.en['step_' + ( +newId + 2 )];
-            delete $scope.item.i18n.en['step_' + ( +newId + 2 )];
-          }
-          if(sequence.mh != null && sequence.mh != undefined && sequence.mh.length != 0){
-            sequence.mh = 'mh_' + ( +newId + 1 );
-            $scope.item.i18n.en[sequence.mh] = $scope.item.i18n.en['mh_' + ( +newId + 2 )];
-            delete  $scope.item.i18n.en['mh_' +( +newId + 2 )];
-          }
-        }
-      })
+        .title('Sure?')
+        .textContent('Are you sure you want to delete Sequnce Id #' + (+index + 1))
+        .ariaLabel('Delete Sequence')
+        .targetEvent($event)
+        .ok('No')
+        .cancel('Yes')
+        .multiple(true);
+      $mdDialog.show(confirm).then(function () { }, function () {
+        //renaming premise and response text for i18n and micro hint upon deletion
+        $scope.item.seqSteps.splice(index, 1);
 
-      delete $scope.item.i18n.en['mh_' +( index + 1 )]
-      delete $scope.item.i18n.en['step_' +( index + 1 )]
+        _.each($scope.item.seqSteps, function (sequence) {
+          if (sequence.identifier > index) {
+            var newId = sequence.identifier - 1;
+            sequence.identifier = "" + newId;
+            if (sequence.text != null && sequence.text != undefined && sequence.text.length != 0) {
+              sequence.text = 'step_' + (+newId + 1);
+              $scope.item.i18n.en[sequence.text] = $scope.item.i18n.en['step_' + (+newId + 2)];
+              delete $scope.item.i18n.en['step_' + (+newId + 2)];
+            }
+            if (sequence.mh != null && sequence.mh != undefined && sequence.mh.length != 0) {
+              sequence.mh = 'mh_' + (+newId + 1);
+              $scope.item.i18n.en[sequence.mh] = $scope.item.i18n.en['mh_' + (+newId + 2)];
+              delete $scope.item.i18n.en['mh_' + (+newId + 2)];
+            }
+          }
+        })
 
-    });
+        delete $scope.item.i18n.en['mh_' + (index + 1)]
+        delete $scope.item.i18n.en['step_' + (index + 1)]
+
+      });
     }
 
-    $scope.addNewSequence = function($event, $index){
+    $scope.addNewSequence = function ($event, $index) {
       var newId = "" + $scope.item.seqSteps.length;
       $scope.item.seqSteps.push({
-        identifier : newId,
-        text : "step_" + ( +newId + 1 ),
-        image : null,
-        mh : "mh_" + ( +newId + 1 ),
-        mmc : []
+        identifier: newId,
+        text: "step_" + (+newId + 1),
+        image: null,
+        mh: "mh_" + (+newId + 1),
+        mmc: []
       })
     }
 
-    $scope.deletePremiseAndResponse = function($event, index){
+    $scope.deletePremiseAndResponse = function ($event, index) {
       var confirm = $mdDialog.confirm()
-      .title('Sure?')
-      .textContent('Are you sure you want to delete Premise & Response of Id #'+ index + '?')
-      .ariaLabel('Delete Premise & Response')
-      .targetEvent($event)
-      .ok('No')
-      .cancel('Yes')
-      .multiple(true);
-    $mdDialog.show(confirm).then(function () {}, function () {
-      //renaming premise and response text for i18n and micro hint upon deletion
-      $scope.item.premises.splice(index, 1);
-      $scope.item.responses.splice(index, 1);
-      //need to remove this in every language, need fix
-      _.each($scope.item.premises, function(premise){
-        if(premise.identifier > index){
-          var newId = premise.identifier - 1;
-          premise.identifier = "" + newId;
-          if(premise.text != null && premise.text != undefined && premise.text.length != 0){
-            premise.text = 'premise_' + ( +newId + 1 );
-            $scope.item.i18n.en[premise.text] = $scope.item.i18n.en['premise_' + ( +newId + 2 )];
-            delete $scope.item.i18n.en['premise_' + ( +newId + 2 )];
+        .title('Sure?')
+        .textContent('Are you sure you want to delete Premise & Response of Id #' + index + '?')
+        .ariaLabel('Delete Premise & Response')
+        .targetEvent($event)
+        .ok('No')
+        .cancel('Yes')
+        .multiple(true);
+      $mdDialog.show(confirm).then(function () { }, function () {
+        //renaming premise and response text for i18n and micro hint upon deletion
+        $scope.item.premises.splice(index, 1);
+        $scope.item.responses.splice(index, 1);
+        //need to remove this in every language, need fix
+        _.each($scope.item.premises, function (premise) {
+          if (premise.identifier > index) {
+            var newId = premise.identifier - 1;
+            premise.identifier = "" + newId;
+            if (premise.text != null && premise.text != undefined && premise.text.length != 0) {
+              premise.text = 'premise_' + (+newId + 1);
+              $scope.item.i18n.en[premise.text] = $scope.item.i18n.en['premise_' + (+newId + 2)];
+              delete $scope.item.i18n.en['premise_' + (+newId + 2)];
+            }
+            if (premise.mh != null && premise.mh != undefined && premise.mh.length != 0) {
+              premise.mh = 'mh_' + (+newId + 1);
+              $scope.item.i18n.en[premise.mh] = $scope.item.i18n.en['mh_' + (+newId + 2)];
+              delete $scope.item.i18n.en['mh_' + (+newId + 2)];
+            }
           }
-          if(premise.mh != null && premise.mh != undefined && premise.mh.length != 0){
-            premise.mh = 'mh_' + ( +newId + 1 );
-            $scope.item.i18n.en[premise.mh] = $scope.item.i18n.en['mh_' + ( +newId + 2 )];
-            delete  $scope.item.i18n.en['mh_' +( +newId + 2 )];
-          }
-        }
-      })
+        })
 
-      _.each($scope.item.responses, function(response){
-        if(response.identifier > index){
-          var newId = response.identifier - 1;
-          response.identifier = "" + newId;
-          if(response.text != null && response.text != undefined && response.text.length != 0){
-            response.text = 'response_' + ( +newId + 1 ) + '_1';
-            $scope.item.i18n.en[response.text] = $scope.item.i18n.en['response_' + ( +newId + 2 ) + '_1'];
-            delete $scope.item.i18n.en['response_' + ( +newId + 2 ) + '_1'];
+        _.each($scope.item.responses, function (response) {
+          if (response.identifier > index) {
+            var newId = response.identifier - 1;
+            response.identifier = "" + newId;
+            if (response.text != null && response.text != undefined && response.text.length != 0) {
+              response.text = 'response_' + (+newId + 1) + '_1';
+              $scope.item.i18n.en[response.text] = $scope.item.i18n.en['response_' + (+newId + 2) + '_1'];
+              delete $scope.item.i18n.en['response_' + (+newId + 2) + '_1'];
+            }
+            if (response.mh != null && response.mh != undefined && response.mh.length != 0) {
+              response.mh = 'mh_' + (+newId + 1) + '_1';
+              $scope.item.i18n.en[response.mh] = $scope.item.i18n.en['mh_' + (+newId + 2) + '_1'];
+              delete $scope.item.i18n.en['mh_' + (+newId + 2) + '_1'];
+            }
           }
-          if(response.mh != null && response.mh != undefined && response.mh.length != 0){
-            response.mh = 'mh_' + ( +newId + 1 ) + '_1';
-            $scope.item.i18n.en[response.mh] = $scope.item.i18n.en['mh_' + ( +newId + 2 ) + '_1'];
-            delete  $scope.item.i18n.en['mh_' +( +newId + 2 ) + '_1'];
-          }
-        }
-      })
-      delete $scope.item.i18n.en['mh_' +( index + 1 )]
-      delete $scope.item.i18n.en['premise_' +( index + 1 )]
-      delete $scope.item.i18n.en['response_' +( index + 1 )+'_1']
+        })
+        delete $scope.item.i18n.en['mh_' + (index + 1)]
+        delete $scope.item.i18n.en['premise_' + (index + 1)]
+        delete $scope.item.i18n.en['response_' + (index + 1) + '_1']
 
 
-       //change mappings upon deleting
-       $scope.item.map.splice(index, 1);
-       _.each($scope.item.map, function(m, i){
-          if(m.premise[0] > index){
+        //change mappings upon deleting
+        $scope.item.map.splice(index, 1);
+        _.each($scope.item.map, function (m, i) {
+          if (m.premise[0] > index) {
             m.premise[0] = "" + (m.premise[0] - 1);
             m.response[0] = "" + (+m.response[0] - 1);
           }
-       })
+        })
 
-    });
-      
-       
+      });
+
+
     }
 
-    $scope.addPremiseAndResponse = function($event){
+    $scope.addPremiseAndResponse = function ($event) {
       var newId = "" + $scope.item.premises.length;
       $scope.item.premises.push({
-        identifier : newId,
-        text : "premise_" + ( +newId + 1 ),
-        image : null,
-        mh : "mh_" + ( +newId + 1 ),
-        mmc : []
+        identifier: newId,
+        text: "premise_" + (+newId + 1),
+        image: null,
+        mh: "mh_" + (+newId + 1),
+        mmc: []
       })
       $scope.item.responses.push({
-        identifier : newId,
-        text : "response_" + ( +newId + 1 ) + '_1',
-        image : null,
-        mh : "mh_" + ( +newId + 1 ) + '_1',
-        mmc : []
+        identifier: newId,
+        text: "response_" + (+newId + 1) + '_1',
+        image: null,
+        mh: "mh_" + (+newId + 1) + '_1',
+        mmc: []
       })
 
       $scope.item.map.push({
-        'premise' : [newId],
+        'premise': [newId],
         'response': [newId]
       })
     }
@@ -356,13 +367,13 @@ angular.module('wpappApp')
         .ok('No')
         .cancel('Yes')
         .multiple(true);
-      $mdDialog.show(confirm).then(function () {}, function () {
+      $mdDialog.show(confirm).then(function () { }, function () {
         $scope.item.premises[index].image.isValid = false;
         $scope.item.premises[index].image.assetId = "";
         $scope.item.premises[index].image.URL = {};
       });
     };
-  
+
     $scope.deleteResponseImage = function ($event, index) {
       var confirm = $mdDialog.confirm()
         .title('Sure?')
@@ -372,13 +383,13 @@ angular.module('wpappApp')
         .ok('No')
         .cancel('Yes')
         .multiple(true);
-      $mdDialog.show(confirm).then(function () {}, function () {
+      $mdDialog.show(confirm).then(function () { }, function () {
         $scope.item.responses[index].image.isValid = false;
         $scope.item.responses[index].image.assetId = "";
         $scope.item.responses[index].image.URL = {};
       });
     };
-    
+
 
     $scope.deleteOptionImage = function ($event, index) {
       var confirm = $mdDialog.confirm()
@@ -389,7 +400,7 @@ angular.module('wpappApp')
         .ok('No')
         .cancel('Yes')
         .multiple(true);
-      $mdDialog.show(confirm).then(function () {}, function () {
+      $mdDialog.show(confirm).then(function () { }, function () {
         $scope.item.options[index].image.isValid = false;
         $scope.item.options[index].image.assetId = "";
         $scope.item.options[index].image.URL = {};
@@ -434,7 +445,7 @@ angular.module('wpappApp')
           item.i18n["en"]["OPT_" + r] = str;
           delete item.i18n["en"]["OPT_" + i]
         }
-      }, function () {});
+      }, function () { });
     }
 
 
@@ -444,7 +455,7 @@ angular.module('wpappApp')
   });
 
 
-angular.module('wpappApp').controller('MTFPremRespCtrl', function($scope){
+angular.module('wpappApp').controller('MTFPremRespCtrl', function ($scope) {
   $scope.images = {
     premiseImages: [],
     responseImages: []
@@ -454,27 +465,27 @@ angular.module('wpappApp').controller('MTFPremRespCtrl', function($scope){
   $scope.responseArray = [];
 
   var init = function () {
-    
+
     _.each($scope.item.premises, function (o, i) {
       $scope.images.premiseImages.push({});
     });
-    
+
     _.each($scope.item.responses, function (r, i) {
       $scope.images.responseImages.push({});
       $scope.responseArray.push(r.identifier);
     });
 
-    //as currently each premise have a single response, Current MTF Does not allow 
-      //a single premise to have multiple responses as answer
-    _.each($scope.item.map, function(m){
+    //as currently each premise have a single response, Current MTF Does not allow
+    //a single premise to have multiple responses as answer
+    _.each($scope.item.map, function (m) {
       $scope.premRespMapObj[m.premise[0]] = m.response[0]
     })
 
-  
+
 
   }();
 
-  
+
 
   $scope.$watch(function () {
     return $scope.images.premiseImages;
@@ -564,7 +575,7 @@ angular.module('wpappApp')
     }, true);
   });
 
-  angular.module('wpappApp')
+angular.module('wpappApp')
   .controller('SequencingCtrl', function ($scope) {
     $scope.images = {
       sequenceImages: []
@@ -574,7 +585,7 @@ angular.module('wpappApp')
         $scope.images.sequenceImages.push({});
       });
     }();
-   
+
 
 
     $scope.$watch(function () {

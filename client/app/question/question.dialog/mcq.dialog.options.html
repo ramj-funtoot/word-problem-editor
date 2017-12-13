@@ -61,16 +61,20 @@
           <div ng-message="required">This is required.</div>
         </div>
       </md-input-container>
+      <span flex="5"></span>
+      <md-input-container flex="70">
+        <label name="mcq_dec">{{meta.mcqTypeTemplateDesc[item.mcqType - 1]}}</label>
+      </md-input-container>
     </div>
     <div layout="row">
-        <div class="md-block option-image-container wrap" flex="100">
-            <label >
+      <div class="md-block option-image-container wrap" flex="100">
+        <label>
               <img class='mcqtype-preview' ng-src='{{meta.mcqTypeTemplateImages[item.mcqType - 1]}}'/>
             </label>
-            <span class="qbutton" flex="10" ng-show="option.image.isValid" ng-click="deleteOptionImage($event, $index)">
+        <span class="qbutton" flex="10" ng-show="option.image.isValid" ng-click="deleteOptionImage($event, $index)">
                 <md-icon md-svg-src="action:delete " aria-label="Delete Option Image"></md-icon>
             </span>
-          </div>
+      </div>
     </div>
   </form>
 </div>
