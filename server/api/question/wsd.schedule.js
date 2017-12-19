@@ -1,13 +1,13 @@
 /*
-   node script to retrive all funtoot worksheet details on ekstep production database
-   generates json dump in /client/app/wsd directory
-   runs every hour
+   node script to retrive all funtoot worksheet details from ekstep production database
+   generates json dump in root directory
+   runs at 1AM everyday and when server is initialised
  */
 
 module.exports = function () {
+
   var schedule = require("node-schedule");
   var rp = require("request-promise");
-  //var re = require("request");
   var fs = require('fs');
 
   var envData = {
@@ -66,26 +66,20 @@ module.exports = function () {
             'cache-control': 'no-cache',
             'keep-alive': 'on',
             'KeepAliveTimeout': '5',
-            'MaxKeepAliveRequests': '100',
+            'MaxKeepAliveRequests': '300',
             authorization: 'Bearer ' + envData["prod"].apiKey,
             'content-type': 'application/json'
           },
           json: true
         }
         setTimeout(function () {
-          /*re(options2, function (req, res) {
-            console.log("res", res.data)
-            re.on('end', function (d) {
-              consle.log("ress", d)
-            })
-          })*/
           rp(options2)
             .then(function (res) {
+              ++retWs;
               if (res.result && res.result.content && res.result.content.body)
                 res.result.content.body = JSON.parse(res.result.content.body);
               if (res.result && res.result.content) {
                 worksheetDetails.content.push(res.result.content);
-                ++retWs;
                 if (retWs + errCount == len) {
                   console.log(retWs + " + " + errCount + " = " + len)
                   addToFile(worksheetDetails);
@@ -115,17 +109,9 @@ module.exports = function () {
     }
 
     function addToFile(ws) {
-
-      /*fs.readFile('client/app/wsd/worksheetDetails.json', function (err, data) {
-      var json = JSON.parse(data);
-      json.push(ws);
-      fs.writeFile('client/app/wsd/worksheetDetails.json', JSON.stringify(json), function (err) {
-        if (err) throw err;
-        console.log('The "data to append" was appended to file!');
-      });
-      })*/
       ws.version_date = new Date().toISOString();
-      fs.writeFile('client/app/wsd/worksheetDetails.json', JSON.stringify(ws), function (err) {
+
+      fs.writeFile('worksheetDetails.json', JSON.stringify(ws), function (err) {
         if (err) {
           console.log('saving json failed');
           console.log(err)

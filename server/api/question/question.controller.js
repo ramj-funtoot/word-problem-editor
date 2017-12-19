@@ -13,9 +13,18 @@ const util = require('util');
 
 /*
 worksheet detail module.
-runs every day at 1 AM as well as when the server is initialised. 
+the task is scheduled to run every day at 1 AM as well as when the server is initialised. 
 */
 var schedule_wsd = require("./wsd.schedule")();
+
+exports.wsd = function (req, res) {
+  fs.readFile("worksheetDetails.json", 'utf8', function (err, data) {
+    if (err) {
+      console.log("Error getting file", err);
+    }
+    return res.status(200).json(JSON.parse(data));
+  })
+}
 
 var logger = new(winston.Logger)({
   transports: [
