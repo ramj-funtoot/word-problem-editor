@@ -13,7 +13,7 @@ const util = require('util');
 
 /*
 worksheet detail module.
-the task is scheduled to run every day at 1 AM as well as when the server is initialised. 
+the task is scheduled to run every day at 1 AM as well as when the server is initialised.
 */
 var schedule_wsd = require("./wsd.schedule")();
 
@@ -136,7 +136,7 @@ function createImageContent(assetId, imageMimeType, env, callback) {
           language: ['English'],
           contentType: 'Asset',
           code: assetId,
-          mimeType: 'image/' + imageMimeType //need to get through getting substring of image base 64 string 
+          mimeType: 'image/' + imageMimeType //need to get through getting substring of image base 64 string
         }
       }
     },
@@ -555,6 +555,7 @@ function publishQuestion(qIds, env, messages, res, code) {
         item.concepts.identifier = question.conceptCode;
         item.qtype = question.qtype;
         item.i18n = question.i18n;
+        item.flags = question.flags;
         if (question.questionImage && question.questionImage.length > 0 && question.questionImage[0].isValid) {
           item.questionImage = question.questionImage[0].assetId;
           item.media.push({

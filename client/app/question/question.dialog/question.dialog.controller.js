@@ -187,7 +187,12 @@ angular.module('wpappApp')
         mh: 'MH_' + max,
         mmc: []
       });
-    }
+    };
+
+    $scope.zoomableImg = function (isChecked) {
+      $scope.item.flags = {};
+      $scope.item.flags.isZoomable = isChecked;
+    };
 
     $scope.deleteQimage = function ($event) {
       var confirm = $mdDialog.confirm()

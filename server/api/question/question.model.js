@@ -56,7 +56,7 @@ var stepSchema = new Schema({
 
 var PremiseResponseSchema = new Schema({
   identifier: String,
-  text:String,
+  text: String,
   image: {
     base64: String,
     assetId: String,
@@ -66,7 +66,7 @@ var PremiseResponseSchema = new Schema({
       id: false
     }
   },
-  mh:String,
+  mh: String,
   mmc: [String],
   _id: {
     id: false
@@ -77,8 +77,8 @@ var mapSchema = new Schema({
   _id: {
     id: false
   },
-  premise:[],
-  response:[]
+  premise: [],
+  response: []
 })
 
 var optionSchema = new Schema({
@@ -167,14 +167,15 @@ var QuestionSchema = new Schema({
     type: Number,
     max: 10
   },
+  flags: Object,
   questionText: String,
   questionImage: [imageSchema],
   steps: [stepSchema],
   options: [optionSchema],
-  premises:[PremiseResponseSchema],
-  responses:[PremiseResponseSchema],
-  map:[mapSchema],
-  dropDowns : [dropDownSchema],
+  premises: [PremiseResponseSchema],
+  responses: [PremiseResponseSchema],
+  map: [mapSchema],
+  dropDowns: [dropDownSchema],
   seqSteps: [PremiseResponseSchema], //currently sequencing and premise responses uses same schema
   fibs: [fibSchema],
   mcqType: Number,

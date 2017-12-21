@@ -18,6 +18,7 @@ var common = {
   qlevel: "",
   template_id: "",
   template: "",
+  flags: {},
   question: "",
   questionImage: [],
   question_audio: "",
@@ -76,18 +77,18 @@ var mcq_option = {
 
 var mtfLHSTemplate = {
   value: {
-    type : "",
+    type: "",
     asset: "",
   },
   index: 0,
   mh: '',
-  mmc:[]
+  mmc: []
 
 }
 
 var mtfRHSTemplate = {
   value: {
-    type : "",
+    type: "",
     asset: "",
   },
   answer: 0
@@ -126,11 +127,11 @@ exports.imageAssetTemplate = function () {
   return _.cloneDeep(imageAsset);
 }
 
-exports.lhsOptionTemplate = function(){
+exports.lhsOptionTemplate = function () {
   return _.cloneDeep(mtfLHSTemplate);
 }
 
-exports.rhsOptionTemplate = function(){
+exports.rhsOptionTemplate = function () {
   return _.cloneDeep(mtfRHSTemplate);
 }
 
