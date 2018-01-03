@@ -11,7 +11,20 @@ var winston = require('winston');
 var Translate = require('@google-cloud/translate')();
 const util = require('util');
 
-//var schedule_wsd = require("./wsd.schedule");
+/*
+worksheet detail module.
+the task is scheduled to run every day at 1 AM as well as when the server is initialised.
+*/
+var schedule_wsd = require("./wsd.schedule")();
+
+exports.wsd = function (req, res) {
+  fs.readFile("worksheetDetails.json", 'utf8', function (err, data) {
+    if (err) {
+      console.log("Error getting file", err);
+    }
+    return res.status(200).json(JSON.parse(data));
+  })
+}
 
 var logger = new(winston.Logger)({
   transports: [
@@ -123,7 +136,7 @@ function createImageContent(assetId, imageMimeType, env, callback) {
           language: ['English'],
           contentType: 'Asset',
           code: assetId,
-          mimeType: 'image/' + imageMimeType //need to get through getting substring of image base 64 string 
+          mimeType: 'image/' + imageMimeType //need to get through getting substring of image base 64 string
         }
       }
     },
@@ -542,6 +555,7 @@ function publishQuestion(qIds, env, messages, res, code) {
         item.concepts.identifier = question.conceptCode;
         item.qtype = question.qtype;
         item.i18n = question.i18n;
+        item.flags = question.flags;
         if (question.questionImage && question.questionImage.length > 0 && question.questionImage[0].isValid) {
           item.questionImage = question.questionImage[0].assetId;
           item.media.push({

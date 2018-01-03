@@ -5,16 +5,20 @@ app.controller('details', function ($scope, $http, $filter) {
   $scope.status = ['Any', 'Live', "Draft", "Retired"];
   $scope.selectedStatus = "Live";
   $scope.loading = true
-  $http.get("app/wsd/worksheetDetails.json").then(function (res) {
+  $http.get("/api/questions/worksheet/jsondata").then(function (res) {
     $scope.allContent = res.data.content;
     $scope.content = res.data.content;
     $scope.version = res.data.version_date;
+    var parr = '';
     if ($scope.content)
-      $scope.content.forEach(element => {
-        //console.log("estate", JSON.parse(element.editorState))
+      $scope.content.forEach(function (element) {
         if (element.body && element.body.theme['plugin-manifest'].plugin && element.body.theme[
             'plugin-manifest'].plugin.length > 0) {
-          element.pluginsUsed = JSON.stringify(element.body.theme['plugin-manifest'].plugin)
+          parr = '';
+          element.body.theme['plugin-manifest'].plugin.forEach(function (p) {
+            parr = parr + p.id;
+          });
+          element.pluginsUsed = parr;
         }
       });
     $scope.vm = {
@@ -29,6 +33,9 @@ app.controller('details', function ($scope, $http, $filter) {
     };
     $scope.loading = false;
     $scope.filterList()
+  }).catch(function (err) {
+    $scope.loading = false;
+    console.log("error getting file - ", err)
   });
   $scope.getDisplayableDate = function (d, bool) {
     if (!bool)
@@ -39,7 +46,7 @@ app.controller('details', function ($scope, $http, $filter) {
   $scope.filterList = function (filter) {
     $scope.content = $filter('filter')($scope.allContent, {
       name: $scope.searchWS,
-      pluginsUsed: $scope.searchP,
+      pluginsUsed: ($scope.searchP && $scope.searchP.length > 0) ? $scope.searchP : undefined,
       status: $scope.selectedStatus == "Any" ? undefined : $scope.selectedStatus
     });
   }
