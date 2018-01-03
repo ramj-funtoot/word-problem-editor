@@ -786,7 +786,7 @@ function publishQuestion(qIds, env, messages, res, code) {
         };
         var client = new restclient();
         client.post(url + 'create/', args, function (data, response) {
-          if (response.statusCode == 200 || response.statusCode == 400) {
+          if (response.statusCode == 200 || response.statusCode == 400 || response.statusCode == 500) {
             if (data.params && data.params.errmsg) {
               if (data.params.errmsg.indexOf("Object already exists with identifier") !== -1) {
                 console.log(item.code + ' already exists. Updating..')
