@@ -193,7 +193,10 @@ angular.module('wpappApp')
       $scope.item.flags = {};
       $scope.item.flags.isZoomable = isChecked;
     };
-
+    $scope.contextFree = function (isChecked) {
+      $scope.item.flags = {};
+      $scope.item.flags.isContextFree = isChecked;
+    };
     $scope.deleteQimage = function ($event) {
       var confirm = $mdDialog.confirm()
         .title('Sure?')

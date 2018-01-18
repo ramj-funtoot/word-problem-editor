@@ -116,9 +116,17 @@
             <label>Question Type</label>
             <input required name="qtype" ng-model="item.qtype" ng-disabled="{{true}}">
           </md-input-container>
+        </div>
+        <div layout="row">
           <md-input-container class="md-block" flex="15">
             <md-checkbox ng-disabled='{{langId=="en"?"false":"true"}}' ng-model="item.flags.isZoomable" aria-label="ImageZoomable" ng-change="zoomableImg(item.flags.isZoomable)">
               Images Zoomable
+            </md-checkbox>
+          </md-input-container>
+          <md-input-container class="md-block" flex="15">
+            <md-checkbox ng-disabled='{{langId=="en"?"false":"true"}}' ng-model="item.flags.isContextFree" aria-label="isContextFree"
+              ng-change="contextFree(item.flags.isContextFree)">
+              Is Context Free
             </md-checkbox>
           </md-input-container>
         </div>
