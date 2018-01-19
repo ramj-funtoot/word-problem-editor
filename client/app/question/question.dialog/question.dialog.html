@@ -127,7 +127,9 @@
             <md-checkbox ng-disabled='{{langId=="en"?"false":"true"}}' ng-model="item.flags.isContextFree" aria-label="isContextFree"
               ng-change="contextFree(item.flags.isContextFree)">
               Context-free Question
-              <md-tooltip md-direction="right">If the question is not based on any context then mark it as context free</md- </md-checkbox>
+              <md-tooltip md-direction="right">If the question is not based on any context then mark it as context free. Questions that does not consists
+                of nouns or adjectives etc </md-tooltip>
+            </md-checkbox>
           </md-input-container>
 
         </div>
