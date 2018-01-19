@@ -123,12 +123,13 @@
               Images Zoomable
             </md-checkbox>
           </md-input-container>
-          <md-input-container class="md-block" flex="15">
+          <md-input-container class="md-block" flex="20">
             <md-checkbox ng-disabled='{{langId=="en"?"false":"true"}}' ng-model="item.flags.isContextFree" aria-label="isContextFree"
               ng-change="contextFree(item.flags.isContextFree)">
-              Is Context Free
-            </md-checkbox>
+              Context-free Question
+              <md-tooltip md-direction="right">If the question is not based on any context then mark it as context free</md- </md-checkbox>
           </md-input-container>
+
         </div>
         <hr />
         <!-- <div layout="row" ng-if="item.qtype=='legacy-word-problem'">
