@@ -60,7 +60,7 @@ module.exports = function () {
         //options to get details of a worksheet id
         var options2 = {
           method: 'GET',
-          url: envData["prod"].contentApiUrl + "read/" + con.identifier + "?fields=body,collaborators,templateId,languageCode,template,gradeLevel,status,concepts,versionKey,name,contentType,owner,domain,code,visibility,createdBy,description,language,mediaType,mimeType,osId,languageCode,createdOn,lastUpdatedOn/",
+          url: envData["prod"].contentApiUrl + "read/" + con.identifier + "?fields=body,collaborators,templateId,languageCode,template,gradeLevel,status,concepts,versionKey,name,contentType,owner,domain,code,visibility,createdBy,description,language,mediaType,mimeType,osId,languageCode,createdOn,lastUpdatedOn",
           headers: {
             'User-Agent': 'Request-Promise',
             'cache-control': 'no-cache',
