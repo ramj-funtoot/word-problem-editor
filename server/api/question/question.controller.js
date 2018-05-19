@@ -543,11 +543,7 @@ function publishQuestion(qIds, env, messages, res, code) {
           //ekstep accepting grade value [ "1", "4"], if it is number array like [1,4] 400 type error returns
           item.grade.push(grade.toString());
           //adding each grade to gradeLevel
-          if(env == "qa"){
-            item.gradeLevel.push("Class " + grade);
-          }else{
-            item.gradeLevel.push("Grade " + grade);
-          }
+          item.gradeLevel.push("Class " + grade);
         })
 
         item.level = question.level;
