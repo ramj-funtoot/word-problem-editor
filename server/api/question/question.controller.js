@@ -546,6 +546,9 @@ function publishQuestion(qIds, env, messages, res, code) {
           item.gradeLevel.push("Class " + grade);
         })
 
+		//As per recent update on ekstep API, "NUM we are chaning to Mathematics"
+		question.subject = "Mathematics"
+		item.subject = question.subject;
         item.level = question.level;
         item.sublevel = question.subLevel;
         item.bloomsTaxonomyLevel = question.btlo;
