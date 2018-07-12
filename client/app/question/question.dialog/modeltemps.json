@@ -1,178 +1,156 @@
 {
-    "legacy-word-problem": {
-        "identifier": "",
-        "grade": "2",
-        "level": 0,
-        "subLevel": 1,
-        "btlo": "Remember",
-        "difficultyLevel": "1",
-        "conceptCode": "C12",
-        "active": true,
-        "owner": "",
-        "state": "Draft",
-        "maxAttempts": 1,
-        "questionText": "",
-        "steps": [
-            {
-                "text": "",
-                "answer": "",
-                "responses": [
-                    {
-                        "default": true,
-                        "response": "",
-                        "mmc": [],
-                        "mh": ""
-                    }
-                ]
-            }
-        ],
-        "hintText": "",
-        "solutionText": "",
-        "expressions": "",
-        "comments": [
-            {
-                "commentedBy": "",
-                "comment": ""
-            }
-        ]
-    },
-    "mcq": {
-        "identifier": "",
-        "grade": "2",
-        "level": 0,
-        "subLevel": 1,
-        "btlo": "Remember",
-        "difficultyLevel": "1",
-        "conceptCode": "C12",
-        "active": true,
-        "owner": "",
-        "state": "Draft",
-        "maxAttempts": 1,
-        "questionText": "",
-        "options": [
-            {
-                "text": "",
-                "image": null,
-                "answer": "",
-                "mh": "",
-                "mmc": []
-            }
-        ],
-        "hintText": "",
-        "solutionText": "",
-        "expressions": "",
-        "comments": [
-            {
-                "commentedBy": "",
-                "comment": ""
-            }
-        ]
-    },
-    "freeResponse": {
-        "identifier": "",
-        "grade": "2",
-        "level": 0,
-        "subLevel": 1,
-        "btlo": "Remember",
-        "difficultyLevel": "1",
-        "subject": "NUM",
-        "conceptCode": "C12",
-        "active": true,
-        "owner": "",
-        "state": "Draft",
-        "maxAttempts": 1,
-        "questionText": "",
-        "fibs": [
-            {
-                "identifier": "",
-                "answer": "",
-                "response": {
-                    "default": "",
-                    "mh": "",
-                    "mmc": [],
-                    "response": []
-                }
-            }
-        ],
-        "hintText": "",
-        "solutionText": "",
-        "expressions": "",
-        "comments": [
-            {
-                "commentedBy": "",
-                "comment": ""
-            }
-        ]
-    },
-    "mfr": {
-        "identifier": "",
-        "grade": "2",
-        "level": 0,
-        "subLevel": 1,
-        "btlo": "Remember",
-        "difficultyLevel": "1",
-        "subject": "NUM",
-        "conceptCode": "C12",
-        "active": true,
-        "owner": "",
-        "state": "Draft",
-        "maxAttempts": 1,
-        "questionText": "",
-        "fibs": [
-            {
-                "identifier": "",
-                "answer": "",
-                "response": {
-                    "default": "",
-                    "mh": "",
-                    "mmc": [],
-                    "response": []
-                }
-            }
-        ],
-        "hintText": "",
-        "solutionText": "",
-        "expressions": "",
-        "comments": [
-            {
-                "commentedBy": "",
-                "comment": ""
-            }
-        ]
-    },
-    "mdd": {
-        "identifier": "",
-        "grade": "2",
-        "level": 0,
-        "subLevel": 1,
-        "btlo": "Remember",
-        "difficultyLevel": "1",
-        "subject": "NUM",
-        "conceptCode": "C12",
-        "active": true,
-        "owner": "",
-        "state": "Draft",
-        "maxAttempts": 1,
-        "questionText": "",
-        "dropDowns": [
-            {
-                "identifier": "",
-                "options": [{
-                        "text" : "",
-                        "answer" : true,
-                        "mh" : "",
-                        "mmc" : []
-                }]
-            }
-        ],
-        "hintText": "",
-        "solutionText": "",
-        "expressions": "",
-        "comments": [
-            {
-                "commentedBy": "",
-                "comment": ""
-            }
-        ]
-    }
+  "legacy-word-problem": {
+    "identifier": "",
+    "grade": "2",
+    "level": 0,
+    "subLevel": 1,
+    "btlo": "Remember",
+    "difficultyLevel": "1",
+    "conceptCode": "C12",
+    "active": true,
+    "owner": "",
+    "state": "Draft",
+    "maxAttempts": 1,
+    "questionText": "",
+    "steps": [{
+      "text": "",
+      "answer": "",
+      "responses": [{
+        "default": true,
+        "response": "",
+        "mmc": [],
+        "mh": ""
+      }]
+    }],
+    "hintText": "",
+    "solutionText": "",
+    "expressions": "EXPRESSIONS",
+    "comments": [{
+      "commentedBy": "",
+      "comment": ""
+    }]
+  },
+  "mcq": {
+    "identifier": "",
+    "grade": "2",
+    "level": 0,
+    "subLevel": 1,
+    "btlo": "Remember",
+    "difficultyLevel": "1",
+    "conceptCode": "C12",
+    "active": true,
+    "owner": "",
+    "state": "Draft",
+    "maxAttempts": 1,
+    "questionText": "",
+    "options": [{
+      "text": "",
+      "image": null,
+      "answer": "",
+      "mh": "",
+      "mmc": []
+    }],
+    "hintText": "",
+    "solutionText": "",
+    "expressions": "EXPRESSIONS",
+    "comments": [{
+      "commentedBy": "",
+      "comment": ""
+    }]
+  },
+  "freeResponse": {
+    "identifier": "",
+    "grade": "2",
+    "level": 0,
+    "subLevel": 1,
+    "btlo": "Remember",
+    "difficultyLevel": "1",
+    "subject": "NUM",
+    "conceptCode": "C12",
+    "active": true,
+    "owner": "",
+    "state": "Draft",
+    "maxAttempts": 1,
+    "questionText": "",
+    "fibs": [{
+      "identifier": "",
+      "answer": "",
+      "response": {
+        "default": "",
+        "mh": "",
+        "mmc": [],
+        "response": []
+      }
+    }],
+    "hintText": "",
+    "solutionText": "",
+    "expressions": "EXPRESSIONS",
+    "comments": [{
+      "commentedBy": "",
+      "comment": ""
+    }]
+  },
+  "mfr": {
+    "identifier": "",
+    "grade": "2",
+    "level": 0,
+    "subLevel": 1,
+    "btlo": "Remember",
+    "difficultyLevel": "1",
+    "subject": "NUM",
+    "conceptCode": "C12",
+    "active": true,
+    "owner": "",
+    "state": "Draft",
+    "maxAttempts": 1,
+    "questionText": "",
+    "fibs": [{
+      "identifier": "",
+      "answer": "",
+      "response": {
+        "default": "",
+        "mh": "",
+        "mmc": [],
+        "response": []
+      }
+    }],
+    "hintText": "",
+    "solutionText": "",
+    "expressions": "EXPRESSIONS",
+    "comments": [{
+      "commentedBy": "",
+      "comment": ""
+    }]
+  },
+  "mdd": {
+    "identifier": "",
+    "grade": "2",
+    "level": 0,
+    "subLevel": 1,
+    "btlo": "Remember",
+    "difficultyLevel": "1",
+    "subject": "NUM",
+    "conceptCode": "C12",
+    "active": true,
+    "owner": "",
+    "state": "Draft",
+    "maxAttempts": 1,
+    "questionText": "",
+    "dropDowns": [{
+      "identifier": "",
+      "options": [{
+        "text": "",
+        "answer": true,
+        "mh": "",
+        "mmc": []
+      }]
+    }],
+    "hintText": "",
+    "solutionText": "",
+    "expressions": "EXPRESSIONS",
+    "comments": [{
+      "commentedBy": "",
+      "comment": ""
+    }]
+  }
 }

@@ -4,6 +4,13 @@ angular.module('wpappApp')
   .controller('QuestionDialogCtrl', function ($scope, item, users, $mdConstant, $mdDialog, Auth, $http, ItemTemplateService) {
     $scope.isMCQAnswerSet = false;
     $scope.item = item || ItemTemplateService.getDefaultItem('legacy-word-problem');
+
+    item.expressions = 'EXPRESSIONS';
+    if (item.i18n.en[''] && item.i18n.en[''].indexOf('=') !== -1 && item.i18n.en[''].indexOf('$') !== -1) {
+      item.i18n.en.EXPRESSIONS = item.i18n.en[''];
+      delete item.i18n.en[''];
+    }
+
     $scope.langId = 'en';
     var langId = $scope.langId;
     $scope.users = users;
@@ -46,13 +53,13 @@ angular.module('wpappApp')
         'Question mandatorily has image and text and options are images. Strictly 2 or 4 options allowed.'
       ],
       locales: [{
-        id: 'en',
-        name: 'English'
-      },
-      {
-        id: 'mr',
-        name: 'Marathi'
-      }
+          id: 'en',
+          name: 'English'
+        },
+        {
+          id: 'mr',
+          name: 'Marathi'
+        }
       ],
       validate: function () {
         return true;
@@ -206,7 +213,7 @@ angular.module('wpappApp')
         .ok('No')
         .cancel('Yes')
         .multiple(true);
-      $mdDialog.show(confirm).then(function () { }, function () {
+      $mdDialog.show(confirm).then(function () {}, function () {
         $scope.item.questionImage[0].isValid = false;
         $scope.item.questionImage[0].assetId = "";
         $scope.item.questionImage[0].URL = {};
@@ -222,7 +229,7 @@ angular.module('wpappApp')
         .ok('No')
         .cancel('Yes')
         .multiple(true);
-      $mdDialog.show(confirm).then(function () { }, function () {
+      $mdDialog.show(confirm).then(function () {}, function () {
         $scope.item.seqSteps[index].image.isValid = false;
         $scope.item.seqSteps[index].image.assetId = "";
         $scope.item.seqSteps[index].image.URL = {};
@@ -239,7 +246,7 @@ angular.module('wpappApp')
         .ok('No')
         .cancel('Yes')
         .multiple(true);
-      $mdDialog.show(confirm).then(function () { }, function () {
+      $mdDialog.show(confirm).then(function () {}, function () {
         //renaming premise and response text for i18n and micro hint upon deletion
         $scope.item.seqSteps.splice(index, 1);
 
@@ -286,7 +293,7 @@ angular.module('wpappApp')
         .ok('No')
         .cancel('Yes')
         .multiple(true);
-      $mdDialog.show(confirm).then(function () { }, function () {
+      $mdDialog.show(confirm).then(function () {}, function () {
         //renaming premise and response text for i18n and micro hint upon deletion
         $scope.item.premises.splice(index, 1);
         $scope.item.responses.splice(index, 1);
@@ -375,7 +382,7 @@ angular.module('wpappApp')
         .ok('No')
         .cancel('Yes')
         .multiple(true);
-      $mdDialog.show(confirm).then(function () { }, function () {
+      $mdDialog.show(confirm).then(function () {}, function () {
         $scope.item.premises[index].image.isValid = false;
         $scope.item.premises[index].image.assetId = "";
         $scope.item.premises[index].image.URL = {};
@@ -391,7 +398,7 @@ angular.module('wpappApp')
         .ok('No')
         .cancel('Yes')
         .multiple(true);
-      $mdDialog.show(confirm).then(function () { }, function () {
+      $mdDialog.show(confirm).then(function () {}, function () {
         $scope.item.responses[index].image.isValid = false;
         $scope.item.responses[index].image.assetId = "";
         $scope.item.responses[index].image.URL = {};
@@ -408,7 +415,7 @@ angular.module('wpappApp')
         .ok('No')
         .cancel('Yes')
         .multiple(true);
-      $mdDialog.show(confirm).then(function () { }, function () {
+      $mdDialog.show(confirm).then(function () {}, function () {
         $scope.item.options[index].image.isValid = false;
         $scope.item.options[index].image.assetId = "";
         $scope.item.options[index].image.URL = {};
@@ -453,7 +460,7 @@ angular.module('wpappApp')
           item.i18n["en"]["OPT_" + r] = str;
           delete item.i18n["en"]["OPT_" + i]
         }
-      }, function () { });
+      }, function () {});
     }
 
 
