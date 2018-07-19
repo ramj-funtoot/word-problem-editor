@@ -79,8 +79,7 @@ angular.module('wpappApp')
       if ($scope.meta.validate()) {
         var user = Auth.getCurrentUser();
         $scope.item.updated = {
-          by: user.email,
-          when: new Date()
+          by: user.email
         };
         $mdDialog.hide($scope.item);
       }

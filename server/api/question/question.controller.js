@@ -12,6 +12,13 @@ var winston = require('winston');
 var Translate = require('@google-cloud/translate')();
 const util = require('util');
 
+var languageCodes = {
+  "en": "English",
+  "mr": "Marathi",
+  "hi": "Hindi",
+  "te": "Telugu"
+}
+
 /*
 worksheet detail module.
 the task is scheduled to run every day at 1 AM as well as when the server is initialised.
@@ -307,6 +314,7 @@ exports.update = function (req, res) {
   if (req.body._id) {
     delete req.body._id;
   }
+  req.body.updated.when = new Date();
   Question.findByIdAndUpdate(req.params.id, {
     $set: req.body
   }, function (err, question) {
@@ -342,10 +350,10 @@ function handleError(res, err) {
   return res.status(500).json(err);
 }
 
-function updateItemStatus(qId, status) {
+// function to update "updated.when" date when the item is updated 
+function itemIsUpdated(qId) {
   Question.findByIdAndUpdate(qId, {
     $set: {
-      'state': status,
       'updated.when': new Date()
     }
   }, function (err, question) {
@@ -484,9 +492,9 @@ function uploadImages(question, env, callback) {
       }
     })
   }
-
   if (imgUploadPromises.length > 0) {
     Promise.all(imgUploadPromises).then(function (results) {
+      itemIsUpdated(question._id);
       logger.info(question.identifier, 'All images uploaded successfully ');
       logger.info(results);
       Question.findOne({
@@ -579,13 +587,17 @@ function publishQuestion(qIds, env, messages, res, code) {
           });
         }
 
+        // Set the template depending on env
+        item.template_id = templateData[env].template_id;
+        item.template = templateData[env].template;
+
+        //item = setIbSpecificValues(item);
+
         //applying question type specific properties into item template
         switch (question.qtype) {
           case "legacy-word-problem":
             {
               item.type = 'ftb';
-              item.template_id = templateData[env].template_id;
-              item.template = templateData[env].template;
               item.keywords = ['wordproblem'];
               item.model.steps = [question.steps[question.steps.length - 1]];
               break;
@@ -593,8 +605,6 @@ function publishQuestion(qIds, env, messages, res, code) {
           case "mcq":
             {
               item.type = 'mcq';
-              item.template_id = templateData[env].template_id;
-              item.template = templateData[env].template;
               item.keywords = ['mcq'];
               var mcqTemplate = quesTemplate.getMCQTemplate();
               item = _.assign({}, item, mcqTemplate);
@@ -628,8 +638,6 @@ function publishQuestion(qIds, env, messages, res, code) {
             {
               item.keywords = ['mfr'];
               item.type = 'ftb';
-              item.template_id = templateData[env].template_id;
-              item.template = templateData[env].template;
               item.model.fibs = [];
               item.model.steps = [];
               question.fibs.forEach(function (fib, i) {
@@ -641,8 +649,6 @@ function publishQuestion(qIds, env, messages, res, code) {
             {
               item.keywords = ['mdd'];
               item.type = 'ftb';
-              item.template_id = templateData[env].template_id;
-              item.template = templateData[env].template;
               item.model.dropDowns = [];
               _.each(question.dropDowns, function (dropDown, i) {
                 item.model.dropDowns.push({
@@ -675,8 +681,6 @@ function publishQuestion(qIds, env, messages, res, code) {
             {
               item.keywords = ['mtf'];
               item.type = 'mtf';
-              item.template_id = templateData[env].template_id;
-              item.template = templateData[env].template;
               item.model.map = question.map;
               item.model.premises = [];
               item.lhs_options = [];
@@ -737,8 +741,6 @@ function publishQuestion(qIds, env, messages, res, code) {
               console.log('-----------------------------Im here----------------------------------')
               item.keywords = ['Sequencing'];
               item.type = 'ftb';
-              item.template_id = templateData[env].template_id;
-              item.template = templateData[env].template;
               item.model.seqSteps = [];
               _.each(question.seqSteps, function (seqStep, i) {
                 var image = null;
@@ -764,8 +766,6 @@ function publishQuestion(qIds, env, messages, res, code) {
             {
               item.keywords = ['freeResponse'];
               item.type = 'ftb';
-              item.template_id = templateData[env].template_id;
-              item.template = templateData[env].template;
               item.model.fibs = [];
               item.model.steps = [];
               question.fibs.forEach(function (fib, i) {
@@ -817,7 +817,7 @@ function publishQuestion(qIds, env, messages, res, code) {
                       statusCode: response.statusCode
                     };
                     /* if (env == 'prod')
-                      updateItemStatus(question._id, 'Published'); */
+                      itemIsUpdated(question._id, 'Published'); */
                     publishQuestion(qIds, env, messages, res, response.statusCode);
                   } else {
                     messages[qid] = {
@@ -865,6 +865,10 @@ function publishQuestion(qIds, env, messages, res, code) {
     }
   });
 }
+
+// function setIbSpecificValues(item) {
+//   var keys = Object.keys(item.i18n);
+// }
 
 exports.publish = function (req, res) {
   if (req.body._id) {
