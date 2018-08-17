@@ -34,10 +34,6 @@ var common = {
   title: "",
   max_score: 5,
   used_for: "worksheet",
-  concepts: {
-    identifier: "",
-    name: ""
-  },
   model: {
     hintMsg: "HINT_TEXT",
     numericLangId: "en",
@@ -134,5 +130,3 @@ exports.lhsOptionTemplate = function () {
 exports.rhsOptionTemplate = function () {
   return _.cloneDeep(mtfRHSTemplate);
 }
-
-

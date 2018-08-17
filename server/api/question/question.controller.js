@@ -564,7 +564,7 @@ function publishQuestion(qIds, env, messages, res, code) {
         item.state = question.state;
         item.status = 'Live'; //question.state == 'Verified' ? 'Live' : 'Draft';
         item.model.hintMsg = question.hintText;
-        item.concepts.identifier = question.conceptCode;
+        item.concepts = question.concepts;
         item.qtype = question.qtype;
         item.i18n = question.i18n;
         item.flags = question.flags;

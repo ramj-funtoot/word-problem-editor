@@ -147,6 +147,7 @@ var QuestionSchema = new Schema({
     default: 'NUM'
   },
   conceptCode: String,
+  concepts: [String],
   es_difficultyLevel: String,
   qtype: String,
   active: Boolean,
